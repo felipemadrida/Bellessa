@@ -1,0 +1,61 @@
+name: bellessa
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: bellessa-db
+    environment:
+      POSTGRES_DB: bellessa
+      POSTGRES_USER: bellessa
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bellessa_dev}
+    volumes:
+      - bellessa_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bellessa -d bellessa"]
+      interval: 10s
+      timeout: 5s
+      retries: 8
+    restart: unless-stopped
+
+  api:
+    build: ./backend
+    container_name: bellessa-api
+    environment:
+      BELLESSA_ENVIRONMENT: production
+      BELLESSA_DATABASE_URL: postgresql+psycopg://bellessa:${POSTGRES_PASSWORD:-bellessa_dev}@db:5432/bellessa
+      BELLESSA_JWT_SECRET: ${JWT_SECRET:-cambia-este-secreto-en-produccion}
+      BELLESSA_SEED_DEMO: ${SEED_DEMO:-true}
+      BELLESSA_CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080}
+      BELLESSA_PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:8080}
+      BELLESSA_API_PUBLIC_BASE_URL: ${API_PUBLIC_BASE_URL:-http://localhost:8000}
+      BELLESSA_CORS_ORIGIN_REGEX: ${CORS_ORIGIN_REGEX:-}
+      BELLESSA_CRON_SECRET: ${CRON_SECRET:-}
+      BELLESSA_PLATFORM_ADMIN_NAME: ${PLATFORM_ADMIN_NAME:-Felipe Madrid}
+      BELLESSA_PLATFORM_ADMIN_EMAIL: ${PLATFORM_ADMIN_EMAIL:-admin@bellessa.mx}
+      BELLESSA_PLATFORM_ADMIN_PASSWORD: ${PLATFORM_ADMIN_PASSWORD:-}
+      BELLESSA_WHATSAPP_PROVIDER: ${WHATSAPP_PROVIDER:-mock}
+      BELLESSA_WHATSAPP_TOKEN: ${WHATSAPP_TOKEN:-}
+      BELLESSA_WHATSAPP_PHONE_NUMBER_ID: ${WHATSAPP_PHONE_NUMBER_ID:-}
+      BELLESSA_WHATSAPP_VERIFY_TOKEN: ${WHATSAPP_VERIFY_TOKEN:-bellessa-verify}
+      BELLESSA_WHATSAPP_APP_SECRET: ${WHATSAPP_APP_SECRET:-}
+      BELLESSA_WHATSAPP_BUSINESS_SLUG: ${WHATSAPP_BUSINESS_SLUG:-salon-lucia}
+      BELLESSA_SCHEDULER_ENABLED: ${SCHEDULER_ENABLED:-true}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  web:
+    build: ./frontend
+    container_name: bellessa-web
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  bellessa_pgdata:
