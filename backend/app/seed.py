@@ -194,7 +194,7 @@ def _seed_demo(db: Session) -> bool:
     today = datetime.now(tz).date()
 
     business = Business(
-        name="Salón Lucía",
+        name="Salón Demo",
         slug=DEMO_SLUG,
         legal_name="Lucía Herrera",
         rfc="HELJ850312MDF",

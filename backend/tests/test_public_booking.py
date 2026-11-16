@@ -20,7 +20,7 @@ def test_public_booking_and_owner_visibility(client: TestClient, auth_headers: d
     public = client.get("/api/public/salon-lucia")
     assert public.status_code == 200
     data = public.json()
-    assert data["name"] == "Salón Lucía"
+    assert data["name"] == "Salón Demo"
     assert any(service["name"] == "Balayage" for service in data["services"])
     assert len(data["staff"]) == 3
 

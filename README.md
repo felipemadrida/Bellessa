@@ -2,7 +2,7 @@
 
 **Agenda y seguimiento para salones de belleza en México.** Una micro-app móvil + nube, inspirada en la experiencia de GlossGenius pero aterrizada al mercado mexicano: precios en MXN con IVA incluido, WhatsApp con formato +52, propinas, anticipos, corte de caja, RFC/CFDI y hora de Ciudad de México.
 
-> Demo lista: **Salón Lucía**, Roma Norte, CDMX.
+> Demo lista: **Salón Demo**, Roma Norte, CDMX.
 > Dueña: `demo@bellessa.mx` · Contraseña: `demo1234`
 > Admin SaaS: `/admin` · `admin@bellessa.mx` / `admin1234`
 > Página pública de reservas: `/reservar/salon-lucia`
@@ -177,7 +177,7 @@ bellessa/
 │   │   ├── models.py               # negocio, staff, clientas, citas, pagos
 │   │   ├── schemas.py              # contratos Pydantic
 │   │   ├── security.py             # scrypt + JWT
-│   │   ├── seed.py                 # Salón Lucía y catálogo inicial
+│   │   ├── seed.py                 # Salón Demo y catálogo inicial
 │   │   ├── services/availability.py# motor de horarios reales
 │   │   ├── services/whatsapp.py     # bot, mock y Cloud API
 │   │   ├── services/marketing.py    # segmentos, plantillas, scheduler

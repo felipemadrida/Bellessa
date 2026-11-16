@@ -19,7 +19,7 @@ def test_demo_login_and_me(client: TestClient):
     headers = {"Authorization": f"Bearer {body['access_token']}"}
     me = client.get("/api/auth/me", headers=headers)
     assert me.status_code == 200
-    assert me.json()["business"]["name"] == "Salón Lucía"
+    assert me.json()["business"]["name"] == "Salón Demo"
 
 
 def test_register_creates_isolated_business(client: TestClient):

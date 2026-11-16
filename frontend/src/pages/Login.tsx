@@ -131,7 +131,7 @@ export function LoginPage({ register = false }: { register?: boolean }) {
           {/* Mini agenda decorativa */}
           <div className="relative rounded-3xl border border-cream/15 bg-cream/10 p-4 backdrop-blur-md">
             <div className="mb-3 flex items-center justify-between text-[11px] uppercase tracking-[0.14em] text-cream/60">
-              <span>Hoy · Salón Lucía</span>
+              <span>Hoy · Salón Demo</span>
               <span className="rounded-full bg-cream/15 px-2 py-0.5 text-[10px] normal-case tracking-normal text-cream">
                 6 citas
               </span>
@@ -195,7 +195,7 @@ export function LoginPage({ register = false }: { register?: boolean }) {
                 <>
                   <Input
                     label="Nombre del salón"
-                    placeholder="Ej. Salón Lucía"
+                    placeholder="Ej. Salón Demo"
                     value={businessName}
                     onChange={(event) => setBusinessName(event.target.value)}
                     autoComplete="organization"
@@ -283,7 +283,7 @@ export function LoginPage({ register = false }: { register?: boolean }) {
                   onClick={handleDemo}
                 >
                   <Sparkles size={17} className="text-gold" />
-                  Abrir el demo de Salón Lucía
+                  Abrir el demo de Salón Demo
                 </Button>
               </>
             ) : null}
