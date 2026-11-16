@@ -49,7 +49,7 @@ Vercel ejecuta FastAPI como función serverless (framework preset). El scheduler
 |---|---|
 | `BELLESSA_DATABASE_URL` | connection string de Neon |
 | `BELLESSA_JWT_SECRET` | secreto largo y aleatorio |
-| `BELLESSA_SEED_DEMO` | `true` solo para demo; `false` en producción |
+| `BELLESSA_SEED_DEMO` | `true` solo para el primer bootstrap; **después `false`** |
 | `BELLESSA_CORS_ORIGINS` | `https://tu-salon.vercel.app` |
 | `BELLESSA_CORS_ORIGIN_REGEX` | opcional: `https://.*\.vercel\.app` para previews |
 | `BELLESSA_PUBLIC_BASE_URL` | `https://tu-salon.vercel.app` |
@@ -70,7 +70,8 @@ Vercel ejecuta FastAPI como función serverless (framework preset). El scheduler
      -H "Authorization: Bearer TU_CRON_SECRET"
    ```
    Debe responder `{"ok":true,"seeded":true}` la primera vez.
-8. Verifica:
+8. Cambia `BELLESSA_SEED_DEMO` a **`false`** después del bootstrap. En serverless pueden arrancar varias instancias a la vez; dejar el seed activo provoca carreras de `slug` único. El código ya captura esa carrera, pero desactivarlo es la operación correcta.
+9. Verifica:
    ```bash
    curl https://tu-api.vercel.app/api/health
    # {"status":"ok","database":"ok",...}
