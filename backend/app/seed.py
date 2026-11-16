@@ -2,7 +2,10 @@ from __future__ import annotations
 
 from datetime import datetime, time, timedelta
 
+import logging
+
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from .config import settings
@@ -24,6 +27,8 @@ from .models import (
 from .security import hash_password
 from .services.plans import ensure_tenant_account
 from .utils import local_to_utc_naive, new_confirmation_code, normalize_phone_mx, tz_for
+
+logger = logging.getLogger("bellessa.seed")
 
 DEMO_SLUG = "salon-lucia"
 DEMO_EMAIL = "demo@bellessa.mx"
@@ -112,6 +117,15 @@ def seed_platform(db: Session) -> None:
     En producción no se crea el admin demo: configura
     BELLESSA_PLATFORM_ADMIN_PASSWORD (y el correo si cambia).
     """
+    try:
+        _seed_platform(db)
+    except IntegrityError:
+        # Dos cold starts pueden intentar crear la misma cuenta a la vez.
+        db.rollback()
+        logger.info("La plataforma ya estaba siendo inicializada por otra instancia.")
+
+
+def _seed_platform(db: Session) -> None:
     password = settings.platform_admin_password or (PLATFORM_PASSWORD if settings.seed_demo else "")
     email = settings.platform_admin_email or PLATFORM_EMAIL
     if password:
@@ -161,6 +175,17 @@ def provision_business(db: Session, business: Business, owner: User) -> None:
 
 
 def seed_demo(db: Session) -> bool:
+    """Siembra idempotente y tolerante a cold starts concurrentes en Vercel."""
+    try:
+        return _seed_demo(db)
+    except IntegrityError:
+        # Otra instancia ganó la carrera del seed: su commit ya dejó los datos.
+        db.rollback()
+        logger.info("El salón demo ya estaba siendo creado por otra instancia.")
+        return False
+
+
+def _seed_demo(db: Session) -> bool:
     existing = db.scalar(select(Business).where(Business.slug == DEMO_SLUG))
     if existing is not None:
         return False
