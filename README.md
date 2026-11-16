@@ -8,6 +8,7 @@
 > Página pública de reservas: `/reservar/salon-lucia`
 >
 > **Demo en Vercel:** https://bellessa-web.vercel.app
+> **Alias de frontend:** https://frontend-neon-delta-72.vercel.app
 > **API:** https://bellessa-api.vercel.app/api/docs
 > **Admin SaaS:** https://bellessa-web.vercel.app/admin
 
