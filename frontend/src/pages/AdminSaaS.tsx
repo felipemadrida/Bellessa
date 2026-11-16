@@ -1,13 +1,17 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
+  Archive,
   ArrowUpRight,
   Building2,
   CalendarDays,
-  Check,
   CircleAlert,
+  Copy,
   CreditCard,
   LogOut,
+  Pencil,
+  Plus,
+  RotateCcw,
   Search,
   ShieldCheck,
   Sparkles,
@@ -22,11 +26,19 @@ import {
   Button,
   Card,
   Input,
+  Modal,
+  Select,
   Skeleton,
   Spinner,
+  Textarea,
 } from '../components/ui'
 import { PlatformApiError, getPlatformToken, platformApi, setPlatformToken } from '../lib/platform'
-import type { PlatformAdmin, PlatformTenant } from '../lib/types'
+import type {
+  PlatformAdmin,
+  PlatformTenant,
+  PlatformTenantCreate,
+  PlatformTenantUpdate,
+} from '../lib/types'
 import { cn, formatDateShort, money } from '../lib/format'
 
 const PLAN_LABEL: Record<string, string> = { free: 'Free', pro: 'Pro', salon: 'Salón' }
@@ -40,11 +52,20 @@ const STATUS_LABEL: Record<string, string> = {
   active: 'Activo',
   trial: 'Prueba',
   suspended: 'Suspendido',
+  archived: 'Archivado',
 }
 const STATUS_TONE: Record<string, string> = {
   active: 'bg-sage-soft text-sage',
   trial: 'bg-gold-soft text-[#7A5A18]',
   suspended: 'bg-rose-soft text-rose-deep',
+  archived: 'bg-sand text-muted',
+}
+const EDITABLE_STATUSES = ['active', 'trial', 'suspended'] as const
+
+interface CreatedCredentials {
+  name: string
+  email: string
+  password: string
 }
 
 export function AdminSaaSPage() {
@@ -210,9 +231,18 @@ function AdminDashboard({ admin, onLogout }: { admin: PlatformAdmin; onLogout: (
   const queryClient = useQueryClient()
   const [search, setSearch] = useState('')
   const [updating, setUpdating] = useState<number | null>(null)
+  const [showArchived, setShowArchived] = useState(false)
+  const [formOpen, setFormOpen] = useState(false)
+  const [editing, setEditing] = useState<PlatformTenant | null>(null)
+  const [archiveTarget, setArchiveTarget] = useState<PlatformTenant | null>(null)
+  const [archiving, setArchiving] = useState(false)
+  const [credentials, setCredentials] = useState<CreatedCredentials | null>(null)
 
   const overviewQuery = useQuery({ queryKey: ['platform-overview'], queryFn: platformApi.overview })
-  const tenantsQuery = useQuery({ queryKey: ['platform-tenants'], queryFn: platformApi.tenants })
+  const tenantsQuery = useQuery({
+    queryKey: ['platform-tenants', showArchived],
+    queryFn: () => platformApi.tenants(showArchived),
+  })
   const overview = overviewQuery.data
   const tenants = tenantsQuery.data ?? []
 
@@ -227,20 +257,62 @@ function AdminDashboard({ admin, onLogout }: { admin: PlatformAdmin; onLogout: (
     )
   }, [tenants, search])
 
-  async function updateTenant(tenant: PlatformTenant, payload: { plan?: string; status?: string }) {
+  function refreshTenants() {
+    return Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['platform-tenants'] }),
+      queryClient.invalidateQueries({ queryKey: ['platform-overview'] }),
+    ])
+  }
+
+  async function updateTenant(tenant: PlatformTenant, payload: PlatformTenantUpdate) {
     setUpdating(tenant.business_id)
     try {
       await platformApi.updateTenant(tenant.business_id, payload)
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['platform-tenants'] }),
-        queryClient.invalidateQueries({ queryKey: ['platform-overview'] }),
-      ])
+      await refreshTenants()
       toast('Salón actualizado')
     } catch (caught) {
       toast(caught instanceof PlatformApiError ? caught.message : 'No pudimos actualizar', 'error')
     } finally {
       setUpdating(null)
     }
+  }
+
+  async function confirmArchive() {
+    if (!archiveTarget) return
+    setArchiving(true)
+    try {
+      await platformApi.archiveTenant(archiveTarget.business_id)
+      await refreshTenants()
+      toast('Salón archivado; sus datos se conservan')
+      setArchiveTarget(null)
+    } catch (caught) {
+      toast(caught instanceof PlatformApiError ? caught.message : 'No pudimos archivar', 'error')
+    } finally {
+      setArchiving(false)
+    }
+  }
+
+  function openCreate() {
+    setEditing(null)
+    setFormOpen(true)
+  }
+
+  function openEdit(tenant: PlatformTenant) {
+    setEditing(tenant)
+    setFormOpen(true)
+  }
+
+  function onTenantSaved() {
+    setFormOpen(false)
+    setEditing(null)
+    void refreshTenants()
+  }
+
+  function onTenantCreated(result: PlatformTenant, email: string, password: string) {
+    setFormOpen(false)
+    setEditing(null)
+    void refreshTenants()
+    setCredentials({ name: result.name, email, password })
   }
 
   return (
@@ -287,11 +359,13 @@ function AdminDashboard({ admin, onLogout }: { admin: PlatformAdmin; onLogout: (
               Vista global de tenants, uso y estado comercial.
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Badge className="bg-sage-soft text-sage">
               <ShieldCheck size={11} /> Superadmin
             </Badge>
-            <span className="text-[10px] text-muted">Datos de plataforma</span>
+            <Button size="sm" variant="rose" onClick={openCreate}>
+              <Plus size={14} /> Nuevo salón
+            </Button>
           </div>
         </div>
 
@@ -308,7 +382,7 @@ function AdminDashboard({ admin, onLogout }: { admin: PlatformAdmin; onLogout: (
                 icon={<Building2 size={17} />}
                 label="Salones"
                 value={String(overview.total_tenants)}
-                hint={`${overview.active_tenants} activos · ${overview.trial_tenants} en prueba`}
+                hint={`${overview.active_tenants} activos · ${overview.trial_tenants} prueba · ${overview.archived_tenants} archivados`}
                 tone="ink"
               />
               <PlatformKpi
@@ -363,14 +437,29 @@ function AdminDashboard({ admin, onLogout }: { admin: PlatformAdmin; onLogout: (
                 {filtered.length} de {tenants.length} salones
               </p>
             </div>
-            <Input
-              placeholder="Buscar salón, slug o correo…"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              leading={<Search size={15} />}
-              aria-label="Buscar tenant"
-              className="h-10 sm:w-72"
-            />
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <button
+                type="button"
+                onClick={() => setShowArchived((value) => !value)}
+                className={cn(
+                  'h-10 rounded-2xl border px-3 text-[11px] font-semibold transition',
+                  showArchived
+                    ? 'border-ink bg-ink text-cream'
+                    : 'border-line bg-white text-muted hover:text-ink',
+                )}
+              >
+                <Archive size={13} className="mr-1.5 inline" />
+                {showArchived ? 'Ocultar archivados' : 'Ver archivados'}
+              </button>
+              <Input
+                placeholder="Buscar salón, slug o correo…"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                leading={<Search size={15} />}
+                aria-label="Buscar tenant"
+                className="h-10 sm:w-72"
+              />
+            </div>
           </div>
 
           {tenantsQuery.isLoading ? (
@@ -436,19 +525,38 @@ function AdminDashboard({ admin, onLogout }: { admin: PlatformAdmin; onLogout: (
                   </div>
 
                   <div className="flex flex-wrap items-center justify-end gap-1.5">
-                    <select
-                      value={tenant.status}
-                      disabled={updating === tenant.business_id}
-                      onChange={(event) => updateTenant(tenant, { status: event.target.value })}
-                      className="h-8 rounded-xl border border-line bg-white px-2 text-[10.5px] font-semibold text-ink"
-                      aria-label={`Estado de ${tenant.name}`}
+                    {tenant.status === 'archived' ? (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => updateTenant(tenant, { status: 'active' })}
+                        loading={updating === tenant.business_id}
+                      >
+                        <RotateCcw size={12} /> Restaurar
+                      </Button>
+                    ) : (
+                      <select
+                        value={tenant.status}
+                        disabled={updating === tenant.business_id}
+                        onChange={(event) => updateTenant(tenant, { status: event.target.value })}
+                        className="h-8 rounded-xl border border-line bg-white px-2 text-[10.5px] font-semibold text-ink"
+                        aria-label={`Estado de ${tenant.name}`}
+                      >
+                        {EDITABLE_STATUSES.map((status) => (
+                          <option key={status} value={status}>
+                            {STATUS_LABEL[status]}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => openEdit(tenant)}
+                      aria-label={`Editar ${tenant.name}`}
+                      className="flex h-8 w-8 items-center justify-center rounded-xl border border-line bg-white text-muted transition hover:border-ink/30 hover:text-ink"
                     >
-                      {Object.keys(STATUS_LABEL).map((status) => (
-                        <option key={status} value={status}>
-                          {STATUS_LABEL[status]}
-                        </option>
-                      ))}
-                    </select>
+                      <Pencil size={13} />
+                    </button>
                     <a
                       href={`/reservar/${tenant.slug}`}
                       target="_blank"
@@ -457,6 +565,16 @@ function AdminDashboard({ admin, onLogout }: { admin: PlatformAdmin; onLogout: (
                     >
                       Web <ArrowUpRight size={12} />
                     </a>
+                    {tenant.status !== 'archived' ? (
+                      <button
+                        type="button"
+                        onClick={() => setArchiveTarget(tenant)}
+                        aria-label={`Archivar ${tenant.name}`}
+                        className="flex h-8 w-8 items-center justify-center rounded-xl border border-line bg-white text-muted transition hover:border-rose/30 hover:text-rose-deep"
+                      >
+                        <Archive size={13} />
+                      </button>
+                    ) : null}
                     {updating === tenant.business_id ? <Spinner size={13} /> : null}
                   </div>
                 </div>
@@ -474,7 +592,305 @@ function AdminDashboard({ admin, onLogout }: { admin: PlatformAdmin; onLogout: (
           <span>El panel del salón sigue en /login</span>
         </div>
       </main>
+
+      <TenantFormModal
+        open={formOpen}
+        editing={editing}
+        onClose={() => {
+          setFormOpen(false)
+          setEditing(null)
+        }}
+        onSaved={onTenantSaved}
+        onCreated={onTenantCreated}
+      />
+
+      <Modal
+        open={Boolean(archiveTarget)}
+        onClose={() => setArchiveTarget(null)}
+        title="Archivar salón"
+        subtitle={archiveTarget?.name}
+        size="sm"
+        footer={
+          <div className="flex justify-end gap-2">
+            <Button variant="secondary" onClick={() => setArchiveTarget(null)}>
+              Cancelar
+            </Button>
+            <Button variant="danger" onClick={confirmArchive} loading={archiving}>
+              <Archive size={14} /> Archivar
+            </Button>
+          </div>
+        }
+      >
+        <p className="text-[13px] leading-relaxed text-muted">
+          El salón dejará de tener acceso y se ocultará de la lista principal. Sus clientas, citas y
+          cobros se conservan; puedes restaurarlo desde “Ver archivados”.
+        </p>
+      </Modal>
+
+      <Modal
+        open={Boolean(credentials)}
+        onClose={() => setCredentials(null)}
+        title="Salón creado"
+        subtitle="Guarda estas credenciales antes de cerrar"
+        size="sm"
+        footer={
+          <Button variant="rose" className="w-full" onClick={() => setCredentials(null)}>
+            Entendido
+          </Button>
+        }
+      >
+        {credentials ? (
+          <div className="space-y-3">
+            <p className="text-[13px] text-muted">
+              <strong className="text-ink">{credentials.name}</strong> ya puede entrar al panel del
+              salón.
+            </p>
+            <div className="rounded-2xl border border-line bg-white p-4">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted">Correo</p>
+              <p className="mt-0.5 break-all font-mono text-[12px] text-ink">{credentials.email}</p>
+              <p className="mt-3 text-[10px] font-bold uppercase tracking-wider text-muted">
+                Contraseña temporal
+              </p>
+              <p className="mt-0.5 break-all font-mono text-[12px] text-ink">
+                {credentials.password || 'La contraseña definida al crear el salón'}
+              </p>
+            </div>
+            <Button
+              variant="secondary"
+              className="w-full"
+              onClick={async () => {
+                await navigator.clipboard?.writeText(
+                  `${credentials.email}\n${credentials.password}`,
+                )
+                toast('Credenciales copiadas')
+              }}
+            >
+              <Copy size={14} /> Copiar credenciales
+            </Button>
+          </div>
+        ) : null}
+      </Modal>
     </div>
+  )
+}
+
+function TenantFormModal({
+  open,
+  editing,
+  onClose,
+  onSaved,
+  onCreated,
+}: {
+  open: boolean
+  editing: PlatformTenant | null
+  onClose: () => void
+  onSaved: () => void
+  onCreated: (tenant: PlatformTenant, email: string, password: string) => void
+}) {
+  const [form, setForm] = useState<PlatformTenantCreate>({
+    name: '',
+    slug: '',
+    owner_name: '',
+    owner_email: '',
+    owner_password: '',
+    phone: '',
+    city: 'Ciudad de México',
+    state: 'CDMX',
+    plan: 'free',
+    status: 'trial',
+    notes: '',
+  })
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!open) return
+    setError(null)
+    if (editing) {
+      setForm({
+        name: editing.name,
+        slug: editing.slug,
+        owner_name: editing.owner_name ?? '',
+        owner_email: editing.owner_email ?? '',
+        owner_password: '',
+        phone: editing.phone ?? '',
+        city: editing.city ?? 'Ciudad de México',
+        state: 'CDMX',
+        plan: editing.plan,
+        status: editing.status === 'archived' ? 'active' : editing.status,
+        notes: editing.notes ?? '',
+      })
+    } else {
+      setForm({
+        name: '',
+        slug: '',
+        owner_name: '',
+        owner_email: '',
+        owner_password: '',
+        phone: '',
+        city: 'Ciudad de México',
+        state: 'CDMX',
+        plan: 'free',
+        status: 'trial',
+        notes: '',
+      })
+    }
+  }, [open, editing])
+
+  function set<K extends keyof PlatformTenantCreate>(key: K, value: PlatformTenantCreate[K]) {
+    setForm((current) => ({ ...current, [key]: value }))
+  }
+
+  async function submit(event: React.FormEvent) {
+    event.preventDefault()
+    setSaving(true)
+    setError(null)
+    try {
+      if (editing) {
+        const payload: PlatformTenantUpdate = {
+          name: form.name,
+          slug: form.slug || undefined,
+          owner_name: form.owner_name,
+          owner_email: form.owner_email,
+          phone: form.phone ?? '',
+          city: form.city || undefined,
+          plan: form.plan,
+          status: form.status,
+          notes: form.notes || null,
+        }
+        if (form.owner_password) payload.owner_password = form.owner_password
+        await platformApi.updateTenant(editing.business_id, payload)
+        onSaved()
+      } else {
+        const result = await platformApi.createTenant({
+          ...form,
+          slug: form.slug || null,
+          owner_password: form.owner_password || null,
+          notes: form.notes || null,
+        })
+        onCreated(
+          result,
+          result.owner_email ?? form.owner_email,
+          form.owner_password || result.generated_password || '',
+        )
+      }
+    } catch (caught) {
+      setError(caught instanceof PlatformApiError ? caught.message : 'No pudimos guardar el salón.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={editing ? 'Editar salón' : 'Nuevo salón'}
+      subtitle={editing ? editing.name : 'Crea el tenant y su cuenta de dueña'}
+      size="lg"
+      footer={
+        <div className="flex justify-end gap-2">
+          <Button variant="secondary" onClick={onClose}>
+            Cancelar
+          </Button>
+          <Button type="submit" form="tenant-form" variant="rose" loading={saving}>
+            {editing ? 'Guardar cambios' : 'Crear salón'}
+          </Button>
+        </div>
+      }
+    >
+      <form id="tenant-form" onSubmit={submit} className="space-y-4">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Input
+            label="Nombre del salón"
+            value={form.name}
+            onChange={(event) => set('name', event.target.value)}
+            placeholder="Ej. Salón Aurora"
+            required
+          />
+          <Input
+            label="Slug"
+            value={form.slug ?? ''}
+            onChange={(event) => set('slug', event.target.value)}
+            placeholder="se genera del nombre"
+            hint="URL pública: /reservar/slug"
+          />
+          <Input
+            label="Dueña"
+            value={form.owner_name}
+            onChange={(event) => set('owner_name', event.target.value)}
+            placeholder="Nombre completo"
+            required
+          />
+          <Input
+            label="Correo de acceso"
+            type="email"
+            value={form.owner_email}
+            onChange={(event) => set('owner_email', event.target.value)}
+            placeholder="duena@salon.mx"
+            required
+          />
+          <Input
+            label={editing ? 'Nueva contraseña (opcional)' : 'Contraseña (opcional)'}
+            type="password"
+            value={form.owner_password ?? ''}
+            onChange={(event) => set('owner_password', event.target.value)}
+            placeholder={editing ? 'Dejar vacío para conservar' : 'Se genera automáticamente'}
+            minLength={8}
+            autoComplete="new-password"
+          />
+          <Input
+            label="Teléfono"
+            value={form.phone ?? ''}
+            onChange={(event) => set('phone', event.target.value)}
+            placeholder="55 1234 5678"
+          />
+          <Input
+            label="Ciudad"
+            value={form.city ?? ''}
+            onChange={(event) => set('city', event.target.value)}
+          />
+          <div className="grid grid-cols-2 gap-3">
+            <Select
+              label="Plan"
+              value={form.plan}
+              onChange={(event) => set('plan', event.target.value)}
+            >
+              {Object.keys(PLAN_LABEL).map((plan) => (
+                <option key={plan} value={plan}>
+                  {PLAN_LABEL[plan]}
+                </option>
+              ))}
+            </Select>
+            <Select
+              label="Estado"
+              value={form.status}
+              onChange={(event) => set('status', event.target.value)}
+            >
+              {EDITABLE_STATUSES.map((status) => (
+                <option key={status} value={status}>
+                  {STATUS_LABEL[status]}
+                </option>
+              ))}
+            </Select>
+          </div>
+        </div>
+        <Textarea
+          label="Notas internas"
+          value={form.notes ?? ''}
+          onChange={(event) => set('notes', event.target.value)}
+          placeholder="Contexto de la cuenta, condiciones especiales…"
+        />
+        {error ? (
+          <div
+            role="alert"
+            className="flex items-start gap-2 rounded-2xl border border-rose/20 bg-rose-soft px-3.5 py-2.5 text-[12.5px] font-medium text-rose-deep"
+          >
+            <CircleAlert size={15} className="mt-0.5 shrink-0" /> {error}
+          </div>
+        ) : null}
+      </form>
+    </Modal>
   )
 }
 

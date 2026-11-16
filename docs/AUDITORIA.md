@@ -32,7 +32,7 @@ Esta revisión compara el código con el nuevo [`PROMPT_maestro_micro_SaaS_salon
 | Docker y despliegue gratuito | ✅ | Compose + nginx, Vercel API/web, Neon y guía Render/Neon/Oracle; Docker no se pudo probar en este entorno |
 | Backups | ✅ | Scripts PowerShell/Bash y restauración documentada |
 | CI | ✅ | pytest + build frontend |
-| Pruebas | ✅ 24 | Auth, aislamiento, agenda, cobros, reportes, bloqueos, bot, webhook, marketing, lealtad, tareas internas y Admin SaaS |
+| Pruebas | ✅ 26 | Auth, aislamiento, agenda, cobros, reportes, bloqueos, bot, webhook, marketing, lealtad, tareas internas y CRUD de Admin SaaS |
 
 ## Mejoras implementadas en esta iteración
 
@@ -43,7 +43,7 @@ Esta revisión compara el código con el nuevo [`PROMPT_maestro_micro_SaaS_salon
 5. **Bandeja de salida** con estados y trazabilidad; campañas con opt-in y auditoría.
 6. **Health check con base de datos**, además de WhatsApp/scheduler.
 7. **Despliegue Vercel + Neon** con bootstrap, cron externo y guía paso a paso en [`DEPLOY_VERCEL_NEON.md`](DEPLOY_VERCEL_NEON.md).
-8. **Admin SaaS híbrido**: superadmin, tenants, planes Free/Pro/Salón, suspensión y métricas globales; tokens separados por scope.
+8. **Admin SaaS híbrido**: superadmin, CRUD de tenants, creación con credenciales temporales, planes Free/Pro/Salón, archivo/restauración, suspensión y métricas globales; tokens separados por scope.
 9. **Bloqueos de agenda y bitácora de auditoría** de la iteración previa.
 10. **Regla de no-traslape por clienta**, también en reservas públicas y por WhatsApp.
 

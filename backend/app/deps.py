@@ -47,11 +47,13 @@ def get_current_business(
     account = db.scalar(
         select(TenantAccount).where(TenantAccount.business_id == business.id)
     )
-    if account is not None and account.status == "suspended":
-        raise HTTPException(
-            status_code=403,
-            detail="El acceso del salón está suspendido. Contacta al administrador de Bellessa.",
+    if account is not None and account.status in {"suspended", "archived"}:
+        detail = (
+            "El salón está archivado. Contacta al administrador de Bellessa."
+            if account.status == "archived"
+            else "El acceso del salón está suspendido. Contacta al administrador de Bellessa."
         )
+        raise HTTPException(status_code=403, detail=detail)
     return business
 
 

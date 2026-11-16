@@ -32,12 +32,15 @@ El acceso se crea solo si `SEED_DEMO=true` o si defines `BELLESSA_PLATFORM_ADMIN
 ## Qué incluye
 
 - Login independiente de plataforma con JWT `scope=platform`.
-- Métricas globales: salones, activos, pruebas, suspendidos, clientas, staff, citas 30 días, ingresos 30 días y MRR estimado.
-- Lista de tenants con dueña, slug, plan, estado, uso y revenue.
-- Cambio de plan **Free / Pro / Salón**.
-- Suspensión y reactivación de un salón.
-- Búsqueda por nombre, slug o correo.
-- Auditoría de cambios de plan/estado.
+- Métricas globales: salones, activos, pruebas, suspendidos, archivados, clientas, staff, citas 30 días, ingresos 30 días y MRR estimado.
+- **CRUD de tenants**:
+  - Crear salón + dueña + catálogo inicial + horarios.
+  - Editar nombre, slug, dueña, correo, teléfono, ciudad, plan, estado y notas.
+  - Archivar (soft delete) y restaurar; los datos se conservan.
+  - Cambio rápido de plan **Free / Pro / Salón** y estado.
+- Contraseña temporal generada al crear si no se define una; se muestra una sola vez.
+- Búsqueda por nombre, slug o correo; filtro de archivados.
+- Auditoría de creación, edición, plan, estado y archivo.
 - Enlace a la página pública de cada salón.
 - Los datos sensibles de clientas no se muestran en la plataforma.
 
@@ -61,19 +64,23 @@ El precio es una referencia configurable en `services/plans.py`; **no hay cobro 
 ## Endpoints
 
 ```text
-POST  /api/platform/login
-GET   /api/platform/me
-GET   /api/platform/overview
-GET   /api/platform/tenants
-PATCH /api/platform/tenants/{business_id}
-GET   /api/platform/plans
+POST   /api/platform/login
+GET    /api/platform/me
+GET    /api/platform/overview
+GET    /api/platform/tenants?include_archived=true
+GET    /api/platform/tenants/{business_id}
+POST   /api/platform/tenants
+PATCH  /api/platform/tenants/{business_id}
+DELETE /api/platform/tenants/{business_id}   # archiva, no borra datos
+GET    /api/platform/plans
 ```
 
 ## Seguridad y límites
 
 - Contraseñas con scrypt; token JWT con expiración.
 - Sin impersonación de salones en v1.
-- Suspender un tenant bloquea sus endpoints operativos, pero no borra datos.
+- Suspender o archivar un tenant bloquea sus endpoints operativos, pero no borra datos.
+- **Archivar es el borrado lógico del CRUD.** No existe borrado permanente desde la interfaz para evitar pérdidas accidentales.
 - No hay RLS de PostgreSQL; el aislamiento sigue siendo por `business_id` en la capa de aplicación.
 - No hay cobro, facturación ni conciliación de suscripciones.
 - El panel no reemplaza al superadmin de una plataforma grande: es el mínimo operativo para administrar los salones de este proyecto.

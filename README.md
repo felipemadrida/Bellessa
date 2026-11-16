@@ -29,7 +29,7 @@ Un salón pequeño vive entre la libreta, Instagram, WhatsApp y una caja que no 
 - **Bitácora de auditoría** de acciones sensibles (cobros, citas, bloqueos, cambios de perfil) visible para la dueña.
 - **Bot de WhatsApp** con simulador local y adaptador a Meta Cloud API: menú de servicios, disponibilidad, confirmación, cancelación y atención humana.
 - **Marketing automatizado**: recordatorios 24 h/2 h, cumpleaños (7 días antes), reactivación 30/60/90 días, reseñas, campañas por segmento, plantillas con opt-out y programa de lealtad (puntos, nivel VIP y recompensa cada 5 visitas).
-- **Admin SaaS híbrido**: panel de plataforma en `/admin` con tenants, planes Free/Pro/Salón, uso, MRR estimado, suspensión/reactivación y métricas globales; separado del panel operativo del salón.
+- **Admin SaaS híbrido**: panel de plataforma en `/admin` con CRUD de tenants (crear, editar, archivar/restaurar), planes Free/Pro/Salón, uso, MRR estimado, credenciales temporales y métricas globales; separado del panel operativo del salón.
 
 ### Lo mexicano, de verdad
 
@@ -65,9 +65,9 @@ Un salón pequeño vive entre la libreta, Instagram, WhatsApp y una caja que no 
 |---|---|
 | ![WhatsApp](docs/screenshots/21-whatsapp-segmentos.png) | ![Lealtad](docs/screenshots/20-lealtad-clienta.png) |
 
-| Admin SaaS |
+| Admin SaaS · CRUD |
 |---|
-| ![Admin SaaS](docs/screenshots/22-admin-saas.png) |
+| ![Admin SaaS CRUD](docs/screenshots/27-admin-crud.png) |
 
 Las capturas se generaron con Playwright sobre el build de producción. El recorrido incluye login, dashboard, agenda, cita, clientas, caja, reportes, servicios, equipo, ajustes, bloqueos, auditoría, reserva pública y el simulador de WhatsApp/campañas. Sin errores de consola ni requests fallidos.
 
@@ -183,7 +183,7 @@ bellessa/
 │   │   ├── services/marketing.py    # segmentos, plantillas, scheduler
 │   │   ├── routers/                # auth, agenda, caja, WhatsApp, marketing, plataforma
 │   │   └── services/plans.py        # planes y límites SaaS
-│   ├── tests/                      # pytest (24 pruebas de flujo)
+│   ├── tests/                      # pytest (26 pruebas de flujo)
 │   └── Dockerfile
 ├── frontend/
 │   ├── src/pages/                  # dashboard, agenda, clientas, caja...
@@ -231,7 +231,7 @@ Swagger: `http://localhost:8000/api/docs`
 | WhatsApp | `GET /api/whatsapp/status`, `GET .../outbox`, `POST .../mock`, `GET/POST .../webhook` |
 | Marketing | `GET /api/marketing/templates`, `GET .../segments`, `GET .../calendar`, `POST .../campaigns` |
 | Interno | `GET/POST /api/internal/tick`, `POST /api/internal/bootstrap` (protegido por `CRON_SECRET`) |
-| Plataforma | `POST /api/platform/login`, `GET /api/platform/overview`, `GET /api/platform/tenants`, `PATCH /api/platform/tenants/{id}` |
+| Plataforma | `POST /api/platform/login`, `GET /api/platform/overview`, `GET/POST /api/platform/tenants`, `GET/PATCH/DELETE /api/platform/tenants/{id}` |
 
 ### Motor de disponibilidad
 

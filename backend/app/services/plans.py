@@ -32,7 +32,7 @@ PLANS: dict[str, dict] = {
     },
 }
 VALID_PLANS = set(PLANS)
-VALID_STATUSES = {"trial", "active", "suspended"}
+VALID_STATUSES = {"trial", "active", "suspended", "archived"}
 
 
 def ensure_tenant_account(

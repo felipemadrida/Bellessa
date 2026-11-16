@@ -18,8 +18,8 @@ No se simulan módulos vacíos. Cada pantalla y botón incluido está conectado 
 | 7 · POS, caja e inventario | Ventas, pagos, cortes, comisiones, productos, stock | ⚠️ Cobros ligados a citas, propinas, corte, gastos, comisiones y recibo; ❌ venta de mostrador, inventario y compras |
 | 8 · Marketing | Cupones, campañas, segmentos, seguimiento | ✅ Plantillas, segmentos, campañas manuales, calendario y automatizaciones (cumpleaños 7 días, win-back 30/60/90, reseñas, lealtad); ❌ cupones/referidos y atribución fina |
 | 9 · Analítica | Dashboard, ventas, ocupación, productividad, exportación | ✅ Dashboard, reportes de 7/30/90 días, ocupación, comisiones, top servicios/clientas y CSV |
-| 10 · Comercialización SaaS | Planes, límites, suscripciones, superadmin | ⚠️ Planes Free/Pro/Salón, límite de staff, suspensión y panel `/admin`; ❌ cobro automático, límite transaccional de citas y subdominios |
-| 11 · Producción | Pruebas, seguridad, backups, cloud, manuales | ⚠️ 24 pruebas backend, build/typecheck, Docker, healthchecks, CSP básica, CI en GitHub Actions, scripts de respaldo y guía de despliegue; ❌ backups automáticos programados, RLS y logs JSON centralizados |
+| 10 · Comercialización SaaS | Planes, límites, suscripciones, superadmin | ⚠️ CRUD de tenants, planes Free/Pro/Salón, límite de staff, archivo/restauración, suspensión y panel `/admin`; ❌ cobro automático, borrado permanente, límite transaccional de citas y subdominios |
+| 11 · Producción | Pruebas, seguridad, backups, cloud, manuales | ⚠️ 26 pruebas backend, build/typecheck, Docker, healthchecks, CSP básica, CI en GitHub Actions, scripts de respaldo y guía de despliegue; ❌ backups automáticos programados, RLS y logs JSON centralizados |
 
 ## Diferencias deliberadas para un MVP
 

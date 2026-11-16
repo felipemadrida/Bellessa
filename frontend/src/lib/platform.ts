@@ -3,6 +3,8 @@ import type {
   PlatformLoginResponse,
   PlatformOverview,
   PlatformTenant,
+  PlatformTenantCreate,
+  PlatformTenantCreated,
   PlatformTenantUpdate,
 } from './types'
 
@@ -60,6 +62,7 @@ async function platformRequest<T>(
     if (response.status === 401) setPlatformToken(null)
     throw new PlatformApiError(response.status, message)
   }
+  if (response.status === 204) return undefined as T
   return (await response.json()) as T
 }
 
@@ -71,10 +74,22 @@ export const platformApi = {
     }),
   me: () => platformRequest<PlatformAdmin>('/platform/me'),
   overview: () => platformRequest<PlatformOverview>('/platform/overview'),
-  tenants: () => platformRequest<PlatformTenant[]>('/platform/tenants'),
+  tenants: (includeArchived = false) =>
+    platformRequest<PlatformTenant[]>(
+      `/platform/tenants${includeArchived ? '?include_archived=true' : ''}`,
+    ),
+  tenant: (businessId: number) =>
+    platformRequest<PlatformTenant>(`/platform/tenants/${businessId}`),
+  createTenant: (payload: PlatformTenantCreate) =>
+    platformRequest<PlatformTenantCreated>('/platform/tenants', {
+      method: 'POST',
+      body: payload,
+    }),
   updateTenant: (businessId: number, payload: PlatformTenantUpdate) =>
     platformRequest<PlatformTenant>(`/platform/tenants/${businessId}`, {
       method: 'PATCH',
       body: payload,
     }),
+  archiveTenant: (businessId: number) =>
+    platformRequest<void>(`/platform/tenants/${businessId}`, { method: 'DELETE' }),
 }

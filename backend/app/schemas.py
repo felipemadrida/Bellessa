@@ -670,9 +670,12 @@ class PlatformTenantOut(BaseModel):
     slug: str
     owner_name: str | None = None
     owner_email: str | None = None
+    phone: str | None = None
+    city: str | None = None
     plan: str
     status: str
     trial_ends_at: UtcDatetime | None = None
+    notes: str | None = None
     clients_count: int
     staff_count: int
     appointments_30d: int
@@ -680,10 +683,35 @@ class PlatformTenantOut(BaseModel):
     created_at: UtcDatetime
 
 
+class PlatformTenantCreate(BaseModel):
+    name: str = Field(min_length=2, max_length=120)
+    slug: str | None = Field(default=None, max_length=80)
+    owner_name: str = Field(min_length=2, max_length=120)
+    owner_email: str = Field(min_length=5, max_length=160)
+    owner_password: str | None = Field(default=None, min_length=8, max_length=128)
+    phone: str | None = Field(default=None, max_length=30)
+    city: str | None = Field(default="Ciudad de México", max_length=120)
+    state: str | None = Field(default="CDMX", max_length=120)
+    plan: str = "free"
+    status: str = "trial"
+    notes: str | None = Field(default=None, max_length=1000)
+
+
+class PlatformTenantCreatedOut(PlatformTenantOut):
+    generated_password: str | None = None
+
+
 class PlatformTenantUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=2, max_length=120)
+    slug: str | None = Field(default=None, min_length=2, max_length=80)
+    owner_name: str | None = Field(default=None, min_length=2, max_length=120)
+    owner_email: str | None = Field(default=None, min_length=5, max_length=160)
+    owner_password: str | None = Field(default=None, min_length=8, max_length=128)
+    phone: str | None = Field(default=None, max_length=30)
+    city: str | None = Field(default=None, max_length=120)
     plan: str | None = None
     status: str | None = None
-    notes: str | None = None
+    notes: str | None = Field(default=None, max_length=1000)
 
 
 class PlatformPlanOut(BaseModel):
@@ -700,6 +728,7 @@ class PlatformOverviewOut(BaseModel):
     active_tenants: int
     trial_tenants: int
     suspended_tenants: int
+    archived_tenants: int
     total_clients: int
     total_staff: int
     appointments_30d: int

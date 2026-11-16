@@ -139,9 +139,12 @@ export interface PlatformTenant {
   slug: string
   owner_name: string | null
   owner_email: string | null
+  phone: string | null
+  city: string | null
   plan: string
   status: string
   trial_ends_at: string | null
+  notes: string | null
   clients_count: number
   staff_count: number
   appointments_30d: number
@@ -149,7 +152,32 @@ export interface PlatformTenant {
   created_at: string
 }
 
+export interface PlatformTenantCreate {
+  name: string
+  slug?: string | null
+  owner_name: string
+  owner_email: string
+  owner_password?: string | null
+  phone?: string | null
+  city?: string | null
+  state?: string | null
+  plan: string
+  status: string
+  notes?: string | null
+}
+
+export interface PlatformTenantCreated extends PlatformTenant {
+  generated_password: string | null
+}
+
 export interface PlatformTenantUpdate {
+  name?: string
+  slug?: string
+  owner_name?: string
+  owner_email?: string
+  owner_password?: string
+  phone?: string
+  city?: string
   plan?: string
   status?: string
   notes?: string | null
@@ -169,6 +197,7 @@ export interface PlatformOverview {
   active_tenants: number
   trial_tenants: number
   suspended_tenants: number
+  archived_tenants: number
   total_clients: number
   total_staff: number
   appointments_30d: number
