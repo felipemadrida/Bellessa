@@ -172,7 +172,7 @@ def seed_demo(db: Session) -> bool:
         name="Salón Lucía",
         slug=DEMO_SLUG,
         legal_name="Lucía Herrera",
-        rfc="HELJ850312MDFRRN05",
+        rfc="HELJ850312MDF",
         phone="55 5555 1234",
         whatsapp="55 5555 1234",
         email="hola@salonlucia.mx",
