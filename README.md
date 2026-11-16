@@ -6,6 +6,10 @@
 > Dueña: `demo@bellessa.mx` · Contraseña: `demo1234`
 > Admin SaaS: `/admin` · `admin@bellessa.mx` / `admin1234`
 > Página pública de reservas: `/reservar/salon-lucia`
+>
+> **Demo en Vercel:** https://bellessa-web.vercel.app
+> **API:** https://bellessa-api.vercel.app/api/docs
+> **Admin SaaS:** https://bellessa-web.vercel.app/admin
 
 ---
 
