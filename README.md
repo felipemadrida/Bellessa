@@ -204,6 +204,7 @@ bellessa/
 │   ├── MARKETING.md
 │   ├── ADMIN_SAAS.md
 │   ├── INVENTARIO.md
+│   ├── PROMPT_PRODUCCION_MICRO_APP.md
 │   ├── DEPLOY_VERCEL_NEON.md
 │   └── DEPLOY.md
 ├── scripts/
