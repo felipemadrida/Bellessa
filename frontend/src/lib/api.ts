@@ -14,6 +14,8 @@ import type {
   MarketingCampaignResult,
   MarketingSegment,
   MarketingTemplate,
+  ManualMessage,
+  ManualMessageCreate,
   MessageLog,
   Payment,
   PaymentMethod,
@@ -299,6 +301,22 @@ export const api = {
         method: 'POST',
         body: { phone, text },
       }),
+    manual: {
+      list: () => request<ManualMessage[]>('/whatsapp/manual'),
+      create: (payload: ManualMessageCreate) =>
+        request<ManualMessage>('/whatsapp/manual', { method: 'POST', body: payload }),
+      prepare: (id: number) =>
+        request<ManualMessage>(`/whatsapp/manual/${id}/prepare`, { method: 'POST' }),
+      opened: (id: number) =>
+        request<ManualMessage>(`/whatsapp/manual/${id}/opened`, { method: 'POST' }),
+      confirm: (id: number) =>
+        request<ManualMessage>(`/whatsapp/manual/${id}/confirm`, { method: 'POST' }),
+      failed: (id: number, reason?: string) =>
+        request<ManualMessage>(`/whatsapp/manual/${id}/failed`, {
+          method: 'POST',
+          body: { reason },
+        }),
+    },
   },
   marketing: {
     templates: () => request<MarketingTemplate[]>('/marketing/templates'),

@@ -23,7 +23,7 @@ TEMPLATES: dict[str, dict] = {
         "marketing": False,
         "body": (
             "Hola {nombre}, te recordamos tu {servicio} el {fecha} a las {hora} "
-            "con {profesional} en {negocio}. Responde CONFIRMAR o CANCELAR. — {negocio}"
+            "con {profesional} en {negocio}. Responde CONFIRMAR o CANCELAR."
         ),
     },
     "reminder_2h": {
@@ -32,7 +32,7 @@ TEMPLATES: dict[str, dict] = {
         "marketing": False,
         "body": (
             "¡Hola {nombre}! Tu cita de {servicio} es hoy a las {hora} con {profesional}. "
-            "Te esperamos en {direccion}. — {negocio}"
+            "Te esperamos en {direccion}."
         ),
     },
     "birthday": {
@@ -171,6 +171,10 @@ def template_context(
         "servicio_favorito": "servicio",
         "dias": str(days),
         "temporada": "esta temporada",
+        "servicio": "tu servicio",
+        "profesional": "tu especialista",
+        "fecha": "tu próxima visita",
+        "hora": "",
         "puntos": "0",
         "nivel": "nueva",
         "visitas": "0",

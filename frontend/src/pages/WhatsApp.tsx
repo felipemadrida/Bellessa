@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { Link } from 'react-router-dom'
 import {
   Bot,
   Check,
@@ -155,15 +156,23 @@ export function WhatsAppPage() {
         title="WhatsApp & marketing"
         subtitle="Bot de citas, bandeja de mensajes y campañas automáticas para que tu agenda se llene sola."
         actions={
-          <Button
-            variant="secondary"
-            onClick={() => {
-              void queryClient.invalidateQueries({ queryKey: ['whatsapp-outbox'] })
-              void statusQuery.refetch()
-            }}
-          >
-            <RefreshCw size={15} /> Actualizar
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              to="/whatsapp/manual"
+              className="inline-flex h-10 items-center gap-1.5 rounded-2xl border border-line bg-white px-3.5 text-[12px] font-semibold text-ink hover:bg-[#FCFAF7]"
+            >
+              <Send size={14} /> Bandeja manual
+            </Link>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                void queryClient.invalidateQueries({ queryKey: ['whatsapp-outbox'] })
+                void statusQuery.refetch()
+              }}
+            >
+              <RefreshCw size={15} /> Actualizar
+            </Button>
+          </div>
         }
       />
 

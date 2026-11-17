@@ -13,6 +13,7 @@ import { ReportsPage } from './pages/Reports'
 import { SettingsPage } from './pages/Settings'
 import { PublicBookingPage } from './pages/PublicBooking'
 import { WhatsAppPage } from './pages/WhatsApp'
+import { ManualWhatsAppPage } from './pages/ManualWhatsApp'
 import { AdminSaaSPage } from './pages/AdminSaaS'
 import { NotFoundPage } from './pages/NotFound'
 
@@ -42,6 +43,7 @@ export function App() {
           <Route path="/equipo" element={<TeamPage />} />
           <Route path="/caja" element={<CashPage />} />
           <Route path="/whatsapp" element={<WhatsAppPage />} />
+          <Route path="/whatsapp/manual" element={<ManualWhatsAppPage />} />
           <Route path="/reportes" element={<ReportsPage />} />
           <Route path="/ajustes" element={<SettingsPage />} />
         </Route>

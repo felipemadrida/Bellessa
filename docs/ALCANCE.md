@@ -13,13 +13,13 @@ No se simulan módulos vacíos. Cada pantalla y botón incluido está conectado 
 | 2 · Seguridad SaaS | Registro, login, roles, tenant, auditoría | ✅ Registro/login JWT, scrypt, aislamiento por `business_id`, superadmin de plataforma y bitácora; ⚠️ roles de salón limitados a dueña/equipo y sin RLS |
 | 3 · Catálogos y CRM básico | Clientes, servicios, personal, horarios, sucursales | ✅ Clientes, servicios, personal y horarios; ⚠️ una sucursal por negocio |
 | 4 · Agenda inteligente | Disponibilidad, bloqueos, reprogramación, cancelación, lista de espera | ✅ Motor de disponibilidad, buffers, traslapes, reagendar, cancelar, no asistió y bloqueos por día desde Equipo; ❌ lista de espera y bloqueos por horas |
-| 5 · WhatsApp manual | Plantillas, mensajes, bandeja, registro | ✅ Bot de citas con simulador y Cloud API, webhook firmado, bandeja, recordatorios programados y handoff humano; ⚠️ plantillas aprobadas e interactivos nativos de Meta pendientes |
+| 5 · WhatsApp manual | Plantillas, mensajes, bandeja, registro | ✅ Bandeja manual con `wa.me`, copia y confirmación del operador; bot y Cloud API opcionales; ⚠️ plantillas aprobadas e interactivos nativos de Meta pendientes |
 | 6 · CRM avanzado | Historial, etiquetas, segmentos, fidelización, cumpleaños | ✅ Historial, notas, etiquetas, cumpleaños, segmentos, puntos/niveles de lealtad y campañas; ❌ canje, paquetes y upselling automático por historial |
 | 7 · POS, caja e inventario | Ventas, pagos, cortes, comisiones, productos, stock | ⚠️ Cobros ligados a citas, propinas, corte, gastos, comisiones y recibo; ❌ venta de mostrador, inventario y compras |
 | 8 · Marketing | Cupones, campañas, segmentos, seguimiento | ✅ Plantillas, segmentos, campañas manuales, calendario y automatizaciones (cumpleaños 7 días, win-back 30/60/90, reseñas, lealtad); ❌ cupones/referidos y atribución fina |
 | 9 · Analítica | Dashboard, ventas, ocupación, productividad, exportación | ✅ Dashboard, reportes de 7/30/90 días, ocupación, comisiones, top servicios/clientas y CSV |
 | 10 · Comercialización SaaS | Planes, límites, suscripciones, superadmin | ⚠️ CRUD de tenants, planes Free/Pro/Salón, límite de staff, archivo/restauración, suspensión y panel `/admin`; ❌ cobro automático, borrado permanente, límite transaccional de citas y subdominios |
-| 11 · Producción | Pruebas, seguridad, backups, cloud, manuales | ⚠️ 26 pruebas backend, build/typecheck, Docker, healthchecks, CSP básica, CI en GitHub Actions, scripts de respaldo y guía de despliegue; ❌ backups automáticos programados, RLS y logs JSON centralizados |
+| 11 · Producción | Pruebas, seguridad, backups, cloud, manuales | ⚠️ 28 pruebas backend, build/typecheck, Docker, healthchecks, CSP básica, CI en GitHub Actions, scripts de respaldo y guía de despliegue; ❌ backups automáticos programados, RLS y logs JSON centralizados |
 
 ## Diferencias deliberadas para un MVP
 

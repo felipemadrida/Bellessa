@@ -32,7 +32,7 @@ Esta revisión compara el código con el nuevo [`PROMPT_maestro_micro_SaaS_salon
 | Docker y despliegue gratuito | ✅ | Compose + nginx, Vercel API/web, Neon y guía Render/Neon/Oracle; Docker no se pudo probar en este entorno |
 | Backups | ✅ | Scripts PowerShell/Bash y restauración documentada |
 | CI | ✅ | pytest + build frontend |
-| Pruebas | ✅ 26 | Auth, aislamiento, agenda, cobros, reportes, bloqueos, bot, webhook, marketing, lealtad, tareas internas y CRUD de Admin SaaS |
+| Pruebas | ✅ 28 | Auth, aislamiento, agenda, cobros, reportes, bloqueos, bot, webhook, marketing, lealtad, CRUD de Admin SaaS y WhatsApp manual |
 
 ## Mejoras implementadas en esta iteración
 
@@ -44,8 +44,36 @@ Esta revisión compara el código con el nuevo [`PROMPT_maestro_micro_SaaS_salon
 6. **Health check con base de datos**, además de WhatsApp/scheduler.
 7. **Despliegue Vercel + Neon** con bootstrap, cron externo y guía paso a paso en [`DEPLOY_VERCEL_NEON.md`](DEPLOY_VERCEL_NEON.md).
 8. **Admin SaaS híbrido**: superadmin, CRUD de tenants, creación con credenciales temporales, planes Free/Pro/Salón, archivo/restauración, suspensión y métricas globales; tokens separados por scope.
-9. **Bloqueos de agenda y bitácora de auditoría** de la iteración previa.
-10. **Regla de no-traslape por clienta**, también en reservas públicas y por WhatsApp.
+9. **WhatsApp manual sin API**: cola de mensajes preparados, enlaces `wa.me`, copia y estados `pending → opened → confirmed/failed`; abrir WhatsApp no equivale a entrega.
+10. **Bloqueos de agenda y bitácora de auditoría** de la iteración previa.
+11. **Regla de no-traslape por clienta**, también en reservas públicas y por WhatsApp.
+
+## Auditoría vs. BeautyHub 1.0
+
+El documento maestro de 16 secciones propone una plataforma más amplia. Esta es la lectura del estado real, sin fingir módulos que no existen:
+
+| Requisito BeautyHub | Estado | Lectura |
+|---|---|---|
+| FastAPI + React + PostgreSQL + Docker + PWA | ✅ | Stack base; PWA instalable y Compose |
+| Multiempresa con `tenant_id` | ✅ | `business_id` en entidades y filtros por servidor; el nombre difiere |
+| RLS de PostgreSQL como segunda barrera | ❌ | Solo aislamiento de aplicación |
+| Sucursales múltiples y zona horaria por sucursal | ❌ | Una ubicación por negocio; timezone por negocio |
+| Roles Superadmin/Propietario/Gerente/Recepcionista/Estilista/Marketing | ⚠️ | SUPERADMIN, OWNER y STAFF; faltan gerente, recepción, estilista y marketing con permisos finos |
+| JWT + Argon2 | ⚠️ | JWT + scrypt; Argon2 queda como migración |
+| API `/api/v1` y UUID | ❌ | API `/api` estable e IDs enteros; cambiar ahora rompe clientes |
+| Alembic | ❌ | `create_all`; migraciones versionadas pendientes |
+| Agenda, disponibilidad y bloqueos | ✅ | Motor real, buffers, traslapes, reprogramación y no-show |
+| FullCalendar y lista de espera | ❌ | Agenda propia por tarjetas; waitlist pendiente |
+| WhatsApp manual sin API | ✅ | Nueva bandeja `/whatsapp/manual` con `wa.me` y confirmación del operador |
+| CRM, lealtad y campañas | ✅ parcial | Historial, etiquetas, puntos, segmentos y campañas; cupones/referidos pendientes |
+| POS, caja y pagos de servicios | ✅ | Cobros, propinas, gastos, corte y recibo interno |
+| Inventario/productos/proveedores | ❌ | No implementado |
+| Reportes CSV | ✅ | Dashboard y exportación CSV; XLSX queda pendiente |
+| Planes, límites y suspensión | ✅ parcial | CRUD de tenants, planes y suspensión; cobro automático y suscripciones pendientes |
+| Pruebas 80 % reglas críticas | ⚠️ | 28 pruebas de integración; cobertura medida pendiente |
+| Cloud free tier | ✅ | Vercel + Neon + GitHub; Docker para VPS |
+
+**Decisión:** no se reescribe el monolito modular ni se migra a Next.js/shadcn/FullCalendar en esta iteración. Se prioriza valor operativo verificable: WhatsApp manual, CRUD SaaS, agenda, cobros y marketing. Las brechas de sucursales, roles finos, inventario, RLS y Alembic se planifican como fases separadas.
 
 ## Brechas priorizadas
 
@@ -65,4 +93,4 @@ El prompt propone Next.js 15 + Prisma + TypeScript. La aplicación actual es Fas
 
 ## Veredicto
 
-La aplicación es **operable y demostrable**: agenda, clientas, equipo, caja, reportes, reservas públicas, bloqueos, auditoría, bot de WhatsApp, marketing, segmentos, lealtad y Admin SaaS funcionan contra una base real y tienen pruebas. Quedan explícitos los huecos de plataforma (roles MANAGER/PROFESSIONAL, cobro de suscripciones, subdominios, RLS, waitlist, paquetes/referidos) y no se simulan con botones vacíos.
+La aplicación es **operable y demostrable**: agenda, clientas, equipo, caja, reportes, reservas públicas, bloqueos, auditoría, WhatsApp manual, bot opcional, marketing, segmentos, lealtad y Admin SaaS funcionan contra una base real y tienen pruebas. Quedan explícitos los huecos de plataforma (sucursales, roles finos, inventario, cobro de suscripciones, RLS, Alembic, waitlist, cupones/referidos) y no se simulan con botones vacíos.

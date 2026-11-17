@@ -216,7 +216,8 @@ Esto evita una migración para el MVP; si se agregan canjes o paquetes, se neces
 
 ## 13. Pruebas
 
-- 26 pruebas de integración con SQLite en memoria y `TestClient`.
+- 28 pruebas de integración con SQLite en memoria y `TestClient`.
+- WhatsApp manual: crear mensaje desde cita, preparar, abrir, confirmar y marcar fallo con trazabilidad en `message_logs`.
 - Aislamiento por fixture: base limpia + seed demo + plataforma en cada prueba.
 - Casos cubiertos: auth, tenant, agenda, conflicto, disponibilidad domingo, cobro/recibo, caja, reserva pública, reportes/CSV, catálogo, planes, CRUD de plataforma, archivo/restauración, suspensión y separación de tokens de plataforma.
 - Frontend: `tsc --noEmit` y build de producción dentro del pipeline.

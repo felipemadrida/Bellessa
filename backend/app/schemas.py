@@ -615,6 +615,23 @@ class WhatsAppMockOut(BaseModel):
     replies: list[str]
 
 
+class ManualMessageCreate(BaseModel):
+    client_id: int | None = None
+    appointment_id: int | None = None
+    template_key: str = "manual"
+    body: str | None = Field(default=None, max_length=2000)
+
+
+class ManualMessageFailIn(BaseModel):
+    reason: str | None = Field(default=None, max_length=500)
+
+
+class ManualMessageOut(MessageLogOut):
+    client_id: int | None = None
+    appointment_id: int | None = None
+    wa_url: str | None = None
+
+
 class MarketingTemplateOut(BaseModel):
     key: str
     label: str

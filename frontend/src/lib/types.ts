@@ -76,6 +76,19 @@ export interface MessageLog {
   client_name: string | null
 }
 
+export interface ManualMessage extends MessageLog {
+  client_id: number | null
+  appointment_id: number | null
+  wa_url: string | null
+}
+
+export interface ManualMessageCreate {
+  client_id?: number | null
+  appointment_id?: number | null
+  template_key: string
+  body?: string | null
+}
+
 export interface WhatsAppStatus {
   provider: string
   configured: boolean
