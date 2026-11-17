@@ -30,7 +30,7 @@ Como **producto sencillo para una dueña de salón**, hoy está en un punto de t
 
 ## 2. Hallazgos de auditoría (micro-app)
 
-> Nota de implementación (2026-11-17): ya se aplicaron la **jerarquía de navegación “Hoy / Más”**, la **búsqueda global de clientas**, el **code-splitting por ruta** y el **acento plateado/dorado** sobre la paleta existente. El onboarding y el “Deshacer” siguen en fase 2.
+> Nota de implementación (2026-11-17): ya se aplicaron la **jerarquía de navegación “Hoy / Más”**, la **búsqueda global de clientas**, el **code-splitting por ruta**, el **acento plateado/dorado**, el **idioma Español/Inglés** y el **tema Claro/Negro**. El onboarding y el “Deshacer” siguen en fase 2. La traducción cubre shell, login y dashboard; los módulos restantes se traducen de forma progresiva.
 
 ### 2.1 Lo que ya está bien
 

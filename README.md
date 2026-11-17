@@ -31,6 +31,7 @@ Un salón pequeño vive entre la libreta, Instagram, WhatsApp y una caja que no 
 - **Bot de WhatsApp opcional** con simulador local y adaptador a Meta Cloud API: menú de servicios, disponibilidad, confirmación, cancelación y atención humana.
 - **Marketing automatizado**: recordatorios 24 h/2 h, cumpleaños (7 días antes), reactivación 30/60/90 días, reseñas, campañas por segmento, plantillas con opt-out y programa de lealtad (puntos, nivel VIP y recompensa cada 5 visitas).
 - **Inventario**: productos con SKU, precio, costo, stock mínimo y movimientos de entrada/salida/ajuste con trazabilidad.
+- **Idioma Español/Inglés** y **tema Claro/Negro** con preferencias persistentes.
 - **Admin SaaS híbrido**: panel de plataforma en `/admin` con CRUD de tenants (crear, editar, archivar/restaurar), planes Free/Pro/Salón, uso, MRR estimado, credenciales temporales y métricas globales; separado del panel operativo del salón.
 
 ### Lo mexicano, de verdad
@@ -71,9 +72,9 @@ Un salón pequeño vive entre la libreta, Instagram, WhatsApp y una caja que no 
 |---|---|
 | ![WhatsApp manual](docs/screenshots/29-whatsapp-manual.png) | ![Inventario](docs/screenshots/30-inventario.png) |
 
-| Diseño plateado/dorado y navegación “Hoy / Más” |
-|---|
-| ![Diseño dorado](docs/screenshots/31-diseno-dorado.png) |
+| Diseño plateado/dorado y navegación “Hoy / Más” | Inglés + tema negro |
+|---|---|
+| ![Diseño dorado](docs/screenshots/31-diseno-dorado.png) | ![Inglés negro](docs/screenshots/32-ingles-negro.png) |
 
 | Admin SaaS · CRUD |
 |---|

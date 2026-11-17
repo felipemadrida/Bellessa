@@ -31,6 +31,71 @@
   }
 }
 
+/* Tema negro: sobrescribe las superficies claras sin tocar cada componente. */
+html.dark {
+  color-scheme: dark;
+  background-color: #0f0d0b;
+}
+html.dark body {
+  background-color: #0f0d0b;
+  color: #f2ece4;
+}
+html.dark .bg-cream {
+  background-color: #0f0d0b !important;
+}
+html.dark .bg-white,
+html.dark [class*="bg-white/"] {
+  background-color: #1b1714 !important;
+}
+html.dark .bg-sand,
+html.dark [class*="bg-sand/"] {
+  background-color: #241f1b !important;
+}
+html.dark .bg-ink {
+  background-color: #1b1714 !important;
+}
+html.dark .text-ink {
+  color: #f2ece4 !important;
+}
+html.dark .text-muted {
+  color: #b7aba1 !important;
+}
+html.dark .text-cream {
+  color: #f2ece4 !important;
+}
+html.dark .border-line,
+html.dark [class*="border-line"] {
+  border-color: #38302a !important;
+}
+html.dark .divide-line > :not([hidden]) ~ :not([hidden]) {
+  border-color: #38302a !important;
+}
+html.dark .bg-rose-soft {
+  background-color: #3a1f26 !important;
+}
+html.dark .bg-sage-soft {
+  background-color: #1f2e28 !important;
+}
+html.dark .bg-gold-soft {
+  background-color: #3a2f1b !important;
+}
+html.dark .metal-silver {
+  background-image: linear-gradient(135deg, #23201d, #3a3632, #23201d) !important;
+}
+html.dark .silver-card {
+  background-image: linear-gradient(180deg, #1b1714, #23201d) !important;
+  border-color: #38302a !important;
+}
+html.dark input,
+html.dark select,
+html.dark textarea {
+  color: #f2ece4;
+}
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #8d8178;
+}
+
 @layer base {
   :root {
     color-scheme: light;

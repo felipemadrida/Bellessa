@@ -15,15 +15,17 @@ import { useToast } from '../components/Toast'
 import { Button, Input } from '../components/ui'
 import { ApiError } from '../lib/api'
 import { useAuth } from '../lib/auth'
+import { usePreferences } from '../lib/preferences'
 
 const FEATURES = [
-  { icon: CalendarCheck2, text: 'Agenda que evita traslapes y llena tu día.' },
-  { icon: MessageCircle, text: 'Recordatorios por WhatsApp con un toque.' },
-  { icon: Wallet, text: 'Cobros, propinas y corte de caja en MXN.' },
+  { icon: CalendarCheck2, text: 'login.feat1' },
+  { icon: MessageCircle, text: 'login.feat2' },
+  { icon: Wallet, text: 'login.feat3' },
 ]
 
 export function LoginPage({ register = false }: { register?: boolean }) {
   const { user, ready, signIn, signUp } = useAuth()
+  const { t, locale, setLocale, theme, toggleTheme } = usePreferences()
   const navigate = useNavigate()
   const location = useLocation()
   const { toast } = useToast()
@@ -56,7 +58,7 @@ export function LoginPage({ register = false }: { register?: boolean }) {
           phone: phone || undefined,
           city: 'Ciudad de México',
         })
-        toast('¡Tu salón ya está en Bellessa!')
+        toast(t('login.successToast'))
       } else {
         await signIn(email, password)
       }
@@ -102,18 +104,17 @@ export function LoginPage({ register = false }: { register?: boolean }) {
           <div className="relative my-auto max-w-lg py-14">
             <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-cream/20 bg-cream/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-cream/80">
               <Sparkles size={13} className="text-gold" />
-              Hecho para salones en México
+              {t('login.madeFor')}
             </p>
             <h1 className="text-balance font-display text-[54px] font-normal leading-[0.98] tracking-[-0.035em] xl:text-[64px]">
-              Tu salón,
+              {t('login.head1')}
               <br />
-              <span className="italic text-[#F0CFA7]">en orden.</span>
+              <span className="italic text-[#F0CFA7]">{t('login.head2')}</span>
               <br />
-              Tu tiempo, tuyo.
+              {t('login.head3')}
             </h1>
             <p className="mt-6 max-w-md text-[15px] leading-relaxed text-cream/75">
-              Agenda, clientas, cobros y seguimiento en una sola app. Menos libreta, menos
-              WhatsApp perdido, más tiempo para crear.
+              {t('login.subtitle')}
             </p>
 
             <ul className="mt-9 space-y-3.5">
@@ -122,7 +123,7 @@ export function LoginPage({ register = false }: { register?: boolean }) {
                   <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-cream/15 bg-cream/10">
                     <feature.icon size={16} className="text-gold" />
                   </span>
-                  {feature.text}
+                  {t(feature.text)}
                 </li>
               ))}
             </ul>
@@ -131,7 +132,7 @@ export function LoginPage({ register = false }: { register?: boolean }) {
           {/* Mini agenda decorativa */}
           <div className="relative rounded-3xl border border-cream/15 bg-cream/10 p-4 backdrop-blur-md">
             <div className="mb-3 flex items-center justify-between text-[11px] uppercase tracking-[0.14em] text-cream/60">
-              <span>Hoy · Salón Demo</span>
+              <span>{t('login.today')}</span>
               <span className="rounded-full bg-cream/15 px-2 py-0.5 text-[10px] normal-case tracking-normal text-cream">
                 6 citas
               </span>
@@ -173,28 +174,43 @@ export function LoginPage({ register = false }: { register?: boolean }) {
               to={register ? '/login' : '/registro'}
               className="text-xs font-semibold text-rose underline-offset-4 hover:underline"
             >
-              {register ? 'Ya tengo cuenta' : 'Crear cuenta'}
+              {register ? t('login.haveAccount') : t('login.createAccountLink')}
             </Link>
+          </div>
+
+          <div className="mb-4 flex items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setLocale(locale === 'es' ? 'en' : 'es')}
+              className="rounded-xl border border-line bg-white/70 px-3 py-1.5 text-[10px] font-bold text-ink"
+            >
+              {locale === 'es' ? 'English' : 'Español'}
+            </button>
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="rounded-xl border border-line bg-white/70 px-3 py-1.5 text-[10px] font-bold text-ink"
+            >
+              {theme === 'dark' ? t('common.light') : t('common.dark')}
+            </button>
           </div>
 
           <div className="mx-auto flex w-full max-w-[420px] flex-1 flex-col justify-center py-10">
             <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-rose">
-              {register ? 'Empieza gratis' : 'Bienvenida de vuelta'}
+              {register ? t('login.startFree') : t('login.welcome')}
             </p>
             <h2 className="mt-2 font-display text-[34px] font-medium leading-tight tracking-[-0.025em] text-ink sm:text-[40px]">
-              {register ? 'Crea el espacio de tu salón' : 'Qué gusto verte'}
+              {register ? t('login.registerHeadline') : t('login.welcomeSub')}
             </h2>
             <p className="mt-2 text-sm text-muted">
-              {register
-                ? 'Tu agenda, tu equipo y tus clientas listos en menos de un minuto.'
-                : 'Entra para ver tu agenda, tus clientas y la caja de hoy.'}
+              {register ? t('login.registerSub') : t('login.enterSub')}
             </p>
 
             <form onSubmit={handleSubmit} className="mt-8 space-y-4">
               {register ? (
                 <>
                   <Input
-                    label="Nombre del salón"
+                    label={t('login.businessName')}
                     placeholder="Ej. Salón Demo"
                     value={businessName}
                     onChange={(event) => setBusinessName(event.target.value)}
@@ -202,7 +218,7 @@ export function LoginPage({ register = false }: { register?: boolean }) {
                     required
                   />
                   <Input
-                    label="Tu nombre"
+                    label={t('login.yourName')}
                     placeholder="Ej. Lucía Herrera"
                     value={ownerName}
                     onChange={(event) => setOwnerName(event.target.value)}
@@ -210,7 +226,7 @@ export function LoginPage({ register = false }: { register?: boolean }) {
                     required
                   />
                   <Input
-                    label="WhatsApp del salón"
+                    label={t('login.whatsapp')}
                     placeholder="55 1234 5678"
                     value={phone}
                     onChange={(event) => setPhone(event.target.value)}
@@ -221,7 +237,7 @@ export function LoginPage({ register = false }: { register?: boolean }) {
               ) : null}
 
               <Input
-                label="Correo"
+                label={t('login.email')}
                 type="email"
                 placeholder="tu@salon.mx"
                 value={email}
@@ -232,7 +248,7 @@ export function LoginPage({ register = false }: { register?: boolean }) {
 
               <div className="relative">
                 <Input
-                  label="Contraseña"
+                  label={t('login.password')}
                   type={showPassword ? 'text' : 'password'}
                   placeholder="Mínimo 8 caracteres"
                   value={password}
@@ -262,7 +278,7 @@ export function LoginPage({ register = false }: { register?: boolean }) {
               ) : null}
 
               <Button type="submit" size="lg" variant="rose" className="w-full" loading={loading}>
-                {register ? 'Crear mi salón' : 'Entrar a mi salón'}
+                {register ? t('login.createSalon') : t('login.enter')}
                 {!loading ? <ArrowRight size={17} /> : null}
               </Button>
             </form>
@@ -271,7 +287,7 @@ export function LoginPage({ register = false }: { register?: boolean }) {
               <>
                 <div className="my-5 flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted/60">
                   <span className="h-px flex-1 bg-line" />
-                  o explora sin cuenta
+                  {t('login.withoutAccount').toLowerCase()}
                   <span className="h-px flex-1 bg-line" />
                 </div>
                 <Button
@@ -283,24 +299,24 @@ export function LoginPage({ register = false }: { register?: boolean }) {
                   onClick={handleDemo}
                 >
                   <Sparkles size={17} className="text-gold" />
-                  Abrir el demo de Salón Demo
+                  {t('login.demo')}
                 </Button>
               </>
             ) : null}
 
             <p className="mt-6 text-center text-xs leading-relaxed text-muted">
-              Al continuar aceptas el uso responsable de los datos de tus clientas.
+              {t('login.accept')}
               <br />
               Hecho con cariño en México · Precios en MXN
             </p>
 
             <div className="mt-6 flex items-center justify-center gap-4 text-xs">
               <Link to={register ? '/login' : '/registro'} className="font-semibold text-rose">
-                {register ? 'Ya tengo una cuenta' : 'Crear una cuenta nueva'}
+                {register ? t('login.haveAccount') : t('login.create')}
               </Link>
               <span className="text-line">|</span>
               <Link to="/reservar/salon-lucia" className="font-semibold text-muted hover:text-ink">
-                Ver página de reservas
+                {t('login.viewBooking')}
               </Link>
               <span className="text-line">|</span>
               <Link to="/admin" className="font-semibold text-muted hover:text-ink">

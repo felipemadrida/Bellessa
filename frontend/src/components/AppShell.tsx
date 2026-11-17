@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../lib/auth'
 import { cn } from '../lib/format'
+import { usePreferences } from '../lib/preferences'
 import { Avatar, IconButton, Input, Menu, MenuItem, Spinner } from './ui'
 
 export function BrandMark({ size = 38 }: { size?: number }) {
@@ -49,23 +50,23 @@ export function Wordmark({ className }: { className?: string }) {
 
 const NAV_SECTIONS = [
   {
-    label: 'Hoy',
+    label: 'nav.hoy',
     items: [
-      { to: '/', label: 'Inicio', icon: LayoutDashboard, end: true },
-      { to: '/agenda', label: 'Agenda', icon: CalendarDays },
-      { to: '/caja', label: 'Caja', icon: Wallet },
+      { to: '/', label: 'nav.home', icon: LayoutDashboard, end: true },
+      { to: '/agenda', label: 'nav.agenda', icon: CalendarDays },
+      { to: '/caja', label: 'nav.cash', icon: Wallet },
     ],
   },
   {
-    label: 'Más',
+    label: 'nav.more',
     items: [
-      { to: '/clientas', label: 'Clientas', icon: Users },
-      { to: '/whatsapp', label: 'WhatsApp', icon: MessageCircle },
-      { to: '/reportes', label: 'Reportes', icon: ChartNoAxesColumn },
-      { to: '/servicios', label: 'Servicios', icon: Scissors },
-      { to: '/inventario', label: 'Inventario', icon: Package },
-      { to: '/equipo', label: 'Equipo', icon: Sparkles },
-      { to: '/ajustes', label: 'Ajustes', icon: Settings },
+      { to: '/clientas', label: 'nav.clients', icon: Users },
+      { to: '/whatsapp', label: 'nav.whatsapp', icon: MessageCircle },
+      { to: '/reportes', label: 'nav.reports', icon: ChartNoAxesColumn },
+      { to: '/servicios', label: 'nav.services', icon: Scissors },
+      { to: '/inventario', label: 'nav.inventory', icon: Package },
+      { to: '/equipo', label: 'nav.team', icon: Sparkles },
+      { to: '/ajustes', label: 'nav.settings', icon: Settings },
     ],
   },
 ]
@@ -84,6 +85,7 @@ function Splash() {
 
 function Sidebar() {
   const { user, business, signOut } = useAuth()
+  const { t, locale, setLocale, theme, toggleTheme } = usePreferences()
   const navigate = useNavigate()
   const [query, setQuery] = useState('')
   if (!user || !business) return null
@@ -94,7 +96,7 @@ function Sidebar() {
         <div className="leading-none">
           <Wordmark />
           <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-gold-deep">
-            Salón en orden
+            {t('common.salonOrder')}
           </p>
         </div>
       </NavLink>
@@ -111,8 +113,8 @@ function Sidebar() {
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           leading={<Search size={15} />}
-          placeholder="Buscar clienta…"
-          aria-label="Buscar clienta"
+          placeholder={t('common.searchClient')}
+          aria-label={t('common.searchLabel')}
           className="h-10 bg-white/80"
         />
       </form>
@@ -121,7 +123,7 @@ function Sidebar() {
         {NAV_SECTIONS.map((section) => (
           <div key={section.label}>
             <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-muted/70">
-              {section.label}
+              {t(section.label)}
             </p>
             <div className="space-y-1">
               {section.items.map((item) => (
@@ -141,7 +143,7 @@ function Sidebar() {
                   {({ isActive }) => (
                     <>
                       <item.icon size={18} strokeWidth={1.9} className={isActive ? 'text-gold' : ''} />
-                      {item.label}
+                      {t(item.label)}
                     </>
                   )}
                 </NavLink>
@@ -158,9 +160,25 @@ function Sidebar() {
             <p className="truncate text-[13px] font-bold text-ink">{user.name}</p>
             <p className="truncate text-[11px] text-muted">{business.name}</p>
           </div>
-          <IconButton label="Cerrar sesión" onClick={signOut} className="h-8 w-8">
+          <IconButton label={t('common.logout')} onClick={signOut} className="h-8 w-8">
             <LogOut size={15} />
           </IconButton>
+        </div>
+        <div className="mt-3 flex items-center gap-2 border-t border-line/70 pt-3">
+          <button
+            type="button"
+            onClick={() => setLocale(locale === 'es' ? 'en' : 'es')}
+            className="flex-1 rounded-xl border border-line bg-white/70 py-1.5 text-[10px] font-bold text-ink"
+          >
+            {locale === 'es' ? 'English' : 'Español'}
+          </button>
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="flex-1 rounded-xl border border-line bg-white/70 py-1.5 text-[10px] font-bold text-ink"
+          >
+            {theme === 'dark' ? t('common.light') : t('common.dark')}
+          </button>
         </div>
       </div>
     </aside>
@@ -169,6 +187,7 @@ function Sidebar() {
 
 function MobileHeader() {
   const { user, business, signOut } = useAuth()
+  const { t, locale, setLocale, theme, toggleTheme } = usePreferences()
   if (!user || !business) return null
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-line/70 bg-cream/85 px-4 backdrop-blur-xl lg:hidden">
@@ -181,7 +200,7 @@ function MobileHeader() {
           to="/agenda?nueva=1"
           className="metal-gold flex h-9 items-center gap-1.5 rounded-full px-3 text-xs font-bold text-ink"
         >
-          <Plus size={14} /> Cita
+          <Plus size={14} /> {t('common.cita')}
         </NavLink>
         <Menu
           trigger={
@@ -201,25 +220,31 @@ function MobileHeader() {
           </div>
           <div className="py-1">
             <MenuItem onClick={() => (window.location.href = '/reportes')}>
-              <ChartNoAxesColumn size={16} /> Reportes
+              <ChartNoAxesColumn size={16} /> {t('nav.reports')}
             </MenuItem>
             <MenuItem onClick={() => (window.location.href = '/whatsapp')}>
-              <MessageCircle size={16} /> WhatsApp
+              <MessageCircle size={16} /> {t('nav.whatsapp')}
             </MenuItem>
             <MenuItem onClick={() => (window.location.href = '/servicios')}>
-              <Scissors size={16} /> Servicios
+              <Scissors size={16} /> {t('nav.services')}
             </MenuItem>
             <MenuItem onClick={() => (window.location.href = '/inventario')}>
-              <Package size={16} /> Inventario
+              <Package size={16} /> {t('nav.inventory')}
             </MenuItem>
             <MenuItem onClick={() => (window.location.href = '/equipo')}>
-              <Sparkles size={16} /> Equipo
+              <Sparkles size={16} /> {t('nav.team')}
             </MenuItem>
             <MenuItem onClick={() => (window.location.href = '/ajustes')}>
-              <Settings size={16} /> Ajustes
+              <Settings size={16} /> {t('nav.settings')}
+            </MenuItem>
+            <MenuItem onClick={() => setLocale(locale === 'es' ? 'en' : 'es')}>
+              {locale === 'es' ? 'English' : 'Español'}
+            </MenuItem>
+            <MenuItem onClick={toggleTheme}>
+              {theme === 'dark' ? t('common.light') : t('common.dark')}
             </MenuItem>
             <MenuItem onClick={signOut} danger>
-              <LogOut size={16} /> Cerrar sesión
+              <LogOut size={16} /> {t('common.logout')}
             </MenuItem>
           </div>
         </Menu>
@@ -229,29 +254,30 @@ function MobileHeader() {
 }
 
 function BottomNav() {
+  const { t } = usePreferences()
   const items = [
-    { to: '/', label: 'Inicio', icon: LayoutDashboard, end: true },
-    { to: '/agenda', label: 'Agenda', icon: CalendarDays },
-    { to: '/clientas', label: 'Clientas', icon: Users },
-    { to: '/caja', label: 'Caja', icon: Wallet },
+    { to: '/', label: 'nav.home', icon: LayoutDashboard, end: true },
+    { to: '/agenda', label: 'nav.agenda', icon: CalendarDays },
+    { to: '/clientas', label: 'nav.clients', icon: Users },
+    { to: '/caja', label: 'nav.cash', icon: Wallet },
   ]
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-line/80 bg-cream/95 pb-[max(.5rem,env(safe-area-inset-bottom))] backdrop-blur-xl lg:hidden">
       <div className="mx-auto grid max-w-md grid-cols-5 items-end px-2 pt-1.5">
         {items.slice(0, 2).map((item) => (
-          <BottomLink key={item.to} {...item} />
+          <BottomLink key={item.to} {...item} label={t(item.label)} />
         ))}
         <div className="flex justify-center">
           <NavLink
             to="/agenda?nueva=1"
-            aria-label="Nueva cita"
+            aria-label={t('common.newAppointment')}
             className="metal-gold -mt-7 flex h-14 w-14 items-center justify-center rounded-full border-[5px] border-cream text-ink shadow-lift transition active:scale-95"
           >
             <Plus size={24} strokeWidth={2.4} />
           </NavLink>
         </div>
         {items.slice(2).map((item) => (
-          <BottomLink key={item.to} {...item} />
+          <BottomLink key={item.to} {...item} label={t(item.label)} />
         ))}
       </div>
     </nav>

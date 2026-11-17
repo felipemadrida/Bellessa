@@ -22,7 +22,6 @@ import {
   cn,
   dateKey,
   formatTime,
-  greeting,
   hourInTZ,
   initials,
   money,
@@ -33,6 +32,7 @@ import {
 import type { Appointment, Dashboard, DayRevenue, TopService } from '../lib/types'
 import { Avatar, Button, Card, EmptyState, ProgressBar, SectionTitle, Skeleton, StatusBadge } from '../components/ui'
 import { useToast } from '../components/Toast'
+import { usePreferences } from '../lib/preferences'
 
 function GoalRing({ percent }: { percent: number }) {
   const radius = 48
@@ -215,6 +215,7 @@ function DashboardSkeleton() {
 export function DashboardPage() {
   const { user, business } = useAuth()
   const { toast } = useToast()
+  const { t } = usePreferences()
   const [copied, setCopied] = useState(false)
   const query = useQuery({ queryKey: ['dashboard'], queryFn: api.dashboard })
   const data: Dashboard | undefined = query.data
@@ -259,24 +260,27 @@ export function DashboardPage() {
             {capitalize(data.today_label)} · {business.city ?? 'Ciudad de México'}
           </p>
           <h1 className="mt-1 font-display text-[32px] font-medium leading-none tracking-[-0.025em] text-ink sm:text-[42px]">
-            {greeting(hourInTZ(business.timezone))}, {user.name.split(' ')[0]}.
+            {(() => {
+              const hour = hourInTZ(business.timezone)
+              return `${t(hour < 12 ? 'greeting.morning' : hour < 18 ? 'greeting.afternoon' : 'greeting.evening')}, ${user.name.split(' ')[0]}.`
+            })()}
           </h1>
           <p className="mt-2 text-sm text-muted">
             {data.unconfirmed > 0
-              ? `Tienes ${data.unconfirmed} cita${data.unconfirmed === 1 ? '' : 's'} por confirmar. Vamos a dejar el día listo.`
-              : 'Todo confirmado. Respira: tu día está bajo control.'}
+              ? t('dashboard.unconfirmed', { n: data.unconfirmed, s: data.unconfirmed === 1 ? '' : 's' })
+              : t('dashboard.confirmed')}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Button variant="secondary" onClick={copyLink}>
             {copied ? <Check size={16} /> : <Copy size={16} />}
-            <span className="hidden sm:inline">Link de reservas</span>
-            <span className="sm:hidden">Compartir</span>
+            <span className="hidden sm:inline">{t('dashboard.linkBooking')}</span>
+            <span className="sm:hidden">{t('dashboard.share')}</span>
           </Button>
           <Link to="/agenda?nueva=1">
             <Button variant="rose">
               <CalendarPlus size={17} />
-              Nueva cita
+              {t('dashboard.newAppointment')}
             </Button>
           </Link>
         </div>
@@ -296,7 +300,7 @@ export function DashboardPage() {
           <div>
             <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-cream/55">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-gold" />
-              Ingresos de hoy
+              {t('dashboard.incomeToday')}
             </div>
             <p className="money mt-2 font-display text-[52px] font-normal leading-none tracking-[-0.04em] sm:text-[64px]">
               {money(data.revenue_today_cents)}
@@ -304,15 +308,15 @@ export function DashboardPage() {
             <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-[12px] text-cream/65">
               <span className="inline-flex items-center gap-1.5">
                 <TrendingUp size={14} className="text-gold" />
-                {money(data.revenue_month_cents)} este mes
+                {money(data.revenue_month_cents)} {t('dashboard.thisMonth')}
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <Clock3 size={14} className="text-gold" />
-                {data.completed_today} de {data.appointments_today} completadas
+                {t('dashboard.completedOf', { a: data.completed_today, b: data.appointments_today })}
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <Wallet size={14} className="text-gold" />
-                {money(data.expected_cash_cents)} en efectivo
+                {money(data.expected_cash_cents)} {t('dashboard.cash')}
               </span>
             </div>
             <div className="mt-5 flex items-center gap-3">
@@ -320,13 +324,13 @@ export function DashboardPage() {
                 to="/agenda"
                 className="inline-flex h-10 items-center gap-2 rounded-2xl bg-cream px-4 text-[13px] font-bold text-ink transition hover:bg-white"
               >
-                Ver agenda <ArrowRight size={15} />
+                {t('dashboard.viewAgenda')} <ArrowRight size={15} />
               </Link>
               <Link
                 to="/reportes"
                 className="inline-flex h-10 items-center gap-1.5 rounded-2xl border border-cream/20 px-4 text-[13px] font-semibold text-cream/80 transition hover:bg-cream/10"
               >
-                Reportes
+                {t('nav.reports')}
               </Link>
             </div>
           </div>
@@ -335,7 +339,7 @@ export function DashboardPage() {
             <GoalRing percent={goalPercent} />
             <div className="text-left sm:text-center">
               <p className="money text-sm font-bold text-cream">{money(data.revenue_month_cents)}</p>
-              <p className="text-[11px] text-cream/50">de {money(data.revenue_goal_cents)}</p>
+              <p className="text-[11px] text-cream/50">{t('dashboard.de')} {money(data.revenue_goal_cents)}</p>
             </div>
           </div>
         </div>
@@ -345,30 +349,30 @@ export function DashboardPage() {
       <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <KpiCard
           icon={CalendarPlus}
-          label="Citas hoy"
+          label={t('dashboard.todayAppointments')}
           value={String(data.appointments_today)}
-          hint={`${data.pending_today} por confirmar`}
+          hint={t('dashboard.toConfirm', { n: data.pending_today })}
           tone="rose"
         />
         <KpiCard
           icon={Wallet}
-          label="Ticket promedio"
+          label={t('dashboard.avgTicket')}
           value={money(data.average_ticket_cents)}
-          hint={`${money(data.tips_today_cents)} en propinas`}
+          hint={`${money(data.tips_today_cents)} ${t('dashboard.tips')}`}
           tone="sage"
         />
         <KpiCard
           icon={Sparkles}
-          label="Ocupación"
+          label={t('dashboard.occupancy')}
           value={`${data.occupancy_pct}%`}
-          hint="De tu capacidad de hoy"
+          hint={t('dashboard.capacity')}
           tone="gold"
         />
         <KpiCard
           icon={Users}
-          label="Clientas nuevas"
+          label={t('dashboard.newClients')}
           value={String(data.new_clients_month)}
-          hint="Este mes"
+          hint={t('dashboard.thisMonth')}
           tone="silver"
         />
       </div>
