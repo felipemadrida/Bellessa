@@ -17,6 +17,7 @@ from .routers import (
     catalog,
     clients,
     internal,
+    inventory,
     marketing,
     money,
     platform,
@@ -63,6 +64,7 @@ app.add_middleware(
 api = APIRouter(prefix="/api")
 api.include_router(auth.router)
 api.include_router(catalog.router)
+api.include_router(inventory.router)
 api.include_router(clients.router)
 api.include_router(appointments.router)
 api.include_router(money.router)

@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   LogOut,
   MessageCircle,
+  Package,
   Plus,
   Scissors,
   Settings,
@@ -61,6 +62,7 @@ const NAV_SECTIONS = [
     items: [
       { to: '/reportes', label: 'Reportes', icon: ChartNoAxesColumn },
       { to: '/servicios', label: 'Servicios', icon: Scissors },
+      { to: '/inventario', label: 'Inventario', icon: Package },
       { to: '/equipo', label: 'Equipo', icon: Sparkles },
       { to: '/ajustes', label: 'Ajustes', icon: Settings },
     ],
@@ -185,6 +187,9 @@ function MobileHeader() {
             </MenuItem>
             <MenuItem onClick={() => (window.location.href = '/servicios')}>
               <Scissors size={16} /> Servicios
+            </MenuItem>
+            <MenuItem onClick={() => (window.location.href = '/inventario')}>
+              <Package size={16} /> Inventario
             </MenuItem>
             <MenuItem onClick={() => (window.location.href = '/equipo')}>
               <Sparkles size={16} /> Equipo

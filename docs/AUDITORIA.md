@@ -32,7 +32,7 @@ Esta revisión compara el código con el nuevo [`PROMPT_maestro_micro_SaaS_salon
 | Docker y despliegue gratuito | ✅ | Compose + nginx, Vercel API/web, Neon y guía Render/Neon/Oracle; Docker no se pudo probar en este entorno |
 | Backups | ✅ | Scripts PowerShell/Bash y restauración documentada |
 | CI | ✅ | pytest + build frontend |
-| Pruebas | ✅ 28 | Auth, aislamiento, agenda, cobros, reportes, bloqueos, bot, webhook, marketing, lealtad, CRUD de Admin SaaS y WhatsApp manual |
+| Pruebas | ✅ 30 | Auth, aislamiento, agenda, cobros, reportes, bloqueos, bot, webhook, marketing, lealtad, CRUD de Admin SaaS, WhatsApp manual e inventario |
 
 ## Mejoras implementadas en esta iteración
 
@@ -45,8 +45,9 @@ Esta revisión compara el código con el nuevo [`PROMPT_maestro_micro_SaaS_salon
 7. **Despliegue Vercel + Neon** con bootstrap, cron externo y guía paso a paso en [`DEPLOY_VERCEL_NEON.md`](DEPLOY_VERCEL_NEON.md).
 8. **Admin SaaS híbrido**: superadmin, CRUD de tenants, creación con credenciales temporales, planes Free/Pro/Salón, archivo/restauración, suspensión y métricas globales; tokens separados por scope.
 9. **WhatsApp manual sin API**: cola de mensajes preparados, enlaces `wa.me`, copia y estados `pending → opened → confirmed/failed`; abrir WhatsApp no equivale a entrega.
-10. **Bloqueos de agenda y bitácora de auditoría** de la iteración previa.
-11. **Regla de no-traslape por clienta**, también en reservas públicas y por WhatsApp.
+10. **Inventario**: productos, SKU por salón, stock mínimo, valor estimado, movimientos de entrada/salida/ajuste y desactivación lógica.
+11. **Bloqueos de agenda y bitácora de auditoría** de la iteración previa.
+12. **Regla de no-traslape por clienta**, también en reservas públicas y por WhatsApp.
 
 ## Auditoría vs. BeautyHub 1.0
 
@@ -67,10 +68,10 @@ El documento maestro de 16 secciones propone una plataforma más amplia. Esta es
 | WhatsApp manual sin API | ✅ | Nueva bandeja `/whatsapp/manual` con `wa.me` y confirmación del operador |
 | CRM, lealtad y campañas | ✅ parcial | Historial, etiquetas, puntos, segmentos y campañas; cupones/referidos pendientes |
 | POS, caja y pagos de servicios | ✅ | Cobros, propinas, gastos, corte y recibo interno |
-| Inventario/productos/proveedores | ❌ | No implementado |
+| Inventario/productos/proveedores | ✅ parcial | Productos, stock, mínimos y movimientos; faltan proveedores, compras y venta de productos |
 | Reportes CSV | ✅ | Dashboard y exportación CSV; XLSX queda pendiente |
 | Planes, límites y suspensión | ✅ parcial | CRUD de tenants, planes y suspensión; cobro automático y suscripciones pendientes |
-| Pruebas 80 % reglas críticas | ⚠️ | 28 pruebas de integración; cobertura medida pendiente |
+| Pruebas 80 % reglas críticas | ⚠️ | 30 pruebas de integración; cobertura medida pendiente |
 | Cloud free tier | ✅ | Vercel + Neon + GitHub; Docker para VPS |
 
 **Decisión:** no se reescribe el monolito modular ni se migra a Next.js/shadcn/FullCalendar en esta iteración. Se prioriza valor operativo verificable: WhatsApp manual, CRUD SaaS, agenda, cobros y marketing. Las brechas de sucursales, roles finos, inventario, RLS y Alembic se planifican como fases separadas.
@@ -93,4 +94,4 @@ El prompt propone Next.js 15 + Prisma + TypeScript. La aplicación actual es Fas
 
 ## Veredicto
 
-La aplicación es **operable y demostrable**: agenda, clientas, equipo, caja, reportes, reservas públicas, bloqueos, auditoría, WhatsApp manual, bot opcional, marketing, segmentos, lealtad y Admin SaaS funcionan contra una base real y tienen pruebas. Quedan explícitos los huecos de plataforma (sucursales, roles finos, inventario, cobro de suscripciones, RLS, Alembic, waitlist, cupones/referidos) y no se simulan con botones vacíos.
+La aplicación es **operable y demostrable**: agenda, clientas, equipo, caja, inventario, reportes, reservas públicas, bloqueos, auditoría, WhatsApp manual, bot opcional, marketing, segmentos, lealtad y Admin SaaS funcionan contra una base real y tienen pruebas. Quedan explícitos los huecos de plataforma (sucursales, roles finos, inventario, cobro de suscripciones, RLS, Alembic, waitlist, cupones/referidos) y no se simulan con botones vacíos.

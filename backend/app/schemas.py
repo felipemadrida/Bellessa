@@ -660,6 +660,75 @@ class MarketingCampaignOut(BaseModel):
 
 
 # ---------------------------------------------------------------------------
+# Inventario
+# ---------------------------------------------------------------------------
+class ProductOut(ORMModel):
+    id: int
+    name: str
+    sku: str | None = None
+    category: str
+    description: str | None = None
+    price_cents: int
+    cost_cents: int
+    stock: int
+    min_stock: int
+    unit: str
+    active: bool
+    created_at: UtcDatetime
+    updated_at: UtcDatetime
+
+
+class ProductCreate(BaseModel):
+    name: str = Field(min_length=2, max_length=120)
+    sku: str | None = Field(default=None, max_length=60)
+    category: str = Field(default="General", max_length=80)
+    description: str | None = Field(default=None, max_length=1000)
+    price_cents: int = Field(default=0, ge=0)
+    cost_cents: int = Field(default=0, ge=0)
+    stock: int = Field(default=0, ge=0)
+    min_stock: int = Field(default=0, ge=0)
+    unit: str = Field(default="pieza", max_length=30)
+
+
+class ProductUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=2, max_length=120)
+    sku: str | None = Field(default=None, max_length=60)
+    category: str | None = Field(default=None, max_length=80)
+    description: str | None = Field(default=None, max_length=1000)
+    price_cents: int | None = Field(default=None, ge=0)
+    cost_cents: int | None = Field(default=None, ge=0)
+    min_stock: int | None = Field(default=None, ge=0)
+    unit: str | None = Field(default=None, max_length=30)
+    active: bool | None = None
+
+
+class StockMovementCreate(BaseModel):
+    kind: Literal["in", "out", "adjustment"]
+    quantity: int
+    reason: str | None = Field(default=None, max_length=240)
+    reference: str | None = Field(default=None, max_length=80)
+
+
+class StockMovementOut(ORMModel):
+    id: int
+    product_id: int
+    product_name: str | None = None
+    kind: str
+    quantity: int
+    reason: str | None = None
+    reference: str | None = None
+    created_at: UtcDatetime
+
+
+class InventorySummaryOut(BaseModel):
+    products: int
+    active_products: int
+    low_stock: int
+    stock_units: int
+    inventory_value_cents: int
+
+
+# ---------------------------------------------------------------------------
 # Plataforma SaaS (superadmin)
 # ---------------------------------------------------------------------------
 class PlatformLoginIn(BaseModel):

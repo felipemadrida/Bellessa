@@ -12,6 +12,7 @@ import { CashPage } from './pages/Cash'
 import { ReportsPage } from './pages/Reports'
 import { SettingsPage } from './pages/Settings'
 import { PublicBookingPage } from './pages/PublicBooking'
+import { InventoryPage } from './pages/Inventory'
 import { WhatsAppPage } from './pages/WhatsApp'
 import { ManualWhatsAppPage } from './pages/ManualWhatsApp'
 import { AdminSaaSPage } from './pages/AdminSaaS'
@@ -40,6 +41,7 @@ export function App() {
           <Route path="/clientas" element={<ClientsPage />} />
           <Route path="/clientas/:id" element={<ClientDetailPage />} />
           <Route path="/servicios" element={<ServicesPage />} />
+          <Route path="/inventario" element={<InventoryPage />} />
           <Route path="/equipo" element={<TeamPage />} />
           <Route path="/caja" element={<CashPage />} />
           <Route path="/whatsapp" element={<WhatsAppPage />} />

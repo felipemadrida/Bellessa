@@ -76,6 +76,65 @@ export interface MessageLog {
   client_name: string | null
 }
 
+export interface Product {
+  id: number
+  name: string
+  sku: string | null
+  category: string
+  description: string | null
+  price_cents: number
+  cost_cents: number
+  stock: number
+  min_stock: number
+  unit: string
+  active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface ProductCreate {
+  name: string
+  sku?: string | null
+  category?: string
+  description?: string | null
+  price_cents?: number
+  cost_cents?: number
+  stock?: number
+  min_stock?: number
+  unit?: string
+}
+
+export interface ProductUpdate {
+  name?: string
+  sku?: string | null
+  category?: string
+  description?: string | null
+  price_cents?: number
+  cost_cents?: number
+  min_stock?: number
+  unit?: string
+  active?: boolean
+}
+
+export interface StockMovement {
+  id: number
+  product_id: number
+  product_name: string | null
+  kind: string
+  quantity: number
+  reason: string | null
+  reference: string | null
+  created_at: string
+}
+
+export interface InventorySummary {
+  products: number
+  active_products: number
+  low_stock: number
+  stock_units: number
+  inventory_value_cents: number
+}
+
 export interface ManualMessage extends MessageLog {
   client_id: number | null
   appointment_id: number | null

@@ -48,6 +48,8 @@ Client 1 ─── * Appointment
 | `AuditLog` | acción, entidad, detalle, usuario | Bitácora operativa de la dueña |
 | `WhatsAppConversation` | phone, step, servicio, slot, draft_name | Estado durable del bot |
 | `MessageLog` | kind, template, body, status, provider, dedupe_key | Bandeja, recordatorios y campañas |
+| `Product` | nombre, SKU, categoría, precio, costo, stock, mínimo | Inventario por salón |
+| `StockMovement` | product_id, tipo, cantidad, motivo, usuario | Entrada, salida o ajuste auditable |
 | `PlatformAdmin` | email único, password_hash, active | Superadmin del SaaS, sin `business_id` |
 | `TenantAccount` | business_id, plan, status, trial_ends_at | Plan comercial y suspensión del salón |
 
@@ -216,7 +218,7 @@ Esto evita una migración para el MVP; si se agregan canjes o paquetes, se neces
 
 ## 13. Pruebas
 
-- 28 pruebas de integración con SQLite en memoria y `TestClient`.
+- 30 pruebas de integración con SQLite en memoria y `TestClient`.
 - WhatsApp manual: crear mensaje desde cita, preparar, abrir, confirmar y marcar fallo con trazabilidad en `message_logs`.
 - Aislamiento por fixture: base limpia + seed demo + plataforma en cada prueba.
 - Casos cubiertos: auth, tenant, agenda, conflicto, disponibilidad domingo, cobro/recibo, caja, reserva pública, reportes/CSV, catálogo, planes, CRUD de plataforma, archivo/restauración, suspensión y separación de tokens de plataforma.

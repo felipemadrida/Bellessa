@@ -15,11 +15,11 @@ No se simulan módulos vacíos. Cada pantalla y botón incluido está conectado 
 | 4 · Agenda inteligente | Disponibilidad, bloqueos, reprogramación, cancelación, lista de espera | ✅ Motor de disponibilidad, buffers, traslapes, reagendar, cancelar, no asistió y bloqueos por día desde Equipo; ❌ lista de espera y bloqueos por horas |
 | 5 · WhatsApp manual | Plantillas, mensajes, bandeja, registro | ✅ Bandeja manual con `wa.me`, copia y confirmación del operador; bot y Cloud API opcionales; ⚠️ plantillas aprobadas e interactivos nativos de Meta pendientes |
 | 6 · CRM avanzado | Historial, etiquetas, segmentos, fidelización, cumpleaños | ✅ Historial, notas, etiquetas, cumpleaños, segmentos, puntos/niveles de lealtad y campañas; ❌ canje, paquetes y upselling automático por historial |
-| 7 · POS, caja e inventario | Ventas, pagos, cortes, comisiones, productos, stock | ⚠️ Cobros ligados a citas, propinas, corte, gastos, comisiones y recibo; ❌ venta de mostrador, inventario y compras |
+| 7 · POS, caja e inventario | Ventas, pagos, cortes, comisiones, productos, stock | ⚠️ Cobros ligados a citas, propinas, corte, gastos, comisiones y recibo; inventario con productos/movimientos; ❌ venta de productos en mostrador, proveedores y compras |
 | 8 · Marketing | Cupones, campañas, segmentos, seguimiento | ✅ Plantillas, segmentos, campañas manuales, calendario y automatizaciones (cumpleaños 7 días, win-back 30/60/90, reseñas, lealtad); ❌ cupones/referidos y atribución fina |
 | 9 · Analítica | Dashboard, ventas, ocupación, productividad, exportación | ✅ Dashboard, reportes de 7/30/90 días, ocupación, comisiones, top servicios/clientas y CSV |
 | 10 · Comercialización SaaS | Planes, límites, suscripciones, superadmin | ⚠️ CRUD de tenants, planes Free/Pro/Salón, límite de staff, archivo/restauración, suspensión y panel `/admin`; ❌ cobro automático, borrado permanente, límite transaccional de citas y subdominios |
-| 11 · Producción | Pruebas, seguridad, backups, cloud, manuales | ⚠️ 28 pruebas backend, build/typecheck, Docker, healthchecks, CSP básica, CI en GitHub Actions, scripts de respaldo y guía de despliegue; ❌ backups automáticos programados, RLS y logs JSON centralizados |
+| 11 · Producción | Pruebas, seguridad, backups, cloud, manuales | ⚠️ 30 pruebas backend, build/typecheck, Docker, healthchecks, CSP básica, CI en GitHub Actions, scripts de respaldo y guía de despliegue; ❌ backups automáticos programados, RLS y logs JSON centralizados |
 
 ## Diferencias deliberadas para un MVP
 
@@ -49,7 +49,7 @@ No se simulan módulos vacíos. Cada pantalla y botón incluido está conectado 
 2. **Vistas semana/mes y lista de espera** para reasignar huecos liberados.
 3. **Alembic + RLS** para evolución de esquema y segunda barrera de aislamiento.
 4. **Lealtad 5+1, cupones únicos y upselling por historial**.
-5. **POS de mostrador + inventario** y pagos de anticipo/CFDI.
+5. **POS de productos en mostrador**, proveedores y compras; pagos de anticipo/CFDI.
 6. **Redis + worker** y modelo predictivo de no-show; logs JSON y alertas.
 
 La base actual permite agregar estos módulos sin reescribir autenticación, agenda, clientes ni caja.

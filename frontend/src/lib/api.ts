@@ -16,14 +16,19 @@ import type {
   MarketingTemplate,
   ManualMessage,
   ManualMessageCreate,
+  InventorySummary,
   MessageLog,
   Payment,
   PaymentMethod,
+  Product,
+  ProductCreate,
+  ProductUpdate,
   PublicBookingResponse,
   PublicBusiness,
   Report,
   Service,
   Staff,
+  StockMovement,
   TimeOff,
   WhatsAppLink,
   WhatsAppMockResponse,
@@ -292,6 +297,36 @@ export const api = {
   dashboard: () => request<Dashboard>('/dashboard'),
   audit: {
     list: (limit = 20) => request<AuditEntry[]>(`/audit${query({ limit })}`),
+  },
+  inventory: {
+    products: (params: { q?: string; low_stock?: boolean; include_inactive?: boolean } = {}) =>
+      request<Product[]>(
+        `/inventory/products${query({
+          q: params.q,
+          low_stock: params.low_stock,
+          include_inactive: params.include_inactive,
+        })}`,
+      ),
+    product: (id: number) => request<Product>(`/inventory/products/${id}`),
+    createProduct: (payload: ProductCreate) =>
+      request<Product>('/inventory/products', { method: 'POST', body: payload }),
+    updateProduct: (id: number, payload: ProductUpdate) =>
+      request<Product>(`/inventory/products/${id}`, { method: 'PATCH', body: payload }),
+    deactivateProduct: (id: number) =>
+      request<void>(`/inventory/products/${id}`, { method: 'DELETE' }),
+    movement: (
+      id: number,
+      payload: { kind: 'in' | 'out' | 'adjustment'; quantity: number; reason?: string },
+    ) =>
+      request<StockMovement>(`/inventory/products/${id}/movements`, {
+        method: 'POST',
+        body: payload,
+      }),
+    movements: (limit = 50, productId?: number) =>
+      request<StockMovement[]>(
+        `/inventory/movements${query({ limit, product_id: productId })}`,
+      ),
+    summary: () => request<InventorySummary>('/inventory/summary'),
   },
   whatsapp: {
     status: () => request<WhatsAppStatus>('/whatsapp/status'),

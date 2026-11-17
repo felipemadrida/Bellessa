@@ -337,6 +337,52 @@ class TenantAccount(Base):
     business: Mapped[Business] = relationship(lazy="joined")
 
 
+class Product(Base):
+    """Producto de inventario; los importes se guardan en centavos."""
+
+    __tablename__ = "products"
+    __table_args__ = (UniqueConstraint("business_id", "sku", name="uq_product_sku"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    business_id: Mapped[int] = mapped_column(
+        ForeignKey("businesses.id", ondelete="CASCADE"), index=True
+    )
+    name: Mapped[str] = mapped_column(String(120))
+    sku: Mapped[str | None] = mapped_column(String(60), nullable=True)
+    category: Mapped[str] = mapped_column(String(80), default="General")
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    price_cents: Mapped[int] = mapped_column(Integer, default=0)
+    cost_cents: Mapped[int] = mapped_column(Integer, default=0)
+    stock: Mapped[int] = mapped_column(Integer, default=0)
+    min_stock: Mapped[int] = mapped_column(Integer, default=0)
+    unit: Mapped[str] = mapped_column(String(30), default="pieza")
+    active: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, onupdate=utcnow)
+
+
+class StockMovement(Base):
+    """Entrada, salida o ajuste de inventario con trazabilidad."""
+
+    __tablename__ = "stock_movements"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    business_id: Mapped[int] = mapped_column(
+        ForeignKey("businesses.id", ondelete="CASCADE"), index=True
+    )
+    product_id: Mapped[int] = mapped_column(
+        ForeignKey("products.id", ondelete="CASCADE"), index=True
+    )
+    kind: Mapped[str] = mapped_column(String(20))  # in | out | adjustment
+    quantity: Mapped[int] = mapped_column(Integer)
+    reason: Mapped[str | None] = mapped_column(String(240), nullable=True)
+    reference: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, index=True)
+
+    product: Mapped[Product] = relationship(lazy="joined")
+
+
 class MessageLog(Base):
     """Bandeja de salida: simulador, recordatorios, campañas y avisos internos."""
 
