@@ -22,6 +22,12 @@ export default {
         gold: {
           DEFAULT: '#D9A441',
           soft: '#F8EED9',
+          deep: '#A97E24',
+        },
+        silver: {
+          DEFAULT: '#C9C6C2',
+          soft: '#F0EFEC',
+          deep: '#6E6B67',
         },
         terra: '#D97757',
       },

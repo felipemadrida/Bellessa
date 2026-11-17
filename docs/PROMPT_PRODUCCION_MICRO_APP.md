@@ -30,6 +30,8 @@ Como **producto sencillo para una dueña de salón**, hoy está en un punto de t
 
 ## 2. Hallazgos de auditoría (micro-app)
 
+> Nota de implementación (2026-11-17): ya se aplicaron la **jerarquía de navegación “Hoy / Más”**, la **búsqueda global de clientas**, el **code-splitting por ruta** y el **acento plateado/dorado** sobre la paleta existente. El onboarding y el “Deshacer” siguen en fase 2.
+
 ### 2.1 Lo que ya está bien
 
 - **Diseño propio y coherente**: `Fraunces` para títulos, `Manrope` para cuerpo; crema `#FBF7F2`, ink `#251D1B`, rosa `#C2415A`, dorado `#D9A441`.
@@ -152,10 +154,10 @@ EMPIEZA POR
 
 ## 5. Resumen de recomendación
 
-1. **Consolidar la raíz en 4 secciones** y mover lo avanzado a “Más”.
+1. **Consolidar la raíz en 4 secciones** y mover lo avanzado a “Más”. *(aplicado)*
 2. **Añadir onboarding de 3 pasos** tras el registro.
-3. **Añadir búsqueda global de clientas** y toast de “Deshacer”.
-4. **Dividir el bundle** y **virtualizar listas largas**.
+3. **Añadir búsqueda global de clientas** *(aplicada)* y toast de “Deshacer” *(pendiente)*.
+4. **Dividir el bundle** *(aplicado)* y **virtualizar listas largas** *(pendiente)*.
 5. **Convertir el WhatsApp manual en el flujo por defecto** (ya está construido) y dejar Cloud API como opción avanzada.
 6. **Mantener el monolito modular**; no microservicios en v1.
 

@@ -71,6 +71,10 @@ Un salón pequeño vive entre la libreta, Instagram, WhatsApp y una caja que no 
 |---|---|
 | ![WhatsApp manual](docs/screenshots/29-whatsapp-manual.png) | ![Inventario](docs/screenshots/30-inventario.png) |
 
+| Diseño plateado/dorado y navegación “Hoy / Más” |
+|---|
+| ![Diseño dorado](docs/screenshots/31-diseno-dorado.png) |
+
 | Admin SaaS · CRUD |
 |---|
 | ![Admin SaaS CRUD](docs/screenshots/27-admin-crud.png) |

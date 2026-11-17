@@ -1,5 +1,5 @@
-import { Navigate, NavLink, Outlet, useLocation } from 'react-router-dom'
-import type { ReactNode } from 'react'
+import { Navigate, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { useState, type ReactNode } from 'react'
 import {
   CalendarDays,
   ChartNoAxesColumn,
@@ -10,6 +10,7 @@ import {
   Package,
   Plus,
   Scissors,
+  Search,
   Settings,
   Sparkles,
   Users,
@@ -17,12 +18,12 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../lib/auth'
 import { cn } from '../lib/format'
-import { Avatar, IconButton, Menu, MenuItem, Spinner } from './ui'
+import { Avatar, IconButton, Input, Menu, MenuItem, Spinner } from './ui'
 
 export function BrandMark({ size = 38 }: { size?: number }) {
   return (
     <span
-      className="inline-flex shrink-0 items-center justify-center rounded-[14px] bg-rose text-cream shadow-soft"
+      className="metal-gold metal-ring inline-flex shrink-0 items-center justify-center rounded-[14px] text-ink"
       style={{ width: size, height: size }}
       aria-hidden="true"
     >
@@ -48,18 +49,18 @@ export function Wordmark({ className }: { className?: string }) {
 
 const NAV_SECTIONS = [
   {
-    label: 'Operación',
+    label: 'Hoy',
     items: [
       { to: '/', label: 'Inicio', icon: LayoutDashboard, end: true },
       { to: '/agenda', label: 'Agenda', icon: CalendarDays },
-      { to: '/clientas', label: 'Clientas', icon: Users },
       { to: '/caja', label: 'Caja', icon: Wallet },
-      { to: '/whatsapp', label: 'WhatsApp', icon: MessageCircle },
     ],
   },
   {
-    label: 'Tu negocio',
+    label: 'Más',
     items: [
+      { to: '/clientas', label: 'Clientas', icon: Users },
+      { to: '/whatsapp', label: 'WhatsApp', icon: MessageCircle },
       { to: '/reportes', label: 'Reportes', icon: ChartNoAxesColumn },
       { to: '/servicios', label: 'Servicios', icon: Scissors },
       { to: '/inventario', label: 'Inventario', icon: Package },
@@ -83,18 +84,38 @@ function Splash() {
 
 function Sidebar() {
   const { user, business, signOut } = useAuth()
+  const navigate = useNavigate()
+  const [query, setQuery] = useState('')
   if (!user || !business) return null
   return (
-    <aside className="fixed inset-y-0 left-0 z-30 hidden w-[272px] flex-col border-r border-line/80 bg-[#F8F2EA]/85 px-4 py-6 backdrop-blur-xl lg:flex">
-      <NavLink to="/" className="mb-8 flex items-center gap-2.5 px-2">
+    <aside className="fixed inset-y-0 left-0 z-30 hidden w-[272px] flex-col border-r border-silver/30 bg-gradient-to-b from-white/85 to-[#F3EFE9]/90 px-4 py-6 backdrop-blur-xl lg:flex">
+      <NavLink to="/" className="mb-6 flex items-center gap-2.5 px-2">
         <BrandMark />
         <div className="leading-none">
           <Wordmark />
-          <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">
+          <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-gold-deep">
             Salón en orden
           </p>
         </div>
       </NavLink>
+
+      <form
+        className="mb-4"
+        onSubmit={(event) => {
+          event.preventDefault()
+          navigate(`/clientas?q=${encodeURIComponent(query.trim())}`)
+          setQuery('')
+        }}
+      >
+        <Input
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          leading={<Search size={15} />}
+          placeholder="Buscar clienta…"
+          aria-label="Buscar clienta"
+          className="h-10 bg-white/80"
+        />
+      </form>
 
       <nav className="flex-1 space-y-7 overflow-y-auto">
         {NAV_SECTIONS.map((section) => (
@@ -130,7 +151,7 @@ function Sidebar() {
         ))}
       </nav>
 
-      <div className="mt-4 rounded-3xl border border-line bg-white/70 p-3">
+      <div className="mt-4 rounded-3xl border border-silver/40 bg-white/70 p-3 metal-ring">
         <div className="flex items-center gap-2.5">
           <Avatar name={user.name} color={user.color} size="sm" />
           <div className="min-w-0 flex-1">
@@ -158,7 +179,7 @@ function MobileHeader() {
       <div className="flex items-center gap-1">
         <NavLink
           to="/agenda?nueva=1"
-          className="flex h-9 items-center gap-1.5 rounded-full bg-ink px-3 text-xs font-semibold text-cream"
+          className="metal-gold flex h-9 items-center gap-1.5 rounded-full px-3 text-xs font-bold text-ink"
         >
           <Plus size={14} /> Cita
         </NavLink>
@@ -224,7 +245,7 @@ function BottomNav() {
           <NavLink
             to="/agenda?nueva=1"
             aria-label="Nueva cita"
-            className="-mt-7 flex h-14 w-14 items-center justify-center rounded-full border-[5px] border-cream bg-rose text-white shadow-lift transition active:scale-95"
+            className="metal-gold -mt-7 flex h-14 w-14 items-center justify-center rounded-full border-[5px] border-cream text-ink shadow-lift transition active:scale-95"
           >
             <Plus size={24} strokeWidth={2.4} />
           </NavLink>

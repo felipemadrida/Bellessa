@@ -74,13 +74,14 @@ function KpiCard({
   label: string
   value: string
   hint?: string
-  tone?: 'rose' | 'sage' | 'gold' | 'ink'
+  tone?: 'rose' | 'sage' | 'gold' | 'ink' | 'silver'
 }) {
   const tones = {
     rose: 'bg-rose-soft text-rose-deep',
     sage: 'bg-sage-soft text-sage',
     gold: 'bg-gold-soft text-[#8A6418]',
     ink: 'bg-sand text-ink',
+    silver: 'metal-silver text-silver-deep',
   }
   return (
     <Card className="p-4 sm:p-5">
@@ -254,7 +255,7 @@ export function DashboardPage() {
     <div className="animate-fade-up">
       <div className="mb-6 flex flex-col gap-4 sm:mb-7 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-rose">
+          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gold-deep">
             {capitalize(data.today_label)} · {business.city ?? 'Ciudad de México'}
           </p>
           <h1 className="mt-1 font-display text-[32px] font-medium leading-none tracking-[-0.025em] text-ink sm:text-[42px]">
@@ -368,7 +369,7 @@ export function DashboardPage() {
           label="Clientas nuevas"
           value={String(data.new_clients_month)}
           hint="Este mes"
-          tone="ink"
+          tone="silver"
         />
       </div>
 

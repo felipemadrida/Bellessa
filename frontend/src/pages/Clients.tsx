@@ -36,7 +36,7 @@ export function ClientsPage() {
   const timezone = business?.timezone ?? 'America/Mexico_City'
   const today = todayKey(timezone)
   const [params, setParams] = useSearchParams()
-  const [search, setSearch] = useState('')
+  const [search, setSearch] = useState(params.get('q') ?? '')
   const [tag, setTag] = useState<string | null>(null)
   const [createOpen, setCreateOpen] = useState(params.get('nueva') === '1')
 

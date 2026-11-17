@@ -85,14 +85,14 @@ export function LoginPage({ register = false }: { register?: boolean }) {
     <div className="min-h-dvh bg-cream">
       <div className="grid min-h-dvh lg:grid-cols-[1.08fr_.92fr]">
         {/* Lado editorial */}
-        <section className="relative hidden overflow-hidden bg-sage px-12 py-12 text-cream lg:flex lg:flex-col xl:px-16">
+        <section className="relative hidden overflow-hidden bg-ink px-12 py-12 text-cream lg:flex lg:flex-col xl:px-16">
           <div
             className="pointer-events-none absolute -right-32 -top-32 h-[520px] w-[520px] rounded-full opacity-60 blur-2xl"
             style={{ background: 'radial-gradient(circle, #D9A44155 0%, transparent 65%)' }}
           />
           <div
             className="pointer-events-none absolute -bottom-48 -left-24 h-[520px] w-[520px] rounded-full opacity-50 blur-2xl"
-            style={{ background: 'radial-gradient(circle, #C2415A66 0%, transparent 65%)' }}
+            style={{ background: 'radial-gradient(circle, #C9C6C244 0%, transparent 65%)' }}
           />
           <div className="relative flex items-center gap-2.5">
             <BrandMark size={40} />

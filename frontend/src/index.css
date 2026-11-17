@@ -2,6 +2,35 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  .metal-gold {
+    background-image: linear-gradient(135deg, #f8eed9 0%, #ecd08f 45%, #d9a441 100%);
+  }
+  .metal-silver {
+    background-image: linear-gradient(135deg, #fbfbfa 0%, #e7e4e0 50%, #c9c6c2 100%);
+  }
+  .metal-ring {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65),
+      0 10px 28px -16px rgba(37, 29, 27, 0.4);
+  }
+  .text-gold-metal {
+    background-image: linear-gradient(135deg, #a97e24, #e7c065, #d9a441);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .text-silver-metal {
+    background-image: linear-gradient(135deg, #6e6b67, #c9c6c2, #f4f2f0);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .silver-card {
+    background-image: linear-gradient(180deg, #ffffff, #f4f2f0);
+    border-color: rgba(201, 198, 194, 0.6);
+  }
+}
+
 @layer base {
   :root {
     color-scheme: light;
