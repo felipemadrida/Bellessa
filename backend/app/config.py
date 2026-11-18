@@ -26,7 +26,9 @@ class Settings(BaseSettings):
     )
     cors_origin_regex: str = ""
     public_base_url: str = "http://localhost:5180"
-    api_public_base_url: str = "http://127.0.0.1:8011"  # URL pública de la API (local)
+    # Sin valor por defecto a propósito: en producción debe venir del entorno
+    # (https://bellessa-api.vercel.app). Local: http://127.0.0.1:8011
+    api_public_base_url: str = ""
     cron_secret: str = ""  # obligatorio para /api/internal/tick en la nube
     platform_admin_name: str = "Felipe Madrid"
     platform_admin_email: str = "admin@bellessa.mx"
