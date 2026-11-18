@@ -4,15 +4,18 @@ import {
   CalendarDays,
   ChartNoAxesColumn,
   ChevronDown,
+  Languages,
   LayoutDashboard,
   LogOut,
   MessageCircle,
+  Moon,
   Package,
   Plus,
   Scissors,
   Search,
   Settings,
   Sparkles,
+  Sun,
   Users,
   Wallet,
 } from 'lucide-react'
@@ -21,29 +24,41 @@ import { cn } from '../lib/format'
 import { usePreferences } from '../lib/preferences'
 import { Avatar, IconButton, Input, Menu, MenuItem, Spinner } from './ui'
 
+/**
+ * Marca de Bellessa: dos perfiles espejo (taupe + champagne) recortados del arte
+ * original. El disco se mantiene claro en ambos temas a propósito: el negativo de
+ * las caras es el fondo, así que si el disco se oscureciera la marca se invertiría.
+ *
+ * Los archivos se generan con `design/brand/extract-mark.py`.
+ */
 export function BrandMark({ size = 38 }: { size?: number }) {
   return (
     <span
-      className="metal-gold metal-ring inline-flex shrink-0 items-center justify-center rounded-[14px] text-ink"
-      style={{ width: size, height: size }}
+      className="inline-flex shrink-0 items-center justify-center overflow-hidden rounded-[14px]"
+      style={{
+        width: size,
+        height: size,
+        backgroundColor: '#FBF7F1',
+        boxShadow: 'inset 0 0 0 1px rgba(234, 223, 210, 0.9)',
+      }}
       aria-hidden="true"
     >
-      <svg viewBox="0 0 40 40" width={size * 0.62} height={size * 0.62} fill="none">
-        <circle cx="20" cy="20" r="12.5" stroke="currentColor" strokeWidth="1.4" opacity=".55" />
-        <path d="M20 10c2.4 3.8 2.4 7.6 0 11.4-2.4-3.8-2.4-7.6 0-11.4Z" fill="currentColor" />
-        <path d="M20 30c-2.4-3.8-2.4-7.6 0-11.4 2.4 3.8 2.4 7.6 0 11.4Z" fill="currentColor" />
-        <path d="M10 16c4.3 1.4 6.7 4.4 7 8.4-4.3-1.4-6.7-4.4-7-8.4Z" fill="currentColor" opacity=".85" />
-        <path d="M30 24c-4.3-1.4-6.7-4.4-7-8.4 4.3 1.4 6.7 4.4 7 8.4Z" fill="currentColor" opacity=".85" />
-        <circle cx="20" cy="20" r="1.7" fill="#D9A441" />
-      </svg>
+      <img
+        src="/brand-mark.png"
+        alt=""
+        width={size}
+        height={size}
+        className="h-full w-full object-contain"
+        draggable={false}
+      />
     </span>
   )
 }
 
-export function Wordmark({ className }: { className?: string }) {
+export function Wordmark({ name, className }: { name?: string, className?: string }) {
   return (
-    <span className={cn('font-display text-[22px] font-medium tracking-[-0.03em] text-ink', className)}>
-      bellessa
+    <span className={cn('font-display text-[22px] font-medium tracking-[-0.03em] text-licorice', className)}>
+      {name ?? 'bellessa'}
     </span>
   )
 }
@@ -73,7 +88,7 @@ const NAV_SECTIONS = [
 
 function Splash() {
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center gap-4 bg-cream">
+    <div className="flex min-h-dvh flex-col items-center justify-center gap-4 bg-alabaster">
       <BrandMark size={52} />
       <div className="flex items-center gap-2 text-sm text-muted">
         <Spinner size={15} />
@@ -90,11 +105,16 @@ function Sidebar() {
   const [query, setQuery] = useState('')
   if (!user || !business) return null
   return (
-    <aside className="fixed inset-y-0 left-0 z-30 hidden w-[272px] flex-col border-r border-silver/30 bg-gradient-to-b from-white/85 to-[#F3EFE9]/90 px-4 py-6 backdrop-blur-xl lg:flex">
+    <aside className="fixed inset-y-0 left-0 z-30 hidden w-[272px] flex-col border-r border-silver/30 bg-gradient-to-b from-alabaster/95 to-sand/90 px-4 py-6 backdrop-blur-xl lg:flex">
       <NavLink to="/" className="mb-6 flex items-center gap-2.5 px-2">
         <BrandMark />
         <div className="leading-none">
-          <Wordmark />
+          <Wordmark name={business.name} />
+          <span
+            aria-hidden="true"
+            className="mt-1.5 block h-[2px] w-9 rounded-full"
+            style={{ backgroundColor: 'var(--brand, #9C5566)' }}
+          />
           <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-gold-deep">
             {t('common.salonOrder')}
           </p>
@@ -115,7 +135,7 @@ function Sidebar() {
           leading={<Search size={15} />}
           placeholder={t('common.searchClient')}
           aria-label={t('common.searchLabel')}
-          className="h-10 bg-white/80"
+          className="h-10 bg-surface/80"
         />
       </form>
 
@@ -135,8 +155,8 @@ function Sidebar() {
                     cn(
                       'group flex items-center gap-3 rounded-2xl px-3 py-2.5 text-[13.5px] font-semibold transition',
                       isActive
-                        ? 'bg-ink text-cream shadow-soft'
-                        : 'text-muted hover:bg-white/70 hover:text-ink',
+                        ? 'bg-licorice text-alabaster shadow-boutique'
+                        : 'text-muted hover:bg-surface/70 hover:text-licorice',
                     )
                   }
                 >
@@ -153,31 +173,36 @@ function Sidebar() {
         ))}
       </nav>
 
-      <div className="mt-4 rounded-3xl border border-silver/40 bg-white/70 p-3 metal-ring">
+      <div className="mt-4 rounded-3xl border border-silver/40 bg-surface/70 p-3 metal-ring">
         <div className="flex items-center gap-2.5">
           <Avatar name={user.name} color={user.color} size="sm" />
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[13px] font-bold text-ink">{user.name}</p>
+            <p className="truncate text-[13px] font-bold text-licorice">{user.name}</p>
             <p className="truncate text-[11px] text-muted">{business.name}</p>
           </div>
           <IconButton label={t('common.logout')} onClick={signOut} className="h-8 w-8">
             <LogOut size={15} />
           </IconButton>
         </div>
-        <div className="mt-3 flex items-center gap-2 border-t border-line/70 pt-3">
+        <div className="mt-3 flex items-center gap-2 border-t border-border/70 pt-3">
           <button
             type="button"
             onClick={() => setLocale(locale === 'es' ? 'en' : 'es')}
-            className="flex-1 rounded-xl border border-line bg-white/70 py-1.5 text-[10px] font-bold text-ink"
+            aria-label={locale === 'es' ? 'Switch to English' : 'Cambiar a español'}
+            title={locale === 'es' ? 'English' : 'Español'}
+            className="flex h-9 flex-1 items-center justify-center gap-1.5 rounded-xl border border-border bg-surface/70 text-licorice transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blush-deep/40"
           >
-            {locale === 'es' ? 'English' : 'Español'}
+            <Languages size={15} strokeWidth={1.9} />
+            <span className="text-[10px] font-bold uppercase tracking-wide">{locale}</span>
           </button>
           <button
             type="button"
             onClick={toggleTheme}
-            className="flex-1 rounded-xl border border-line bg-white/70 py-1.5 text-[10px] font-bold text-ink"
+            aria-label={theme === 'dark' ? t('common.light') : t('common.dark')}
+            title={theme === 'dark' ? t('common.light') : t('common.dark')}
+            className="flex h-9 w-11 items-center justify-center rounded-xl border border-border bg-surface/70 text-licorice transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blush-deep/40"
           >
-            {theme === 'dark' ? t('common.light') : t('common.dark')}
+            {theme === 'dark' ? <Sun size={15} strokeWidth={1.9} /> : <Moon size={15} strokeWidth={1.9} />}
           </button>
         </div>
       </div>
@@ -190,15 +215,15 @@ function MobileHeader() {
   const { t, locale, setLocale, theme, toggleTheme } = usePreferences()
   if (!user || !business) return null
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-line/70 bg-cream/85 px-4 backdrop-blur-xl lg:hidden">
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border/70 bg-alabaster/85 px-4 backdrop-blur-xl lg:hidden">
       <NavLink to="/" className="flex items-center gap-2">
         <BrandMark size={34} />
-        <Wordmark className="text-xl" />
+        <Wordmark name={business.name} className="text-xl" />
       </NavLink>
       <div className="flex items-center gap-1">
         <NavLink
           to="/agenda?nueva=1"
-          className="metal-gold flex h-9 items-center gap-1.5 rounded-full px-3 text-xs font-bold text-ink"
+          className="metal-gold flex h-9 items-center gap-1.5 rounded-full px-3 text-xs font-bold text-licorice"
         >
           <Plus size={14} /> {t('common.cita')}
         </NavLink>
@@ -207,15 +232,15 @@ function MobileHeader() {
             <button
               type="button"
               className="flex items-center gap-1 rounded-full p-1 text-muted"
-              aria-label="Abrir menú de cuenta"
+              aria-label={t('common.accountMenu')}
             >
               <Avatar name={user.name} color={user.color} size="sm" />
               <ChevronDown size={14} />
             </button>
           }
         >
-          <div className="border-b border-line/70 px-3 py-2.5">
-            <p className="text-sm font-bold text-ink">{user.name}</p>
+          <div className="border-b border-border/70 px-3 py-2.5">
+            <p className="text-sm font-bold text-licorice">{user.name}</p>
             <p className="text-xs text-muted">{business.name}</p>
           </div>
           <div className="py-1">
@@ -238,9 +263,10 @@ function MobileHeader() {
               <Settings size={16} /> {t('nav.settings')}
             </MenuItem>
             <MenuItem onClick={() => setLocale(locale === 'es' ? 'en' : 'es')}>
-              {locale === 'es' ? 'English' : 'Español'}
+              <Languages size={16} /> {locale === 'es' ? 'English' : 'Español'}
             </MenuItem>
             <MenuItem onClick={toggleTheme}>
+              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
               {theme === 'dark' ? t('common.light') : t('common.dark')}
             </MenuItem>
             <MenuItem onClick={signOut} danger>
@@ -262,7 +288,7 @@ function BottomNav() {
     { to: '/caja', label: 'nav.cash', icon: Wallet },
   ]
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-line/80 bg-cream/95 pb-[max(.5rem,env(safe-area-inset-bottom))] backdrop-blur-xl lg:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border/80 bg-alabaster/95 pb-[max(.5rem,env(safe-area-inset-bottom))] backdrop-blur-xl lg:hidden">
       <div className="mx-auto grid max-w-md grid-cols-5 items-end px-2 pt-1.5">
         {items.slice(0, 2).map((item) => (
           <BottomLink key={item.to} {...item} label={t(item.label)} />
@@ -271,7 +297,7 @@ function BottomNav() {
           <NavLink
             to="/agenda?nueva=1"
             aria-label={t('common.newAppointment')}
-            className="metal-gold -mt-7 flex h-14 w-14 items-center justify-center rounded-full border-[5px] border-cream text-ink shadow-lift transition active:scale-95"
+            className="metal-gold -mt-7 flex h-14 w-14 items-center justify-center rounded-full border-[5px] border-cream text-licorice shadow-lift transition active:scale-95"
           >
             <Plus size={24} strokeWidth={2.4} />
           </NavLink>
@@ -324,7 +350,7 @@ export function AppShell() {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />
   }
   return (
-    <div className="min-h-dvh bg-cream">
+    <div className="min-h-dvh bg-alabaster">
       <Sidebar />
       <div className="lg:pl-[272px]">
         <MobileHeader />
@@ -354,7 +380,7 @@ export function PageHeader({
         {eyebrow ? (
           <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.18em] text-rose">{eyebrow}</p>
         ) : null}
-        <h1 className="font-display text-[30px] font-medium leading-[1.05] tracking-[-0.02em] text-ink sm:text-[38px]">
+        <h1 className="font-display text-[30px] font-medium leading-[1.05] tracking-[-0.02em] text-licorice sm:text-[38px]">
           {title}
         </h1>
         {subtitle ? <div className="mt-1.5 text-sm text-muted">{subtitle}</div> : null}

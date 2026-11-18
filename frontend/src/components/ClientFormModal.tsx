@@ -3,7 +3,9 @@ import { useQueryClient } from '@tanstack/react-query'
 import { CircleAlert } from 'lucide-react'
 import { api, ApiError } from '../lib/api'
 import { cn } from '../lib/format'
+import { usePreferences } from '../lib/preferences'
 import type { Client } from '../lib/types'
+import { vocabularyLabel } from '../lib/vocabulary'
 import { useToast } from './Toast'
 import { Button, Input, Modal, Textarea } from './ui'
 
@@ -19,6 +21,7 @@ const TAG_SUGGESTIONS = ['VIP', 'Color', 'Uñas', 'Novias', 'Recurrente', 'Nueva
 export function ClientFormModal({ open, onClose, client, onSaved }: Props) {
   const queryClient = useQueryClient()
   const { toast } = useToast()
+  const { t } = usePreferences()
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [email, setEmail] = useState('')
@@ -59,7 +62,7 @@ export function ClientFormModal({ open, onClose, client, onSaved }: Props) {
   async function submit(event: React.FormEvent) {
     event.preventDefault()
     if (phone.replace(/\D/g, '').length < 10) {
-      setError('Necesitamos un WhatsApp mexicano de 10 dígitos.')
+      setError(t('cfm.errorPhone'))
       return
     }
     setSaving(true)
@@ -83,11 +86,11 @@ export function ClientFormModal({ open, onClose, client, onSaved }: Props) {
         queryClient.invalidateQueries({ queryKey: ['client', saved.id] }),
         queryClient.invalidateQueries({ queryKey: ['dashboard'] }),
       ])
-      toast(client ? 'Ficha actualizada' : 'Clienta agregada a tu base')
+      toast(client ? t('cfm.savedEdit') : t('cfm.savedNew'))
       onSaved?.(saved)
       onClose()
     } catch (caught) {
-      setError(caught instanceof ApiError ? caught.message : 'No pudimos guardar la ficha.')
+      setError(caught instanceof ApiError ? caught.message : t('cfm.saveError'))
     } finally {
       setSaving(false)
     }
@@ -97,31 +100,31 @@ export function ClientFormModal({ open, onClose, client, onSaved }: Props) {
     <Modal
       open={open}
       onClose={onClose}
-      title={client ? 'Editar ficha' : 'Nueva clienta'}
-      subtitle={client ? 'Los detalles que hacen que vuelva.' : 'Solo lo esencial, sin llenar mil campos.'}
+      title={client ? t('cfm.titleEdit') : t('cfm.titleNew')}
+      subtitle={client ? t('cfm.subtitleEdit') : t('cfm.subtitleNew')}
       footer={
         <div className="flex items-center justify-end gap-2">
           <Button variant="ghost" onClick={onClose} disabled={saving}>
-            Cancelar
+            {t('cfm.cancel')}
           </Button>
           <Button variant="rose" type="submit" form="client-form" loading={saving}>
-            {client ? 'Guardar cambios' : 'Agregar clienta'}
+            {client ? t('cfm.saveChanges') : t('cfm.addClient')}
           </Button>
         </div>
       }
     >
       <form id="client-form" onSubmit={submit} className="space-y-4">
         <Input
-          label="Nombre completo"
+          label={t('cfm.fullName')}
           value={name}
           onChange={(event) => setName(event.target.value)}
-          placeholder="Ej. Fernanda Castillo"
+          placeholder={t('cfm.namePlaceholder')}
           autoComplete="name"
           required
         />
         <div className="grid gap-3 sm:grid-cols-2">
           <Input
-            label="WhatsApp"
+            label={t('settings.whatsapp')}
             value={phone}
             onChange={(event) => setPhone(event.target.value)}
             placeholder="55 1234 5678"
@@ -130,33 +133,33 @@ export function ClientFormModal({ open, onClose, client, onSaved }: Props) {
             required
           />
           <Input
-            label="Correo (opcional)"
+            label={t('cfm.email')}
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            placeholder="correo@ejemplo.mx"
+            placeholder={t('cfm.emailPlaceholder')}
             type="email"
             autoComplete="email"
           />
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           <Input
-            label="Cumpleaños"
+            label={t('cfm.birthday')}
             type="date"
             value={birthday}
             onChange={(event) => setBirthday(event.target.value)}
           />
           <Input
-            label="RFC (para factura)"
+            label={t('cfm.rfc')}
             value={rfc}
             onChange={(event) => setRfc(event.target.value.toUpperCase())}
             placeholder="XAXX010101000"
             maxLength={13}
-            hint="Opcional · CFDI 4.0"
+            hint={t('cfm.rfcHint')}
           />
         </div>
 
         <div>
-          <p className="mb-1.5 text-[13px] font-semibold text-ink">Etiquetas</p>
+          <p className="mb-1.5 text-[13px] font-semibold text-licorice">{t('cfm.tags')}</p>
           <div className="flex flex-wrap gap-1.5">
             {TAG_SUGGESTIONS.map((tag) => (
               <button
@@ -166,11 +169,11 @@ export function ClientFormModal({ open, onClose, client, onSaved }: Props) {
                 className={cn(
                   'rounded-full border px-3 py-1.5 text-[11px] font-semibold transition',
                   selectedTags.includes(tag)
-                    ? 'border-rose bg-rose-soft text-rose-deep'
-                    : 'border-line bg-white text-muted hover:border-rose/30',
+                    ? 'border-rose bg-blush-soft text-blush-deep'
+                    : 'border-border bg-surface text-muted hover:border-rose/30',
                 )}
               >
-                {tag}
+                {vocabularyLabel(tag, t)}
               </button>
             ))}
           </div>
@@ -178,36 +181,36 @@ export function ClientFormModal({ open, onClose, client, onSaved }: Props) {
             className="mt-2"
             value={tags}
             onChange={(event) => setTags(event.target.value)}
-            placeholder="VIP, Color, Uñas…"
-            aria-label="Etiquetas personalizadas"
+            placeholder={t('cfm.tagsPlaceholder')}
+            aria-label={t('cfm.tagsAria')}
           />
         </div>
 
         <Textarea
-          label="Notas y preferencias"
+          label={t('cfm.notes')}
           value={notes}
           onChange={(event) => setNotes(event.target.value)}
-          placeholder="Alergias, tonos favoritos, café, horarios que prefiere…"
+          placeholder={t('cfm.notesPlaceholder')}
         />
 
-        <label className="flex cursor-pointer items-start gap-2.5 rounded-2xl border border-line bg-white px-3.5 py-3">
+        <label className="flex cursor-pointer items-start gap-2.5 rounded-2xl border border-border bg-surface px-3.5 py-3">
           <input
             type="checkbox"
             checked={marketing}
             onChange={(event) => setMarketing(event.target.checked)}
-            className="mt-0.5 h-4 w-4 accent-[#C2415A]"
+            className="mt-0.5 h-4 w-4 accent-[#9C5566]"
           />
           <span className="text-[12px] leading-snug text-muted">
-            <span className="font-semibold text-ink">Puedo escribirle por WhatsApp</span>
+            <span className="font-semibold text-licorice">{t('cfm.marketing')}</span>
             <br />
-            Para recordatorios, cumpleaños y promociones del salón.
+            {t('cfm.marketingHint')}
           </span>
         </label>
 
         {error ? (
           <div
             role="alert"
-            className="flex items-start gap-2 rounded-2xl border border-rose/20 bg-rose-soft px-3.5 py-2.5 text-[12.5px] font-medium text-rose-deep"
+            className="flex items-start gap-2 rounded-2xl border border-rose/20 bg-blush-soft px-3.5 py-2.5 text-[12.5px] font-medium text-blush-deep"
           >
             <CircleAlert size={15} className="mt-0.5 shrink-0" /> {error}
           </div>

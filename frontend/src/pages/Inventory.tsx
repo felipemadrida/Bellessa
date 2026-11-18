@@ -12,7 +12,8 @@ import {
   Wallet,
 } from 'lucide-react'
 import { api, ApiError } from '../lib/api'
-import { money } from '../lib/format'
+import { activeMoneyConfig, money } from '../lib/format'
+import { usePreferences } from '../lib/preferences'
 import { PageHeader } from '../components/AppShell'
 import { useToast } from '../components/Toast'
 import {
@@ -39,6 +40,7 @@ function fromCents(cents: number): string {
 
 export function InventoryPage() {
   const { toast } = useToast()
+  const { t } = usePreferences()
   const queryClient = useQueryClient()
   const [search, setSearch] = useState('')
   const [lowOnly, setLowOnly] = useState(false)
@@ -85,12 +87,12 @@ export function InventoryPage() {
   return (
     <div className="animate-fade-up">
       <PageHeader
-        eyebrow="Existencias"
-        title="Inventario"
-        subtitle="Productos, stock mínimo y movimientos de entrada, salida y ajuste."
+        eyebrow={t('inventory.eyebrow')}
+        title={t('inventory.title')}
+        subtitle={t('inventory.subtitle')}
         actions={
           <Button variant="rose" onClick={() => { setEditing(null); setFormOpen(true) }}>
-            <Plus size={15} /> Nuevo producto
+            <Plus size={15} /> {t('inventory.newProduct')}
           </Button>
         }
       />
@@ -98,39 +100,41 @@ export function InventoryPage() {
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <SummaryCard
           icon={<Package size={16} />}
-          label="Productos activos"
+          label={t('inventory.activeProducts')}
           value={String(summary?.active_products ?? 0)}
-          hint={`${summary?.products ?? 0} en total`}
+          hint={t('inventory.totalHint', { n: summary?.products ?? 0 })}
           tone="ink"
         />
         <SummaryCard
           icon={<AlertTriangle size={16} />}
-          label="Stock bajo"
+          label={t('inventory.lowStock')}
           value={String(summary?.low_stock ?? 0)}
-          hint="En o bajo el mínimo"
+          hint={t('inventory.lowStockHint')}
           tone="rose"
         />
         <SummaryCard
           icon={<Boxes size={16} />}
-          label="Unidades"
+          label={t('inventory.units')}
           value={String(summary?.stock_units ?? 0)}
-          hint="Suma del stock activo"
+          hint={t('inventory.unitsHint')}
           tone="sage"
         />
         <SummaryCard
           icon={<Wallet size={16} />}
-          label="Valor inventario"
+          label={t('inventory.inventoryValue')}
           value={money(summary?.inventory_value_cents ?? 0)}
-          hint="Costo o precio de referencia"
+          hint={t('inventory.valueHint')}
           tone="gold"
         />
       </div>
 
       <Card className="mt-4 overflow-hidden">
-        <div className="flex flex-col gap-3 border-b border-line/70 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+        <div className="flex flex-col gap-3 border-b border-border/70 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
           <div>
-            <h2 className="font-display text-xl font-medium text-ink">Productos</h2>
-            <p className="text-[11px] text-muted">{products.length} visibles</p>
+            <h2 className="font-display text-xl font-medium text-licorice">
+              {t('inventory.productsTitle')}
+            </h2>
+            <p className="text-[11px] text-muted">{t('inventory.visible', { n: products.length })}</p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <button
@@ -138,18 +142,18 @@ export function InventoryPage() {
               onClick={() => setLowOnly((value) => !value)}
               className={`inline-flex h-10 items-center gap-1.5 rounded-2xl border px-3 text-[11px] font-semibold transition ${
                 lowOnly
-                  ? 'border-rose bg-rose-soft text-rose-deep'
-                  : 'border-line bg-white text-muted hover:text-ink'
+                  ? 'border-rose bg-blush-soft text-blush-deep'
+                  : 'border-border bg-surface text-muted hover:text-licorice'
               }`}
             >
-              <AlertTriangle size={13} /> Stock bajo
+              <AlertTriangle size={13} /> {t('inventory.lowStock')}
             </button>
             <Input
-              placeholder="Buscar nombre, SKU o categoría…"
+              placeholder={t('inventory.searchPlaceholder')}
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               leading={<Search size={15} />}
-              aria-label="Buscar producto"
+              aria-label={t('inventory.searchAria')}
               className="h-10 sm:w-72"
             />
           </div>
@@ -162,7 +166,7 @@ export function InventoryPage() {
             ))}
           </div>
         ) : products.length ? (
-          <div className="divide-y divide-line/60">
+          <div className="divide-y divide-border/60">
             {products.map((product) => {
               const low = product.stock <= product.min_stock
               return (
@@ -171,40 +175,42 @@ export function InventoryPage() {
                   className="grid gap-3 px-4 py-4 sm:px-5 lg:grid-cols-[1.5fr_.7fr_.8fr_auto] lg:items-center"
                 >
                   <div className="flex items-start gap-3">
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-sand text-ink">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-sand text-licorice">
                       <Package size={17} />
                     </span>
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <p className="truncate text-[13.5px] font-bold text-ink">{product.name}</p>
+                        <p className="truncate text-[13.5px] font-bold text-licorice">{product.name}</p>
                         {low ? (
-                          <Badge className="bg-rose-soft text-rose-deep">
-                            <AlertTriangle size={10} /> Stock bajo
+                          <Badge className="bg-blush-soft text-blush-deep">
+                            <AlertTriangle size={10} /> {t('inventory.lowStock')}
                           </Badge>
                         ) : null}
                       </div>
                       <p className="truncate text-[11px] text-muted">
-                        {product.sku ?? 'Sin SKU'} · {product.category} · {product.unit}
+                        {product.sku ?? t('inventory.noSku')} · {product.category} · {product.unit}
                       </p>
                     </div>
                   </div>
 
                   <div>
-                    <p className="text-[10px] uppercase tracking-wider text-muted">Stock</p>
-                    <p className={`money text-[16px] font-bold ${low ? 'text-rose-deep' : 'text-ink'}`}>
+                    <p className="text-[10px] uppercase tracking-wider text-muted">{t('inventory.stock')}</p>
+                    <p className={`money text-[16px] font-bold ${low ? 'text-blush-deep' : 'text-licorice'}`}>
                       {product.stock}
                       <span className="ml-1 text-[10px] font-normal text-muted">
-                        / mín. {product.min_stock}
+                        {t('inventory.minShort', { n: product.min_stock })}
                       </span>
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-[10px] uppercase tracking-wider text-muted">Precio</p>
-                    <p className="money text-[14px] font-semibold text-ink">
+                    <p className="text-[10px] uppercase tracking-wider text-muted">{t('inventory.price')}</p>
+                    <p className="money text-[14px] font-semibold text-licorice">
                       {money(product.price_cents)}
                     </p>
-                    <p className="text-[10px] text-muted">Costo {money(product.cost_cents)}</p>
+                    <p className="text-[10px] text-muted">
+                      {t('inventory.cost', { amount: money(product.cost_cents) })}
+                    </p>
                   </div>
 
                   <div className="flex flex-wrap items-center justify-end gap-1.5">
@@ -213,21 +219,21 @@ export function InventoryPage() {
                       size="sm"
                       onClick={() => setMovementProduct(product)}
                     >
-                      <SlidersHorizontal size={12} /> Movimiento
+                      <SlidersHorizontal size={12} /> {t('inventory.movement')}
                     </Button>
                     <button
                       type="button"
                       onClick={() => { setEditing(product); setFormOpen(true) }}
-                      aria-label={`Editar ${product.name}`}
-                      className="flex h-8 w-8 items-center justify-center rounded-xl border border-line bg-white text-muted hover:text-ink"
+                      aria-label={t('inventory.editAria', { name: product.name })}
+                      className="flex h-8 w-8 items-center justify-center rounded-xl border border-border bg-surface text-muted hover:text-licorice"
                     >
                       <Pencil size={13} />
                     </button>
                     <button
                       type="button"
                       onClick={() => setDeactivateTarget(product)}
-                      aria-label={`Desactivar ${product.name}`}
-                      className="flex h-8 w-8 items-center justify-center rounded-xl border border-line bg-white text-muted hover:text-rose-deep"
+                      aria-label={t('inventory.deactivateAria', { name: product.name })}
+                      className="flex h-8 w-8 items-center justify-center rounded-xl border border-border bg-surface text-muted hover:text-blush-deep"
                     >
                       <Power size={13} />
                     </button>
@@ -240,16 +246,18 @@ export function InventoryPage() {
           <div className="p-4">
             <EmptyState
               icon={<Package size={22} />}
-              title={search || lowOnly ? 'Sin resultados' : 'Inventario vacío'}
+              title={
+                search || lowOnly ? t('inventory.emptySearchTitle') : t('inventory.emptyTitle')
+              }
               description={
                 search || lowOnly
-                  ? 'Prueba otro término o quita el filtro de stock bajo.'
-                  : 'Agrega tu primer producto para controlar existencias y movimientos.'
+                  ? t('inventory.emptySearchDesc')
+                  : t('inventory.emptyDesc')
               }
               action={
                 !search && !lowOnly ? (
                   <Button variant="rose" onClick={() => setFormOpen(true)}>
-                    <Plus size={14} /> Nuevo producto
+                    <Plus size={14} /> {t('inventory.newProduct')}
                   </Button>
                 ) : undefined
               }
@@ -274,24 +282,21 @@ export function InventoryPage() {
       <Modal
         open={Boolean(deactivateTarget)}
         onClose={() => setDeactivateTarget(null)}
-        title="Desactivar producto"
+        title={t('inventory.deactivateTitle')}
         subtitle={deactivateTarget?.name}
         size="sm"
         footer={
           <div className="flex justify-end gap-2">
             <Button variant="secondary" onClick={() => setDeactivateTarget(null)}>
-              Cancelar
+              {t('inventory.cancel')}
             </Button>
             <Button variant="danger" onClick={deactivate} loading={deactivating}>
-              <Power size={14} /> Desactivar
+              <Power size={14} /> {t('inventory.deactivate')}
             </Button>
           </div>
         }
       >
-        <p className="text-[13px] leading-relaxed text-muted">
-          El producto dejará de aparecer en el inventario activo, pero sus movimientos e historial se
-          conservan.
-        </p>
+        <p className="text-[13px] leading-relaxed text-muted">{t('inventory.deactivateBody')}</p>
       </Modal>
     </div>
   )
@@ -311,10 +316,10 @@ function SummaryCard({
   tone: 'ink' | 'gold' | 'sage' | 'rose'
 }) {
   const tones = {
-    ink: 'bg-sand text-ink',
-    gold: 'bg-gold-soft text-[#7A5A18]',
+    ink: 'bg-sand text-licorice',
+    gold: 'bg-champagne-soft text-champagne-deep',
     sage: 'bg-sage-soft text-sage',
-    rose: 'bg-rose-soft text-rose-deep',
+    rose: 'bg-blush-soft text-blush-deep',
   }
   return (
     <Card className="p-4">
@@ -322,7 +327,7 @@ function SummaryCard({
         {icon}
       </span>
       <p className="mt-3 text-[10px] font-bold uppercase tracking-[0.12em] text-muted">{label}</p>
-      <p className="money mt-0.5 font-display text-[24px] font-medium leading-none text-ink">{value}</p>
+      <p className="money mt-0.5 font-display text-[24px] font-medium leading-none text-licorice">{value}</p>
       <p className="mt-1 text-[10px] text-muted">{hint}</p>
     </Card>
   )
@@ -340,6 +345,7 @@ function ProductFormModal({
   onSaved: () => void
 }) {
   const { toast } = useToast()
+  const { t } = usePreferences()
   const [form, setForm] = useState({
     name: '',
     sku: '',
@@ -405,7 +411,7 @@ function ProductFormModal({
           description: form.description || null,
         }
         await api.inventory.updateProduct(editing.id, payload)
-        toast('Producto actualizado')
+        toast(t('inventory.savedUpdate'))
       } else {
         const payload: ProductCreate = {
           name: form.name,
@@ -419,11 +425,11 @@ function ProductFormModal({
           description: form.description || null,
         }
         await api.inventory.createProduct(payload)
-        toast('Producto creado')
+        toast(t('inventory.savedCreate'))
       }
       onSaved()
     } catch (caught) {
-      setError(caught instanceof ApiError ? caught.message : 'No pudimos guardar el producto.')
+      setError(caught instanceof ApiError ? caught.message : t('inventory.saveError'))
     } finally {
       setSaving(false)
     }
@@ -433,34 +439,38 @@ function ProductFormModal({
     <Modal
       open={open}
       onClose={onClose}
-      title={editing ? 'Editar producto' : 'Nuevo producto'}
-      subtitle={editing ? editing.name : 'Precios en MXN'}
+      title={editing ? t('inventory.formTitleEdit') : t('inventory.formTitleNew')}
+      subtitle={
+        editing
+          ? editing.name
+          : t('inventory.formSubtitleNew', { currency: activeMoneyConfig().currency })
+      }
       size="lg"
       footer={
         <div className="flex justify-end gap-2">
-          <Button variant="secondary" onClick={onClose}>Cancelar</Button>
+          <Button variant="secondary" onClick={onClose}>{t('inventory.cancel')}</Button>
           <Button type="submit" form="product-form" variant="rose" loading={saving}>
-            {editing ? 'Guardar cambios' : 'Crear producto'}
+            {editing ? t('inventory.saveChanges') : t('inventory.createProduct')}
           </Button>
         </div>
       }
     >
       <form id="product-form" onSubmit={submit} className="space-y-4">
         <div className="grid gap-3 sm:grid-cols-2">
-          <Input label="Nombre" value={form.name} onChange={(event) => set('name', event.target.value)} required />
-          <Input label="SKU" value={form.sku} onChange={(event) => set('sku', event.target.value)} placeholder="Opcional" />
-          <Input label="Categoría" value={form.category} onChange={(event) => set('category', event.target.value)} />
-          <Input label="Unidad" value={form.unit} onChange={(event) => set('unit', event.target.value)} placeholder="pieza, ml, botella…" />
-          <Input label="Precio venta MXN" type="number" min="0" step="0.01" value={form.price} onChange={(event) => set('price', event.target.value)} />
-          <Input label="Costo MXN" type="number" min="0" step="0.01" value={form.cost} onChange={(event) => set('cost', event.target.value)} />
+          <Input label={t('inventory.name')} value={form.name} onChange={(event) => set('name', event.target.value)} required />
+          <Input label={t('inventory.sku')} value={form.sku} onChange={(event) => set('sku', event.target.value)} placeholder={t('inventory.optional')} />
+          <Input label={t('inventory.category')} value={form.category} onChange={(event) => set('category', event.target.value)} />
+          <Input label={t('inventory.unit')} value={form.unit} onChange={(event) => set('unit', event.target.value)} placeholder={t('inventory.unitPlaceholder')} />
+          <Input label={t('inventory.priceLabel', { currency: activeMoneyConfig().currency })} type="number" min="0" step="0.01" value={form.price} onChange={(event) => set('price', event.target.value)} />
+          <Input label={t('inventory.costLabel', { currency: activeMoneyConfig().currency })} type="number" min="0" step="0.01" value={form.cost} onChange={(event) => set('cost', event.target.value)} />
           {!editing ? (
-            <Input label="Stock inicial" type="number" min="0" step="1" value={form.stock} onChange={(event) => set('stock', event.target.value)} />
+            <Input label={t('inventory.initialStock')} type="number" min="0" step="1" value={form.stock} onChange={(event) => set('stock', event.target.value)} />
           ) : null}
-          <Input label="Stock mínimo" type="number" min="0" step="1" value={form.min_stock} onChange={(event) => set('min_stock', event.target.value)} />
+          <Input label={t('inventory.minStock')} type="number" min="0" step="1" value={form.min_stock} onChange={(event) => set('min_stock', event.target.value)} />
         </div>
-        <Textarea label="Descripción" value={form.description} onChange={(event) => set('description', event.target.value)} />
+        <Textarea label={t('inventory.description')} value={form.description} onChange={(event) => set('description', event.target.value)} />
         {error ? (
-          <div role="alert" className="rounded-2xl border border-rose/20 bg-rose-soft px-3.5 py-2.5 text-[12.5px] font-medium text-rose-deep">
+          <div role="alert" className="rounded-2xl border border-rose/20 bg-blush-soft px-3.5 py-2.5 text-[12.5px] font-medium text-blush-deep">
             {error}
           </div>
         ) : null}
@@ -479,6 +489,7 @@ function MovementModal({
   onSaved: () => void
 }) {
   const { toast } = useToast()
+  const { t } = usePreferences()
   const [kind, setKind] = useState<'in' | 'out' | 'adjustment'>('in')
   const [quantity, setQuantity] = useState('1')
   const [reason, setReason] = useState('')
@@ -507,10 +518,10 @@ function MovementModal({
         quantity: numeric,
         reason: reason.trim() || undefined,
       })
-      toast('Movimiento registrado')
+      toast(t('inventory.movedToast'))
       onSaved()
     } catch (caught) {
-      setError(caught instanceof ApiError ? caught.message : 'No pudimos registrar el movimiento.')
+      setError(caught instanceof ApiError ? caught.message : t('inventory.moveError'))
     } finally {
       setSaving(false)
     }
@@ -520,38 +531,43 @@ function MovementModal({
     <Modal
       open={Boolean(product)}
       onClose={onClose}
-      title="Movimiento de inventario"
-      subtitle={product ? `${product.name} · stock actual ${product.stock}` : undefined}
+      title={t('inventory.movementTitle')}
+      subtitle={
+        product
+          ? t('inventory.movementSubtitle', { name: product.name, stock: product.stock })
+          : undefined
+      }
       size="sm"
       footer={
         <div className="flex justify-end gap-2">
-          <Button variant="secondary" onClick={onClose}>Cancelar</Button>
+          <Button variant="secondary" onClick={onClose}>{t('inventory.cancel')}</Button>
           <Button type="submit" form="movement-form" variant="rose" loading={saving}>
-            Registrar
+            {t('inventory.register')}
           </Button>
         </div>
       }
     >
       <form id="movement-form" onSubmit={submit} className="space-y-3">
-        <Select label="Tipo" value={kind} onChange={(event) => setKind(event.target.value as typeof kind)}>
-          <option value="in">Entrada</option>
-          <option value="out">Salida</option>
-          <option value="adjustment">Ajuste (+/-)</option>
+        <Select label={t('inventory.type')} value={kind} onChange={(event) => setKind(event.target.value as typeof kind)}>
+          <option value="in">{t('inventory.kindIn')}</option>
+          <option value="out">{t('inventory.kindOut')}</option>
+          <option value="adjustment">{t('inventory.kindAdjust')}</option>
         </Select>
         <Input
-          label={kind === 'adjustment' ? 'Delta (+/-)' : 'Cantidad'}
+          label={kind === 'adjustment' ? t('inventory.delta') : t('inventory.quantity')}
           type="number"
           step="1"
           value={quantity}
           onChange={(event) => setQuantity(event.target.value)}
           required
         />
-        <Input label="Motivo" value={reason} onChange={(event) => setReason(event.target.value)} placeholder="Compra, venta, merma…" />
+        <Input label={t('inventory.reason')} value={reason} onChange={(event) => setReason(event.target.value)} placeholder={t('inventory.reasonPlaceholder')} />
         <p className="rounded-2xl bg-sand/60 px-3 py-2 text-[11px] text-muted">
-          Stock resultante: <strong className={preview < 0 ? 'text-rose-deep' : 'text-ink'}>{preview}</strong>
+          {t('inventory.resulting')}{' '}
+          <strong className={preview < 0 ? 'text-blush-deep' : 'text-licorice'}>{preview}</strong>
         </p>
         {error ? (
-          <p role="alert" className="rounded-2xl bg-rose-soft px-3 py-2 text-[11px] font-medium text-rose-deep">
+          <p role="alert" className="rounded-2xl bg-blush-soft px-3 py-2 text-[11px] font-medium text-blush-deep">
             {error}
           </p>
         ) : null}

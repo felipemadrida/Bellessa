@@ -8,9 +8,7 @@ import {
   Check,
   CheckCircle2,
   CircleAlert,
-  Clock3,
   CreditCard,
-  Download,
   MessageCircle,
   Phone,
   Receipt,
@@ -20,6 +18,7 @@ import {
 } from 'lucide-react'
 import { api, ApiError } from '../lib/api'
 import { useAuth } from '../lib/auth'
+import { usePreferences } from '../lib/preferences'
 import {
   addDaysKey,
   cn,
@@ -28,7 +27,6 @@ import {
   formatDateLong,
   formatDuration,
   formatTime,
-  METHOD_LABEL,
   money,
   parseMoney,
   phoneDisplay,
@@ -46,7 +44,6 @@ import {
   Segmented,
   Spinner,
   StatusBadge,
-  Textarea,
 } from './ui'
 
 interface Props {
@@ -61,6 +58,7 @@ type ConfirmAction = 'cancel' | 'no_show' | null
 
 export function AppointmentSheet({ appointment, open, onClose, onChanged }: Props) {
   const { business } = useAuth()
+  const { t } = usePreferences()
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
@@ -204,10 +202,10 @@ export function AppointmentSheet({ appointment, open, onClose, onChanged }: Prop
         reference: payReference.trim() || null,
       })
       await refresh()
-      toast(`Cobro registrado por ${money(payment.total_cents)}`)
+      toast(t('sheet.chargeRegistered', { amount: money(payment.total_cents) }))
       setMode('view')
     } catch (caught) {
-      setError(caught instanceof ApiError ? caught.message : 'No pudimos registrar el cobro.')
+      setError(caught instanceof ApiError ? caught.message : t('sheet.chargeError'))
     } finally {
       setPaying(false)
     }
@@ -215,11 +213,11 @@ export function AppointmentSheet({ appointment, open, onClose, onChanged }: Prop
 
   async function submitReschedule() {
     if (!rescheduleSlot) {
-      setError('Elige el nuevo horario.')
+      setError(t('sheet.pickNewTime'))
       return
     }
     if (rescheduleSlot === current!.start_at) {
-      setError('Ese es el mismo horario actual.')
+      setError(t('sheet.sameTime'))
       return
     }
     setRescheduling(true)
@@ -227,10 +225,10 @@ export function AppointmentSheet({ appointment, open, onClose, onChanged }: Prop
     try {
       await api.appointments.update(current!.id, { start_at: rescheduleSlot })
       await refresh()
-      toast('Cita movida de horario')
+      toast(t('sheet.moved'))
       setMode('view')
     } catch (caught) {
-      setError(caught instanceof ApiError ? caught.message : 'No pudimos mover la cita.')
+      setError(caught instanceof ApiError ? caught.message : t('sheet.moveError'))
     } finally {
       setRescheduling(false)
     }
@@ -243,17 +241,21 @@ export function AppointmentSheet({ appointment, open, onClose, onChanged }: Prop
       open={open}
       onClose={onClose}
       title={title}
-      subtitle={`${formatDateLong(current.start_at, timezone)} · ${time} a ${endTime}`}
+      subtitle={t('sheet.timeRange', {
+        date: formatDateLong(current.start_at, timezone),
+        start: time,
+        end: endTime,
+      })}
       size="md"
     >
       <div className="space-y-4">
-        <div className="flex items-start gap-3 rounded-3xl border border-line bg-white p-4">
+        <div className="flex items-start gap-3 rounded-3xl border border-border bg-surface p-4">
           <Avatar name={current.client.name} color={current.staff.color} size="lg" />
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <Link
                 to={`/clientas/${current.client.id}`}
-                className="truncate font-display text-xl font-medium text-ink hover:underline"
+                className="truncate font-display text-xl font-medium text-licorice hover:underline"
               >
                 {current.client.name}
               </Link>
@@ -271,7 +273,7 @@ export function AppointmentSheet({ appointment, open, onClose, onChanged }: Prop
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <a
                 href={`tel:${current.client.phone}`}
-                className="inline-flex h-8 items-center gap-1.5 rounded-full border border-line px-3 text-[11px] font-semibold text-ink"
+                className="inline-flex h-8 items-center gap-1.5 rounded-full border border-border px-3 text-[11px] font-semibold text-licorice"
               >
                 <Phone size={12} /> {phoneDisplay(current.client.phone)}
               </a>
@@ -279,12 +281,12 @@ export function AppointmentSheet({ appointment, open, onClose, onChanged }: Prop
                 type="button"
                 onClick={sendWhatsApp}
                 disabled={busy === 'whatsapp'}
-                className="inline-flex h-8 items-center gap-1.5 rounded-full bg-[#E7F3E9] px-3 text-[11px] font-bold text-[#2E6B3A] disabled:opacity-60"
+                className="inline-flex h-8 items-center gap-1.5 rounded-pill bg-sage-soft px-3 text-[11px] font-bold text-sage-deep disabled:opacity-60"
               >
                 {busy === 'whatsapp' ? <Spinner size={12} /> : <MessageCircle size={13} />}
                 WhatsApp
               </button>
-              <span className="money ml-auto font-display text-lg font-medium text-ink">
+              <span className="money ml-auto font-display text-lg font-medium text-licorice">
                 {money(current.price_cents)}
               </span>
             </div>
@@ -293,8 +295,8 @@ export function AppointmentSheet({ appointment, open, onClose, onChanged }: Prop
 
         {current.notes ? (
           <div className="rounded-2xl bg-sand/50 px-4 py-3">
-            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">Notas</p>
-            <p className="mt-1 whitespace-pre-line text-[12.5px] leading-relaxed text-ink">{current.notes}</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">{t('sheet.notes')}</p>
+            <p className="mt-1 whitespace-pre-line text-[12.5px] leading-relaxed text-licorice">{current.notes}</p>
           </div>
         ) : null}
 
@@ -302,9 +304,12 @@ export function AppointmentSheet({ appointment, open, onClose, onChanged }: Prop
           <div className="flex items-center gap-3 rounded-2xl border border-sage/20 bg-sage-soft/60 px-4 py-3">
             <CheckCircle2 size={19} className="shrink-0 text-sage" />
             <div className="min-w-0 flex-1">
-              <p className="text-[12.5px] font-bold text-sage">Cobrado · {METHOD_LABEL[current.payment.method]}</p>
+              <p className="text-[12.5px] font-bold text-sage">
+                {t('sheet.charged', { method: t(`method.${current.payment.method}`) })}
+              </p>
               <p className="money text-[11.5px] text-muted">
-                {money(current.payment.amount_cents)} + {money(current.payment.tip_cents)} propina
+                {money(current.payment.amount_cents)}{' '}
+                {t('sheet.tipSuffix', { amount: money(current.payment.tip_cents) })}
               </p>
             </div>
             <Button
@@ -312,7 +317,7 @@ export function AppointmentSheet({ appointment, open, onClose, onChanged }: Prop
               size="sm"
               onClick={() => api.payments.downloadReceipt(current.payment!.id)}
             >
-              <Receipt size={14} /> Recibo
+              <Receipt size={14} /> {t('sheet.receipt')}
             </Button>
           </div>
         ) : null}
@@ -320,7 +325,7 @@ export function AppointmentSheet({ appointment, open, onClose, onChanged }: Prop
         {error ? (
           <div
             role="alert"
-            className="flex items-start gap-2 rounded-2xl border border-rose/20 bg-rose-soft px-3.5 py-2.5 text-[12.5px] font-medium text-rose-deep"
+            className="flex items-start gap-2 rounded-2xl border border-rose/20 bg-blush-soft px-3.5 py-2.5 text-[12.5px] font-medium text-blush-deep"
           >
             <CircleAlert size={15} className="mt-0.5 shrink-0" /> {error}
           </div>
@@ -337,48 +342,48 @@ export function AppointmentSheet({ appointment, open, onClose, onChanged }: Prop
                     loading={busy === 'confirmed'}
                     onClick={() => changeStatus('confirmed')}
                   >
-                    <Check size={16} /> Confirmar cita
+                    <Check size={16} /> {t('sheet.confirm')}
                   </Button>
                 ) : (
                   <Button variant="rose" className="col-span-2" onClick={() => setMode('pay')}>
-                    <Banknote size={17} /> Completar y cobrar
+                    <Banknote size={17} /> {t('sheet.completeAndCharge')}
                   </Button>
                 )}
                 <Button variant="secondary" onClick={() => setMode('reschedule')}>
-                  <RotateCcw size={15} /> Reagendar
+                  <RotateCcw size={15} /> {t('sheet.reschedule')}
                 </Button>
                 <Button variant="secondary" onClick={sendWhatsApp} disabled={busy === 'whatsapp'}>
-                  <MessageCircle size={15} /> Recordatorio
+                  <MessageCircle size={15} /> {t('sheet.reminder')}
                 </Button>
                 <Button variant="ghost" onClick={() => setConfirmAction('no_show')}>
-                  <UserX size={15} /> No asistió
+                  <UserX size={15} /> {t('sheet.noShow')}
                 </Button>
                 <Button variant="ghost" onClick={() => setConfirmAction('cancel')}>
-                  Cancelar cita
+                  {t('sheet.cancelAppointment')}
                 </Button>
               </div>
             ) : current.status === 'completed' ? (
               <div className="grid grid-cols-2 gap-2">
                 {!current.payment ? (
                   <Button variant="rose" className="col-span-2" onClick={() => setMode('pay')}>
-                    <Banknote size={17} /> Registrar cobro
+                    <Banknote size={17} /> {t('sheet.registerPayment')}
                   </Button>
                 ) : null}
                 <Button variant="secondary" onClick={sendWhatsApp}>
-                  <MessageCircle size={15} /> Agradecer
+                  <MessageCircle size={15} /> {t('sheet.thank')}
                 </Button>
                 <Link to={`/clientas/${current.client.id}`}>
                   <Button variant="ghost" className="w-full">
-                    Ver ficha
+                    {t('sheet.viewRecord')}
                   </Button>
                 </Link>
               </div>
             ) : (
               <div className="rounded-2xl bg-sand/40 px-4 py-3 text-center text-[12px] text-muted">
-                Esta cita está {current.status === 'canceled' ? 'cancelada' : 'marcada como no asistió'}.
+                {current.status === 'canceled' ? t('sheet.canceledMsg') : t('sheet.noShowMsg')}
                 <div className="mt-2">
                   <Link to={`/clientas/${current.client.id}`} className="font-semibold text-rose">
-                    Ver ficha de la clienta
+                    {t('sheet.viewClientRecord')}
                   </Link>
                 </div>
               </div>
@@ -387,34 +392,34 @@ export function AppointmentSheet({ appointment, open, onClose, onChanged }: Prop
         ) : null}
 
         {mode === 'pay' ? (
-          <div className="space-y-3 rounded-3xl border border-line bg-white p-4">
+          <div className="space-y-3 rounded-3xl border border-border bg-surface p-4">
             <div className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-rose-soft text-rose-deep">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-blush-soft text-blush-deep">
                 <Banknote size={16} />
               </span>
               <div className="flex-1">
-                <p className="text-[13px] font-bold text-ink">Registrar cobro</p>
-                <p className="text-[11px] text-muted">El IVA ya está incluido en el precio.</p>
+                <p className="text-[13px] font-bold text-licorice">{t('sheet.registerPayment')}</p>
+                <p className="text-[11px] text-muted">{t('sheet.vatIncluded')}</p>
               </div>
               <button
                 type="button"
                 className="text-[11px] font-semibold text-muted"
                 onClick={() => setMode('view')}
               >
-                Cerrar
+                {t('sheet.close')}
               </button>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <Input
-                label="Monto del servicio"
+                label={t('sheet.serviceAmount')}
                 leading="$"
                 inputMode="decimal"
                 value={payAmount}
                 onChange={(event) => setPayAmount(event.target.value)}
               />
               <Input
-                label="Propina"
+                label={t('sheet.tip')}
                 leading="$"
                 inputMode="decimal"
                 value={payTip}
@@ -431,21 +436,21 @@ export function AppointmentSheet({ appointment, open, onClose, onChanged }: Prop
                   }
                   className={cn(
                     'rounded-full border px-3 py-1 text-[11px] font-semibold transition',
-                    'border-line bg-cream text-muted hover:border-rose/40 hover:text-ink',
+                    'border-border bg-alabaster text-muted hover:border-rose/40 hover:text-licorice',
                   )}
                 >
-                  {percent === 0 ? 'Sin propina' : `${percent}%`}
+                  {percent === 0 ? t('sheet.noTip') : `${percent}%`}
                 </button>
               ))}
             </div>
 
-            <Field label="Forma de pago">
+            <Field label={t('sheet.paymentMethod')}>
               <Segmented
                 options={[
-                  { value: 'cash', label: 'Efectivo' },
-                  { value: 'card', label: 'Tarjeta' },
-                  { value: 'transfer', label: 'Transfer.' },
-                  { value: 'other', label: 'Otro' },
+                  { value: 'cash', label: t('method.cash') },
+                  { value: 'card', label: t('method.card') },
+                  { value: 'transfer', label: t('sheet.transferShort') },
+                  { value: 'other', label: t('method.other') },
                 ]}
                 value={payMethod}
                 onChange={(value) => setPayMethod(value as PaymentMethod)}
@@ -455,45 +460,45 @@ export function AppointmentSheet({ appointment, open, onClose, onChanged }: Prop
             </Field>
 
             <Input
-              label="Referencia (opcional)"
-              placeholder="Clip, terminal, últimos 4…"
+              label={t('sheet.reference')}
+              placeholder={t('sheet.referencePlaceholder')}
               value={payReference}
               onChange={(event) => setPayReference(event.target.value)}
             />
 
-            <div className="flex items-center justify-between rounded-2xl bg-ink px-4 py-3 text-cream">
+            <div className="flex items-center justify-between rounded-2xl bg-licorice px-4 py-3 text-alabaster">
               <div>
-                <p className="text-[10px] uppercase tracking-[0.14em] text-cream/50">Total a cobrar</p>
+                <p className="text-[10px] uppercase tracking-[0.14em] text-alabaster/50">{t('sheet.totalToCharge')}</p>
                 <p className="money font-display text-2xl font-medium">{money(totalCents)}</p>
               </div>
-              <div className="text-right text-[10px] text-cream/60">
-                <p>Servicio {money(amountCents)}</p>
-                <p>Propina {money(tipCents)}</p>
+              <div className="text-right text-[10px] text-alabaster/60">
+                <p>{t('sheet.service')} {money(amountCents)}</p>
+                <p>{t('sheet.tip')} {money(tipCents)}</p>
               </div>
             </div>
 
             <Button variant="rose" className="w-full" loading={paying} onClick={submitPayment}>
-              <CreditCard size={16} /> Registrar cobro
+              <CreditCard size={16} /> {t('sheet.registerPayment')}
             </Button>
           </div>
         ) : null}
 
         {mode === 'reschedule' ? (
-          <div className="space-y-3 rounded-3xl border border-line bg-white p-4">
+          <div className="space-y-3 rounded-3xl border border-border bg-surface p-4">
             <div className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-sand text-ink">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-sand text-licorice">
                 <CalendarClock size={16} />
               </span>
               <div className="flex-1">
-                <p className="text-[13px] font-bold text-ink">Mover la cita</p>
-                <p className="text-[11px] text-muted">Mismo servicio y profesional.</p>
+                <p className="text-[13px] font-bold text-licorice">{t('sheet.moveTitle')}</p>
+                <p className="text-[11px] text-muted">{t('sheet.moveSubtitle')}</p>
               </div>
               <button
                 type="button"
                 className="text-[11px] font-semibold text-muted"
                 onClick={() => setMode('view')}
               >
-                Cerrar
+                {t('sheet.close')}
               </button>
             </div>
             <div className="flex gap-2 overflow-x-auto pb-1">
@@ -510,8 +515,8 @@ export function AppointmentSheet({ appointment, open, onClose, onChanged }: Prop
                   className={cn(
                     'flex h-16 w-14 shrink-0 flex-col items-center justify-center rounded-2xl border text-[11px] transition',
                     option === rescheduleDate
-                      ? 'border-ink bg-ink text-cream'
-                      : 'border-line bg-cream text-muted',
+                      ? 'border-licorice bg-licorice text-alabaster'
+                      : 'border-border bg-alabaster text-muted',
                   )}
                 >
                   <span className="text-[9px] font-bold uppercase">{weekdayShort(option)}</span>
@@ -534,7 +539,7 @@ export function AppointmentSheet({ appointment, open, onClose, onChanged }: Prop
                       'h-9 rounded-lg border text-[11px] font-semibold',
                       slot.start_utc === rescheduleSlot
                         ? 'border-rose bg-rose text-white'
-                        : 'border-line bg-cream text-ink',
+                        : 'border-border bg-alabaster text-licorice',
                     )}
                   >
                     {formatTime(slot.start_at, timezone)}
@@ -543,36 +548,34 @@ export function AppointmentSheet({ appointment, open, onClose, onChanged }: Prop
               </div>
             ) : (
               <p className="rounded-2xl bg-sand/50 px-3 py-4 text-center text-xs text-muted">
-                Sin horarios disponibles ese día.
+                {t('sheet.noSlots')}
               </p>
             )}
             <Button variant="rose" className="w-full" loading={rescheduling} onClick={submitReschedule}>
-              <ArrowRight size={16} /> Guardar nuevo horario
+              <ArrowRight size={16} /> {t('sheet.saveNewTime')}
             </Button>
           </div>
         ) : null}
 
         {confirmAction ? (
-          <div className="rounded-3xl border border-rose/25 bg-rose-soft/70 p-4">
-            <p className="text-[13px] font-bold text-rose-deep">
-              {confirmAction === 'cancel' ? '¿Cancelar esta cita?' : '¿Marcar como no asistió?'}
+          <div className="rounded-3xl border border-rose/25 bg-blush-soft/70 p-4">
+            <p className="text-[13px] font-bold text-blush-deep">
+              {confirmAction === 'cancel' ? t('sheet.cancelQuestion') : t('sheet.noShowQuestion')}
             </p>
-            <p className="mt-1 text-[11.5px] text-rose-deep/80">
-              {confirmAction === 'cancel'
-                ? 'Se liberará el horario y la clienta ya no aparecerá en tu agenda.'
-                : 'Contaremos la cita como perdida en tus reportes.'}
+            <p className="mt-1 text-[11.5px] text-blush-deep/80">
+              {confirmAction === 'cancel' ? t('sheet.cancelBody') : t('sheet.noShowBody')}
             </p>
             <div className="mt-3">
               <Input
-                label="Motivo (opcional)"
-                placeholder="Ej. Clienta canceló, se enfermó…"
+                label={t('sheet.reason')}
+                placeholder={t('sheet.reasonPlaceholder')}
                 value={reason}
                 onChange={(event) => setReason(event.target.value)}
               />
             </div>
             <div className="mt-3 flex gap-2">
               <Button variant="secondary" size="sm" onClick={() => setConfirmAction(null)}>
-                Mejor no
+                {t('sheet.betterNot')}
               </Button>
               <Button
                 variant="danger"
@@ -582,14 +585,14 @@ export function AppointmentSheet({ appointment, open, onClose, onChanged }: Prop
                   changeStatus(confirmAction === 'cancel' ? 'canceled' : 'no_show', reason || undefined)
                 }
               >
-                {confirmAction === 'cancel' ? 'Sí, cancelar' : 'Sí, no asistió'}
+                {confirmAction === 'cancel' ? t('sheet.yesCancel') : t('sheet.yesNoShow')}
               </Button>
             </div>
           </div>
         ) : null}
 
         <p className="text-center text-[10px] text-muted/60">
-          Código de cita · {current.confirmation_code}
+          {t('sheet.code', { code: current.confirmation_code })}
         </p>
       </div>
     </Modal>

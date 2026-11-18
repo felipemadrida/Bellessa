@@ -25,6 +25,8 @@ export interface Business {
   instagram: string | null
   timezone: string
   currency: string
+  locale: string
+  brand_color: string
   tax_rate_bps: number
   require_deposit: boolean
   deposit_percent: number
@@ -530,6 +532,8 @@ export interface PublicBusiness {
   instagram: string | null
   timezone: string
   currency: string
+  locale: string
+  brand_color: string
   require_deposit: boolean
   deposit_percent: number
   cancellation_hours: number

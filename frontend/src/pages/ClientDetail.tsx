@@ -18,6 +18,8 @@ import {
 } from 'lucide-react'
 import { api, ApiError } from '../lib/api'
 import { useAuth } from '../lib/auth'
+import { usePreferences } from '../lib/preferences'
+import { splitTags, vocabularyLabel } from '../lib/vocabulary'
 import {
   birthdayLabel,
   cn,
@@ -51,6 +53,7 @@ export function ClientDetailPage() {
   const { id } = useParams()
   const clientId = Number(id)
   const { business } = useAuth()
+  const { t } = usePreferences()
   const timezone = business?.timezone ?? 'America/Mexico_City'
   const today = todayKey(timezone)
   const navigate = useNavigate()
@@ -73,7 +76,7 @@ export function ClientDetailPage() {
     return (
       <div className="space-y-4">
         <Skeleton className="h-8 w-40" />
-        <Skeleton className="h-40 rounded-4xl" />
+        <Skeleton className="h-40 rounded-[28px]" />
         <div className="grid gap-4 sm:grid-cols-4">
           {Array.from({ length: 4 }, (_, index) => (
             <Skeleton key={index} className="h-24 rounded-3xl" />
@@ -88,11 +91,11 @@ export function ClientDetailPage() {
       <Card>
         <EmptyState
           icon={<CircleAlert size={22} />}
-          title="No encontramos esta ficha"
-          description="Puede que la clienta se haya eliminado o el enlace esté mal."
+          title={t('cd.notFound')}
+          description={t('clients.notFoundDesc')}
           action={
             <Link to="/clientas">
-              <Button variant="secondary">Volver a clientas</Button>
+              <Button variant="secondary">{t('page.clients.all')}</Button>
             </Link>
           }
         />
@@ -100,10 +103,7 @@ export function ClientDetailPage() {
     )
   }
 
-  const tags = (client.tags ?? '')
-    .split(',')
-    .map((tag) => tag.trim())
-    .filter(Boolean)
+  const tags = splitTags(client.tags)
   const upcoming = [...client.appointments]
     .filter(
       (appointment) =>
@@ -137,37 +137,37 @@ export function ClientDetailPage() {
       <button
         type="button"
         onClick={() => navigate('/clientas')}
-        className="mb-4 inline-flex items-center gap-1.5 text-[12px] font-semibold text-muted transition hover:text-ink"
+        className="mb-4 inline-flex items-center gap-1.5 text-[12px] font-semibold text-muted transition hover:text-licorice"
       >
-        <ArrowLeft size={15} /> Todas las clientas
+        <ArrowLeft size={15} /> {t('page.clients.all')}
       </button>
 
-      <section className="relative overflow-hidden rounded-4xl border border-line bg-white/80 p-5 shadow-soft sm:p-6">
+      <section className="relative overflow-hidden rounded-[28px] border border-border bg-surface/80 p-5 shadow-boutique sm:p-6">
         <div
           className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full opacity-40 blur-2xl"
           style={{ background: 'radial-gradient(circle, #F0CDD4 0%, transparent 70%)' }}
         />
         <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-start gap-4">
-            <Avatar name={client.name} color="#C2415A" size="xl" />
+            <Avatar name={client.name} color="#9C5566" size="xl" />
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="font-display text-[30px] font-medium leading-tight tracking-[-0.02em] text-ink sm:text-[36px]">
+                <h1 className="font-display text-[30px] font-medium leading-tight tracking-[-0.02em] text-licorice sm:text-[36px]">
                   {client.name}
                 </h1>
                 {birthdayDays !== null && birthdayDays <= 7 ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-gold-soft px-2.5 py-1 text-[10px] font-bold text-[#7A5A18]">
-                    <Cake size={12} /> Cumple en {birthdayDays} días
+                  <span className="inline-flex items-center gap-1 rounded-full bg-champagne-soft px-2.5 py-1 text-[10px] font-bold text-champagne-deep">
+                    <Cake size={12} /> {t('cd.birthdayChip', { n: birthdayDays })}
                   </span>
                 ) : null}
               </div>
               <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12.5px] text-muted">
-                <a href={`tel:${client.phone}`} className="inline-flex items-center gap-1 hover:text-ink">
+                <a href={`tel:${client.phone}`} className="inline-flex items-center gap-1 hover:text-licorice">
                   <Phone size={12} /> {phoneDisplay(client.phone)}
                 </a>
                 {client.email ? <span>{client.email}</span> : null}
                 <span className="text-line">·</span>
-                <span>Clienta desde {formatDateLong(client.created_at, timezone)}</span>
+                <span>{t('cd.clientSince', { date: formatDateLong(client.created_at, timezone) })}</span>
               </div>
               <div className="mt-2.5 flex flex-wrap gap-1.5">
                 {tags.map((tag) => (
@@ -175,12 +175,12 @@ export function ClientDetailPage() {
                     key={tag}
                     className="rounded-full bg-sand px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-muted"
                   >
-                    {tag}
+                    {vocabularyLabel(tag, t)}
                   </span>
                 ))}
                 {!client.accepts_marketing ? (
-                  <span className="rounded-full bg-rose-soft px-2.5 py-1 text-[10px] font-semibold text-rose-deep">
-                    Sin promociones
+                  <span className="rounded-full bg-blush-soft px-2.5 py-1 text-[10px] font-semibold text-blush-deep">
+                    {t('cd.noPromos')}
                   </span>
                 ) : null}
               </div>
@@ -189,7 +189,7 @@ export function ClientDetailPage() {
 
           <div className="flex flex-wrap items-center gap-2">
             <Button variant="secondary" onClick={() => setEditOpen(true)}>
-              <Pencil size={15} /> Editar
+              <Pencil size={15} /> {t('cd.edit')}
             </Button>
             <Menu
               trigger={
@@ -198,29 +198,29 @@ export function ClientDetailPage() {
                 </Button>
               }
             >
-              <MenuItem onClick={() => sendTemplate('reactivacion')}>Reactivar clienta</MenuItem>
-              <MenuItem onClick={() => sendTemplate('cumpleanos')}>Saludo de cumpleaños</MenuItem>
-              <MenuItem onClick={() => sendTemplate('gracias')}>Agradecer visita</MenuItem>
+              <MenuItem onClick={() => sendTemplate('reactivacion')}>{t('cd.reactivateClient')}</MenuItem>
+              <MenuItem onClick={() => sendTemplate('cumpleanos')}>{t('cd.birthdayGreeting')}</MenuItem>
+              <MenuItem onClick={() => sendTemplate('gracias')}>{t('cd.thankVisit')}</MenuItem>
             </Menu>
             <Button variant="rose" onClick={() => setNewOpen(true)}>
-              <CalendarPlus size={16} /> Nueva cita
+              <CalendarPlus size={16} /> {t('common.newAppointment')}
             </Button>
           </div>
         </div>
       </section>
 
       <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Stat icon={<ReceiptText size={16} />} label="Visitas" value={String(client.stats.visits)} tone="rose" />
-        <Stat icon={<Wallet size={16} />} label="Gastado" value={money(client.stats.spent_cents)} tone="sage" />
+        <Stat icon={<ReceiptText size={16} />} label={t('cd.statVisits')} value={String(client.stats.visits)} tone="rose" />
+        <Stat icon={<Wallet size={16} />} label={t('cd.statSpent')} value={money(client.stats.spent_cents)} tone="sage" />
         <Stat
           icon={<Sparkles size={16} />}
-          label="Ticket promedio"
+          label={t('cd.statAvgTicket')}
           value={money(client.stats.avg_ticket_cents)}
           tone="gold"
         />
         <Stat
           icon={<Heart size={16} />}
-          label="Servicio favorito"
+          label={t('cd.statFavorite')}
           value={client.stats.favorite_service ?? '—'}
           tone="ink"
           small
@@ -229,34 +229,33 @@ export function ClientDetailPage() {
 
       <Card className="mt-3 overflow-hidden border-gold/25">
         <div className="flex flex-col gap-4 bg-gradient-to-r from-gold-soft/70 to-cream p-4 sm:flex-row sm:items-center sm:p-5">
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gold text-white">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-champagne text-licorice">
             <Sparkles size={22} />
           </span>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#7A5A18]">
-                Lealtad
+              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-champagne-deep">
+                {t('cd.loyalty')}
               </p>
               <Badge
                 className={
                   client.stats.loyalty_level === 'vip'
-                    ? 'bg-ink text-gold'
-                    : 'bg-white/70 text-[#7A5A18]'
+                    ? 'bg-licorice text-gold'
+                    : 'bg-surface/70 text-champagne-deep'
                 }
               >
                 {client.stats.loyalty_level === 'vip'
-                  ? 'VIP'
+                  ? vocabularyLabel('VIP', t)
                   : client.stats.loyalty_level === 'frecuente'
-                    ? 'Frecuente'
-                    : 'Nueva'}
+                    ? vocabularyLabel('Frecuente', t)
+                    : vocabularyLabel('Nueva', t)}
               </Badge>
             </div>
-            <p className="mt-1 font-display text-[24px] font-medium leading-none text-ink">
-              {client.stats.loyalty_points} puntos
+            <p className="mt-1 font-display text-[24px] font-medium leading-none text-licorice">
+              {t('cd.points', { n: client.stats.loyalty_points })}
             </p>
             <p className="mt-1 text-[11px] text-muted">
-              1 punto por cada $10 de servicio · {money(client.stats.loyalty_spent_12m_cents)} en los
-              últimos 12 meses
+              {t('cd.loyaltyRule', { amount: money(client.stats.loyalty_spent_12m_cents) })}
             </p>
             <div className="mt-3 max-w-sm">
               <ProgressBar
@@ -265,20 +264,20 @@ export function ClientDetailPage() {
                     ? 100
                     : ((5 - client.stats.loyalty_next_reward_in) / 5) * 100
                 }
-                color="#D9A441"
+                color="#A8842C"
               />
-              <p className="mt-1.5 text-[11px] font-semibold text-[#7A5A18]">
+              <p className="mt-1.5 text-[11px] font-semibold text-champagne-deep">
                 {client.stats.loyalty_reward_available
-                  ? '¡Recompensa disponible! Su 6ta visita tiene un beneficio.'
-                  : `A ${client.stats.loyalty_next_reward_in} visita${
-                      client.stats.loyalty_next_reward_in === 1 ? '' : 's'
-                    } de su recompensa`}
+                  ? t('cd.rewardAvailable')
+                  : client.stats.loyalty_next_reward_in === 1
+                    ? t('cd.rewardIn', { n: client.stats.loyalty_next_reward_in })
+                    : t('cd.rewardInPlural', { n: client.stats.loyalty_next_reward_in })}
               </p>
             </div>
           </div>
           <div className="hidden text-right sm:block">
-            <p className="text-[10px] uppercase tracking-wider text-muted">Visitas completadas</p>
-            <p className="font-display text-[28px] font-medium text-ink">{client.stats.visits}</p>
+            <p className="text-[10px] uppercase tracking-wider text-muted">{t('cd.visitsCompleted')}</p>
+            <p className="font-display text-[28px] font-medium text-licorice">{client.stats.visits}</p>
           </div>
         </div>
       </Card>
@@ -288,7 +287,9 @@ export function ClientDetailPage() {
           {upcoming ? (
             <Card className="overflow-hidden border-sage/25">
               <div className="flex items-center justify-between gap-3 bg-sage-soft/70 px-4 py-2.5">
-                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-sage">Próxima cita</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-sage">
+                  {t('cd.nextAppointment')}
+                </p>
                 <StatusBadge status={upcoming.status} />
               </div>
               <button
@@ -296,7 +297,7 @@ export function ClientDetailPage() {
                 onClick={() => setSelected(upcoming)}
                 className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition hover:bg-sand/30"
               >
-                <div className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-2xl bg-ink text-cream">
+                <div className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-2xl bg-licorice text-alabaster">
                   <span className="text-[9px] font-bold uppercase">
                     {new Intl.DateTimeFormat('es-MX', { timeZone: timezone, month: 'short' })
                       .format(new Date(upcoming.start_at))
@@ -309,24 +310,24 @@ export function ClientDetailPage() {
                   </span>
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[13.5px] font-bold text-ink">{upcoming.service.name}</p>
+                  <p className="text-[13.5px] font-bold text-licorice">{upcoming.service.name}</p>
                   <p className="text-[11.5px] text-muted">
                     {formatDateLong(upcoming.start_at, timezone)} ·{' '}
                     {formatTime(upcoming.start_at, timezone)} · {upcoming.staff.name}
                   </p>
                 </div>
-                <p className="money text-[13px] font-bold text-ink">{money(upcoming.price_cents)}</p>
+                <p className="money text-[13px] font-bold text-licorice">{money(upcoming.price_cents)}</p>
               </button>
             </Card>
           ) : null}
 
           <Card className="p-4 sm:p-5">
             <SectionTitle
-              title="Historial"
-              subtitle={`${client.appointments.length} citas registradas`}
+              title={t('cd.history')}
+              subtitle={t('cd.historySub', { n: client.appointments.length })}
               action={
                 <Button size="sm" variant="ghost" onClick={() => setNewOpen(true)}>
-                  <CalendarPlus size={14} /> Agendar
+                  <CalendarPlus size={14} /> {t('cd.schedule')}
                 </Button>
               }
             />
@@ -340,7 +341,7 @@ export function ClientDetailPage() {
                     className="flex w-full items-center gap-3 rounded-2xl px-2 py-2.5 text-left transition hover:bg-sand/40"
                   >
                     <div className="w-14 shrink-0">
-                      <p className="text-[11.5px] font-bold text-ink">
+                      <p className="text-[11.5px] font-bold text-licorice">
                         {formatDateShortLocal(appointment.start_at, timezone)}
                       </p>
                       <p className="text-[9.5px] text-muted">
@@ -352,7 +353,7 @@ export function ClientDetailPage() {
                       style={{ backgroundColor: appointment.service.color }}
                     />
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-[12.5px] font-semibold text-ink">
+                      <p className="truncate text-[12.5px] font-semibold text-licorice">
                         {appointment.service.name}
                       </p>
                       <p className="truncate text-[10.5px] text-muted">
@@ -369,11 +370,11 @@ export function ClientDetailPage() {
             ) : (
               <EmptyState
                 icon={<CalendarPlus size={20} />}
-                title="Aún no tiene citas"
-                description="Agenda su primera visita y empieza a construir su historial."
+                title={t('cd.noAppointmentsTitle')}
+                description={t('cd.noAppointmentsDesc')}
                 action={
                   <Button size="sm" variant="secondary" onClick={() => setNewOpen(true)}>
-                    Nueva cita
+                    {t('common.newAppointment')}
                   </Button>
                 }
                 className="py-8"
@@ -384,57 +385,57 @@ export function ClientDetailPage() {
 
         <div className="space-y-4">
           <Card className="p-4 sm:p-5">
-            <SectionTitle title="Ficha" />
+            <SectionTitle title={t('cd.profile')} />
             <div className="space-y-3 text-[12.5px]">
-              <InfoRow label="Cumpleaños">
+              <InfoRow label={t('cd.birthdayField')}>
                 {client.birthday ? (
-                  <span className="inline-flex items-center gap-1 font-semibold text-ink">
+                  <span className="inline-flex items-center gap-1 font-semibold text-licorice">
                     <Cake size={13} className="text-gold" />
                     {birthdayLabel(client.birthday, timezone)}
                   </span>
                 ) : (
-                  <span className="text-muted">Sin registrar</span>
+                  <span className="text-muted">{t('cd.notRegistered')}</span>
                 )}
               </InfoRow>
-              <InfoRow label="WhatsApp">
+              <InfoRow label={t('settings.whatsapp')}>
                 <a href={`https://wa.me/52${client.phone}`} target="_blank" rel="noreferrer" className="font-semibold text-sage">
                   {phoneDisplay(client.phone)}
                 </a>
               </InfoRow>
-              <InfoRow label="Correo">
-                <span className="font-medium text-ink">{client.email ?? '—'}</span>
+              <InfoRow label={t('cd.email')}>
+                <span className="font-medium text-licorice">{client.email ?? '—'}</span>
               </InfoRow>
-              <InfoRow label="RFC">
-                <span className="inline-flex items-center gap-1 font-mono text-[11.5px] text-ink">
+              <InfoRow label={t('cd.rfc')}>
+                <span className="inline-flex items-center gap-1 font-mono text-[11.5px] text-licorice">
                   <FileText size={12} className="text-muted" />
-                  {client.rfc ?? 'Público en general'}
+                  {client.rfc ?? t('cd.publicGeneral')}
                 </span>
               </InfoRow>
-              <InfoRow label="Promociones">
+              <InfoRow label={t('cd.promotions')}>
                 <span
                   className={cn(
                     'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold',
                     client.accepts_marketing
                       ? 'bg-sage-soft text-sage'
-                      : 'bg-rose-soft text-rose-deep',
+                      : 'bg-blush-soft text-blush-deep',
                   )}
                 >
                   {client.accepts_marketing ? <Check size={11} /> : null}
-                  {client.accepts_marketing ? 'Acepta' : 'No acepta'}
+                  {client.accepts_marketing ? t('cd.accepts') : t('cd.notAccepts')}
                 </span>
               </InfoRow>
             </div>
           </Card>
 
           <Card className="p-4 sm:p-5">
-            <SectionTitle title="Notas del salón" />
+            <SectionTitle title={t('cd.notes')} />
             {client.notes ? (
-              <p className="whitespace-pre-line rounded-2xl bg-sand/40 px-3.5 py-3 text-[12.5px] leading-relaxed text-ink">
+              <p className="whitespace-pre-line rounded-2xl bg-sand/40 px-3.5 py-3 text-[12.5px] leading-relaxed text-licorice">
                 {client.notes}
               </p>
             ) : (
               <p className="rounded-2xl bg-sand/40 px-3.5 py-4 text-center text-[12px] text-muted">
-                Sin notas todavía. Guarda alergias, tonos y preferencias para la próxima visita.
+                {t('cd.noNotes')}
               </p>
             )}
             <Button
@@ -443,23 +444,21 @@ export function ClientDetailPage() {
               className="mt-2 w-full"
               onClick={() => setEditOpen(true)}
             >
-              <Pencil size={13} /> Editar notas y datos
+              <Pencil size={13} /> {t('cd.editNotes')}
             </Button>
           </Card>
 
-          <div className="rounded-3xl border border-dashed border-line bg-white/40 p-4">
+          <div className="rounded-3xl border border-dashed border-border bg-surface/40 p-4">
             <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-muted">
-              <MessageCircle size={13} className="text-sage" /> Seguimiento
+              <MessageCircle size={13} className="text-sage" /> {t('cd.followUp')}
             </p>
-            <p className="mt-2 text-[12px] leading-relaxed text-muted">
-              Un mensaje a tiempo llena la agenda. Recuérdale su próxima cita o salúdala en su cumpleaños.
-            </p>
+            <p className="mt-2 text-[12px] leading-relaxed text-muted">{t('cd.followUpText')}</p>
             <div className="mt-3 flex flex-wrap gap-2">
               <Button size="sm" variant="secondary" onClick={() => sendTemplate('reactivacion')}>
-                Reactivar
+                {t('cd.reactivate')}
               </Button>
               <Button size="sm" variant="secondary" onClick={() => sendTemplate('cumpleanos')}>
-                Cumpleaños
+                {t('cd.birthdayShort')}
               </Button>
             </div>
           </div>
@@ -500,10 +499,10 @@ function Stat({
   small?: boolean
 }) {
   const tones = {
-    rose: 'bg-rose-soft text-rose-deep',
+    rose: 'bg-blush-soft text-blush-deep',
     sage: 'bg-sage-soft text-sage',
-    gold: 'bg-gold-soft text-[#7A5A18]',
-    ink: 'bg-sand text-ink',
+    gold: 'bg-champagne-soft text-champagne-deep',
+    ink: 'bg-sand text-licorice',
   }
   return (
     <Card className="p-4">
@@ -513,7 +512,7 @@ function Stat({
       <p className="mt-3 text-[10px] font-bold uppercase tracking-[0.12em] text-muted">{label}</p>
       <p
         className={cn(
-          'mt-0.5 truncate font-display font-medium leading-tight text-ink',
+          'mt-0.5 truncate font-display font-medium leading-tight text-licorice',
           small ? 'text-[15px]' : 'text-[22px]',
         )}
       >
@@ -525,7 +524,7 @@ function Stat({
 
 function InfoRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between gap-3 border-b border-line/50 pb-2.5 last:border-0 last:pb-0">
+    <div className="flex items-center justify-between gap-3 border-b border-border/50 pb-2.5 last:border-0 last:pb-0">
       <span className="text-muted">{label}</span>
       {children}
     </div>

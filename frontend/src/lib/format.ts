@@ -4,20 +4,43 @@ export function cn(...classes: Array<string | false | null | undefined>): string
   return classes.filter(Boolean).join(' ')
 }
 
-export function money(cents: number): string {
+/**
+ * Moneda e idioma activos de la app. Se configuran desde el salón
+ * (`PreferencesProvider` / `AuthProvider`) para que todo `money()` respete la
+ * divisa base sin tocar cada llamada.
+ */
+let activeCurrency = 'MXN'
+let activeNumberLocale = 'es-MX'
+
+export function configureMoney(options: {
+  currency?: string | null
+  locale?: string | null
+}): void {
+  if (options.currency) activeCurrency = options.currency.toUpperCase()
+  if (options.locale) {
+    activeNumberLocale = options.locale.toLowerCase().startsWith('en') ? 'en-US' : 'es-MX'
+  }
+}
+
+export function activeMoneyConfig(): { currency: string; locale: string } {
+  return { currency: activeCurrency, locale: activeNumberLocale }
+}
+
+export function money(cents: number, currency?: string): string {
+  const code = currency ?? activeCurrency
   const hasCents = Math.abs(cents) % 100 !== 0
-  return new Intl.NumberFormat('es-MX', {
+  return new Intl.NumberFormat(activeNumberLocale, {
     style: 'currency',
-    currency: 'MXN',
+    currency: code,
     minimumFractionDigits: hasCents ? 2 : 0,
     maximumFractionDigits: hasCents ? 2 : 0,
   }).format(cents / 100)
 }
 
-export function moneyExact(cents: number): string {
-  return new Intl.NumberFormat('es-MX', {
+export function moneyExact(cents: number, currency?: string): string {
+  return new Intl.NumberFormat(activeNumberLocale, {
     style: 'currency',
-    currency: 'MXN',
+    currency: currency ?? activeCurrency,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(cents / 100)
@@ -107,6 +130,30 @@ export function weekdayShort(key: string): string {
   return capitalize(
     new Intl.DateTimeFormat('es-MX', { timeZone: 'UTC', weekday: 'short' })
       .format(parseKey(key))
+      .replace('.', ''),
+  )
+}
+
+/**
+ * Nombre del día de la semana por índice (0 = lunes), en el idioma activo.
+ * Usa Intl para no duplicar listas de días por idioma.
+ */
+export function weekdayNameByIndex(
+  index: number,
+  locale: string,
+  style: 'long' | 'short' | 'narrow' = 'long',
+): string {
+  const english = locale.toLowerCase().startsWith('en')
+  // En español "miércoles" y "martes" comparten la inicial M; usamos X como es costumbre.
+  if (!english && style === 'narrow' && index === 2) return 'X'
+  // 2024-01-01 fue lunes, así que sirve de ancla para cualquier índice.
+  const date = new Date(Date.UTC(2024, 0, 1 + index))
+  return capitalize(
+    new Intl.DateTimeFormat(english ? 'en-US' : 'es-MX', {
+      timeZone: 'UTC',
+      weekday: style,
+    })
+      .format(date)
       .replace('.', ''),
   )
 }
@@ -234,11 +281,11 @@ export const STATUS_LABEL: Record<AppointmentStatus, string> = {
 }
 
 export const STATUS_TONE: Record<AppointmentStatus, string> = {
-  pending: 'bg-gold-soft text-[#8A6418]',
-  confirmed: 'bg-sage-soft text-sage',
-  completed: 'bg-[#EDEBE6] text-muted',
-  canceled: 'bg-[#F3E9E6] text-[#A6624F]',
-  no_show: 'bg-rose-soft text-rose-deep',
+  pending: 'bg-champagne-soft text-champagne-deep',
+  confirmed: 'bg-sage-soft text-sage-deep',
+  completed: 'bg-sand text-muted',
+  canceled: 'bg-status-cancelled-bg text-status-cancelled-text',
+  no_show: 'bg-blush-soft text-blush-deep',
 }
 
 export const METHOD_LABEL: Record<PaymentMethod, string> = {

@@ -17,16 +17,26 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     access_token_minutes: int = 60 * 24 * 7  # 7 días: apps móviles
     seed_demo: bool = True
-    cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
+    # Cuando True, el arranque aplica `alembic upgrade head` en lugar de
+    # `Base.metadata.create_all` (recomendado para Neon PostgreSQL en producción).
+    run_migrations: bool = False
+    cors_origins: str = (
+        "http://localhost:5180,http://127.0.0.1:5180,"
+        "http://localhost:4180,http://127.0.0.1:4180"
+    )
     cors_origin_regex: str = ""
-    public_base_url: str = "http://localhost:5173"
-    api_public_base_url: str = ""  # URL pública de la API (Vercel/Render)
+    public_base_url: str = "http://localhost:5180"
+    api_public_base_url: str = "http://127.0.0.1:8011"  # URL pública de la API (local)
     cron_secret: str = ""  # obligatorio para /api/internal/tick en la nube
     platform_admin_name: str = "Felipe Madrid"
     platform_admin_email: str = "admin@bellessa.mx"
     platform_admin_password: str = ""  # en producción, define uno seguro
     default_timezone: str = "America/Mexico_City"
     currency: str = "MXN"
+    # Internacionalización
+    supported_currencies: list[str] = ["MXN", "USD"]
+    # Tasa para conversión o visualización
+    exchange_rate_usd: float = 20.0
 
     # WhatsApp Cloud API / simulador local
     whatsapp_provider: str = "mock"  # mock | cloud

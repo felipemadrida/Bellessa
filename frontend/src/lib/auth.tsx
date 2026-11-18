@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import { api, getToken, setToken } from './api'
+import { configureMoney } from './format'
 import type { Business, Staff } from './types'
 
 interface AuthValue {
@@ -82,6 +83,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => ({ user, business, ready, signIn, signUp, signOut: clear, refresh }),
     [user, business, ready, signIn, signUp, clear, refresh],
   )
+
+  // La moneda del salón se aplica antes de renderizar a sus hijas, de modo que
+  // cada `money()` de la app respeta la divisa base al instante.
+  configureMoney({ currency: business?.currency, locale: business?.locale })
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

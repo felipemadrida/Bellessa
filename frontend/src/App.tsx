@@ -18,6 +18,9 @@ const InventoryPage = lazy(() => import('./pages/Inventory').then((module) => ({
 const WhatsAppPage = lazy(() => import('./pages/WhatsApp').then((module) => ({ default: module.WhatsAppPage })))
 const ManualWhatsAppPage = lazy(() => import('./pages/ManualWhatsApp').then((module) => ({ default: module.ManualWhatsAppPage })))
 const AdminSaaSPage = lazy(() => import('./pages/AdminSaaS').then((module) => ({ default: module.AdminSaaSPage })))
+const PaletaPreviewPage = lazy(() =>
+  import('./pages/PaletaPreview').then((module) => ({ default: module.PaletaPreviewPage })),
+)
 const NotFoundPage = lazy(() => import('./pages/NotFound').then((module) => ({ default: module.NotFoundPage })))
 
 function ScrollToTop() {
@@ -30,7 +33,7 @@ function ScrollToTop() {
 
 function PageFallback() {
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-cream">
+    <div className="flex min-h-dvh items-center justify-center bg-alabaster">
       <div className="flex items-center gap-2 text-sm text-muted">
         <Spinner /> Cargando…
       </div>
@@ -48,6 +51,7 @@ export function App() {
           <Route path="/registro" element={<LoginPage register />} />
           <Route path="/admin" element={<AdminSaaSPage />} />
           <Route path="/reservar/:slug" element={<PublicBookingPage />} />
+          <Route path="/paleta" element={<PaletaPreviewPage />} />
           <Route element={<AppShell />}>
             <Route index element={<DashboardPage />} />
             <Route path="/agenda" element={<AgendaPage />} />

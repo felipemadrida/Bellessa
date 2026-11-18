@@ -25,9 +25,9 @@ services:
       BELLESSA_DATABASE_URL: postgresql+psycopg://bellessa:${POSTGRES_PASSWORD:-bellessa_dev}@db:5432/bellessa
       BELLESSA_JWT_SECRET: ${JWT_SECRET:-cambia-este-secreto-en-produccion}
       BELLESSA_SEED_DEMO: ${SEED_DEMO:-true}
-      BELLESSA_CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080}
-      BELLESSA_PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:8080}
-      BELLESSA_API_PUBLIC_BASE_URL: ${API_PUBLIC_BASE_URL:-http://localhost:8000}
+      BELLESSA_CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8090}
+      BELLESSA_PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:8090}
+      BELLESSA_API_PUBLIC_BASE_URL: ${API_PUBLIC_BASE_URL:-http://localhost:8011}
       BELLESSA_CORS_ORIGIN_REGEX: ${CORS_ORIGIN_REGEX:-}
       BELLESSA_CRON_SECRET: ${CRON_SECRET:-}
       BELLESSA_PLATFORM_ADMIN_NAME: ${PLATFORM_ADMIN_NAME:-Felipe Madrid}
@@ -44,14 +44,14 @@ services:
       db:
         condition: service_healthy
     ports:
-      - "8000:8000"
+      - "8011:8000"
     restart: unless-stopped
 
   web:
     build: ./frontend
     container_name: bellessa-web
     ports:
-      - "${WEB_PORT:-8080}:80"
+      - "${WEB_PORT:-8090}:80"
     depends_on:
       api:
         condition: service_healthy

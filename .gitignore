@@ -31,3 +31,7 @@ Thumbs.db
 screenshots/
 *.zip
 backups/
+
+# Marca regenerable (python design/brand/extract-mark.py)
+frontend/design/brand/brand-mark-light.png
+frontend/design/brand/brand-mark-dark.png

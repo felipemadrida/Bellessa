@@ -24,7 +24,7 @@ from ..schemas import (
     PublicBusinessOut,
 )
 from ..services.availability import compute_slots, is_slot_available, slot_payload
-from ..services.booking import ensure_client_has_no_overlap
+from ..services.booking import ensure_client_has_no_overlap, lock_staff_row
 from ..utils import (
     format_datetime_es,
     local_day_bounds,
@@ -72,6 +72,8 @@ def _public_business(db: Session, business: Business) -> PublicBusinessOut:
         instagram=business.instagram,
         timezone=business.timezone,
         currency=business.currency,
+        locale=business.locale,
+        brand_color=business.brand_color,
         require_deposit=business.require_deposit,
         deposit_percent=business.deposit_percent,
         cancellation_hours=business.cancellation_hours,
@@ -129,7 +131,7 @@ def public_book(
     service = db.get(Service, payload.service_id)
     if service is None or service.business_id != business.id or not service.active:
         raise HTTPException(status_code=404, detail="Servicio no disponible.")
-    member = db.get(User, payload.staff_id)
+    member = lock_staff_row(db, payload.staff_id)
     if member is None or member.business_id != business.id or not member.active:
         raise HTTPException(status_code=404, detail="Profesional no disponible.")
 

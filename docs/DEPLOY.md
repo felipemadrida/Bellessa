@@ -11,7 +11,7 @@ Todas las piezas son open source y gratuitas: PostgreSQL, FastAPI, React, nginx 
 | `POSTGRES_PASSWORD` | `una-clave-larga` | Contraseña de Postgres en Compose |
 | `JWT_SECRET` | `openssl rand -hex 32` | Firma de tokens; **obligatorio cambiarlo** |
 | `SEED_DEMO` | `false` en producción | Crea el Salón Demo de demostración |
-| `WEB_PORT` | `8080` | Puerto público del frontend |
+| `WEB_PORT` | `8090` | Puerto público del frontend |
 | `PUBLIC_BASE_URL` | `https://agenda.tusalon.mx` | Links de WhatsApp y página pública |
 | `CORS_ORIGINS` | `https://agenda.tusalon.mx` | Orígenes permitidos |
 | `CORS_ORIGIN_REGEX` | `https://.*\\.vercel\\.app` | Opcional para previews de Vercel |

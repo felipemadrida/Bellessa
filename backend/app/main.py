@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
+from pathlib import Path
 
 from fastapi import APIRouter, Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -27,10 +28,25 @@ from .routers import (
 from .seed import seed_demo, seed_platform
 from .services.scheduler import start_scheduler, stop_scheduler
 
+_BACKEND_DIR = Path(__file__).resolve().parent.parent
+
+
+def _apply_migrations() -> None:
+    """Aplica las migraciones de Alembic apuntando a la base configurada."""
+    from alembic import command
+    from alembic.config import Config as AlembicConfig
+
+    cfg = AlembicConfig(str(_BACKEND_DIR / "alembic.ini"))
+    cfg.set_main_option("script_location", str(_BACKEND_DIR / "alembic"))
+    command.upgrade(cfg, "head")
+
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    Base.metadata.create_all(bind=engine)
+    if settings.run_migrations:
+        _apply_migrations()
+    else:
+        Base.metadata.create_all(bind=engine)
     with SessionLocal() as db:
         if settings.seed_demo:
             seed_demo(db)

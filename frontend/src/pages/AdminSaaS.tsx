@@ -46,7 +46,7 @@ const PLAN_PRICE: Record<string, number> = { free: 0, pro: 299, salon: 599 }
 const PLAN_TONE: Record<string, string> = {
   free: 'bg-sand text-muted',
   pro: 'bg-sage-soft text-sage',
-  salon: 'bg-gold-soft text-[#7A5A18]',
+  salon: 'bg-champagne-soft text-champagne-deep',
 }
 const STATUS_LABEL: Record<string, string> = {
   active: 'Activo',
@@ -56,8 +56,8 @@ const STATUS_LABEL: Record<string, string> = {
 }
 const STATUS_TONE: Record<string, string> = {
   active: 'bg-sage-soft text-sage',
-  trial: 'bg-gold-soft text-[#7A5A18]',
-  suspended: 'bg-rose-soft text-rose-deep',
+  trial: 'bg-champagne-soft text-champagne-deep',
+  suspended: 'bg-blush-soft text-blush-deep',
   archived: 'bg-sand text-muted',
 }
 const EDITABLE_STATUSES = ['active', 'trial', 'suspended'] as const
@@ -113,7 +113,7 @@ export function AdminSaaSPage() {
 
   if (booting) {
     return (
-      <div className="flex min-h-dvh items-center justify-center bg-cream">
+      <div className="flex min-h-dvh items-center justify-center bg-alabaster">
         <div className="flex items-center gap-2 text-sm text-muted">
           <Spinner /> Cargando plataforma…
         </div>
@@ -123,26 +123,26 @@ export function AdminSaaSPage() {
 
   if (!admin) {
     return (
-      <div className="grid min-h-dvh bg-cream lg:grid-cols-[1.05fr_.95fr]">
-        <section className="relative hidden overflow-hidden bg-ink px-12 py-12 text-cream lg:flex lg:flex-col">
+      <div className="grid min-h-dvh bg-alabaster lg:grid-cols-[1.05fr_.95fr]">
+        <section className="relative hidden overflow-hidden bg-licorice px-12 py-12 text-alabaster lg:flex lg:flex-col">
           <div
             className="pointer-events-none absolute -right-28 -top-28 h-96 w-96 rounded-full opacity-60 blur-3xl"
-            style={{ background: 'radial-gradient(circle, #D9A44155, transparent 70%)' }}
+            style={{ background: 'radial-gradient(circle, #A8842C55, transparent 70%)' }}
           />
           <div className="relative flex items-center gap-2.5">
             <BrandMark size={40} />
-            <Wordmark className="text-cream" />
+            <Wordmark className="text-alabaster" />
           </div>
           <div className="relative my-auto max-w-lg">
-            <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-cream/15 bg-cream/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-cream/70">
+            <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-cream/15 bg-alabaster/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-alabaster/70">
               <ShieldCheck size={13} className="text-gold" /> Plataforma Bellessa
             </p>
             <h1 className="font-display text-[54px] font-normal leading-[0.98] tracking-[-0.035em]">
               Los salones,
               <br />
-              <span className="italic text-[#F0CFA7]">en una vista.</span>
+              <span className="italic text-champagne-soft">en una vista.</span>
             </h1>
-            <p className="mt-5 max-w-md text-[14px] leading-relaxed text-cream/65">
+            <p className="mt-5 max-w-md text-[14px] leading-relaxed text-alabaster/65">
               Administra tenants, planes, uso y estado comercial. El panel de plataforma está
               separado del panel operativo de cada salón.
             </p>
@@ -152,14 +152,14 @@ export function AdminSaaSPage() {
                 ['Planes', 'Free/Pro/Salón'],
                 ['Métricas', 'globales'],
               ].map(([title, subtitle]) => (
-                <div key={title} className="rounded-2xl border border-cream/10 bg-cream/5 px-2 py-3">
-                  <p className="font-display text-lg text-cream">{title}</p>
-                  <p className="text-[9px] uppercase tracking-wider text-cream/45">{subtitle}</p>
+                <div key={title} className="rounded-2xl border border-cream/10 bg-alabaster/5 px-2 py-3">
+                  <p className="font-display text-lg text-alabaster">{title}</p>
+                  <p className="text-[9px] uppercase tracking-wider text-alabaster/45">{subtitle}</p>
                 </div>
               ))}
             </div>
           </div>
-          <p className="relative text-[10px] text-cream/35">Admin SaaS · acceso separado del salón</p>
+          <p className="relative text-[10px] text-alabaster/35">Admin SaaS · acceso separado del salón</p>
         </section>
 
         <section className="flex flex-col px-5 py-8 sm:px-10 lg:px-14 lg:py-12">
@@ -171,7 +171,7 @@ export function AdminSaaSPage() {
           </div>
           <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center py-10">
             <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-rose">Plataforma</p>
-            <h2 className="mt-2 font-display text-[38px] font-medium leading-tight tracking-[-0.025em] text-ink">
+            <h2 className="mt-2 font-display text-[38px] font-medium leading-tight tracking-[-0.025em] text-licorice">
               Admin SaaS
             </h2>
             <p className="mt-2 text-sm text-muted">Acceso de superadministrador de Bellessa.</p>
@@ -196,7 +196,7 @@ export function AdminSaaSPage() {
               {error ? (
                 <div
                   role="alert"
-                  className="flex items-start gap-2 rounded-2xl border border-rose/20 bg-rose-soft px-3.5 py-2.5 text-[12.5px] font-medium text-rose-deep"
+                  className="flex items-start gap-2 rounded-2xl border border-rose/20 bg-blush-soft px-3.5 py-2.5 text-[12.5px] font-medium text-blush-deep"
                 >
                   <CircleAlert size={15} className="mt-0.5 shrink-0" /> {error}
                 </div>
@@ -206,14 +206,14 @@ export function AdminSaaSPage() {
               </Button>
             </form>
             <p className="mt-5 rounded-2xl bg-sand/50 px-4 py-3 text-center text-[11px] leading-relaxed text-muted">
-              Demo: <span className="font-mono text-ink">admin@bellessa.mx</span> /{' '}
-              <span className="font-mono text-ink">admin1234</span>
+              Demo: <span className="font-mono text-licorice">admin@bellessa.mx</span> /{' '}
+              <span className="font-mono text-licorice">admin1234</span>
               <br />
               En producción cambia esta contraseña.
             </p>
             <a
               href="/login"
-              className="mt-6 text-center text-[11px] font-semibold text-muted hover:text-ink"
+              className="mt-6 text-center text-[11px] font-semibold text-muted hover:text-licorice"
             >
               Volver al panel del salón
             </a>
@@ -316,14 +316,14 @@ function AdminDashboard({ admin, onLogout }: { admin: PlatformAdmin; onLogout: (
   }
 
   return (
-    <div className="min-h-dvh bg-cream">
-      <header className="border-b border-line/80 bg-ink text-cream">
+    <div className="min-h-dvh bg-alabaster">
+      <header className="border-b border-border/80 bg-licorice text-alabaster">
         <div className="mx-auto flex max-w-[1280px] items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
             <BrandMark size={34} />
             <div className="leading-none">
-              <Wordmark className="text-cream" />
-              <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.18em] text-cream/40">
+              <Wordmark className="text-alabaster" />
+              <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.18em] text-alabaster/40">
                 Admin SaaS
               </p>
             </div>
@@ -331,14 +331,14 @@ function AdminDashboard({ admin, onLogout }: { admin: PlatformAdmin; onLogout: (
           <div className="flex items-center gap-3">
             <div className="hidden text-right sm:block">
               <p className="text-[11px] font-semibold">{admin.name}</p>
-              <p className="text-[9px] text-cream/40">{admin.email}</p>
+              <p className="text-[9px] text-alabaster/40">{admin.email}</p>
             </div>
-            <Avatar name={admin.name} color="#D9A441" size="sm" />
+            <Avatar name={admin.name} color="#A8842C" size="sm" />
             <button
               type="button"
               onClick={onLogout}
               aria-label="Cerrar sesión de plataforma"
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-cream/15 text-cream/60 transition hover:bg-cream/10 hover:text-cream"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-cream/15 text-alabaster/60 transition hover:bg-alabaster/10 hover:text-alabaster"
             >
               <LogOut size={15} />
             </button>
@@ -352,7 +352,7 @@ function AdminDashboard({ admin, onLogout }: { admin: PlatformAdmin; onLogout: (
             <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-rose">
               Plataforma Bellessa
             </p>
-            <h1 className="mt-1 font-display text-[34px] font-medium leading-none text-ink sm:text-[42px]">
+            <h1 className="mt-1 font-display text-[34px] font-medium leading-none text-licorice sm:text-[42px]">
               Salones y planes
             </h1>
             <p className="mt-2 text-[13px] text-muted">
@@ -412,12 +412,12 @@ function AdminDashboard({ admin, onLogout }: { admin: PlatformAdmin; onLogout: (
               {overview.plans.map((plan) => (
                 <Card key={plan.key} className="flex items-center justify-between gap-3 p-4">
                   <div>
-                    <p className="text-[11px] font-bold text-ink">{plan.label}</p>
+                    <p className="text-[11px] font-bold text-licorice">{plan.label}</p>
                     <p className="text-[10px] text-muted">
                       {overview.plan_counts[plan.key] ?? 0} salones · hasta {plan.max_staff} staff
                     </p>
                   </div>
-                  <span className="money text-[13px] font-bold text-ink">
+                  <span className="money text-[13px] font-bold text-licorice">
                     ${plan.price_mxn}
                     <span className="text-[9px] font-normal text-muted"> MXN/mes</span>
                   </span>
@@ -430,9 +430,9 @@ function AdminDashboard({ admin, onLogout }: { admin: PlatformAdmin; onLogout: (
         )}
 
         <Card className="mt-5 overflow-hidden">
-          <div className="flex flex-col gap-3 border-b border-line/70 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+          <div className="flex flex-col gap-3 border-b border-border/70 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
             <div>
-              <h2 className="font-display text-xl font-medium text-ink">Tenants</h2>
+              <h2 className="font-display text-xl font-medium text-licorice">Tenants</h2>
               <p className="text-[11px] text-muted">
                 {filtered.length} de {tenants.length} salones
               </p>
@@ -444,8 +444,8 @@ function AdminDashboard({ admin, onLogout }: { admin: PlatformAdmin; onLogout: (
                 className={cn(
                   'h-10 rounded-2xl border px-3 text-[11px] font-semibold transition',
                   showArchived
-                    ? 'border-ink bg-ink text-cream'
-                    : 'border-line bg-white text-muted hover:text-ink',
+                    ? 'border-licorice bg-licorice text-alabaster'
+                    : 'border-border bg-surface text-muted hover:text-licorice',
                 )}
               >
                 <Archive size={13} className="mr-1.5 inline" />
@@ -469,17 +469,17 @@ function AdminDashboard({ admin, onLogout }: { admin: PlatformAdmin; onLogout: (
               ))}
             </div>
           ) : filtered.length ? (
-            <div className="divide-y divide-line/60">
+            <div className="divide-y divide-border/60">
               {filtered.map((tenant) => (
                 <div
                   key={tenant.business_id}
                   className="grid gap-3 px-4 py-4 sm:px-5 lg:grid-cols-[1.4fr_.8fr_.7fr_.8fr] lg:items-center"
                 >
                   <div className="flex items-start gap-3">
-                    <Avatar name={tenant.name} color="#C2415A" size="md" />
+                    <Avatar name={tenant.name} color="#9C5566" size="md" />
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <p className="truncate text-[14px] font-bold text-ink">{tenant.name}</p>
+                        <p className="truncate text-[14px] font-bold text-licorice">{tenant.name}</p>
                         <Badge className={STATUS_TONE[tenant.status] ?? 'bg-sand text-muted'}>
                           {STATUS_LABEL[tenant.status] ?? tenant.status}
                         </Badge>
@@ -501,7 +501,7 @@ function AdminDashboard({ admin, onLogout }: { admin: PlatformAdmin; onLogout: (
                       value={tenant.plan}
                       disabled={updating === tenant.business_id}
                       onChange={(event) => updateTenant(tenant, { plan: event.target.value })}
-                      className="h-8 rounded-xl border border-line bg-white px-2 text-[11px] font-semibold text-ink"
+                      className="h-8 rounded-xl border border-border bg-surface px-2 text-[11px] font-semibold text-licorice"
                       aria-label={`Plan de ${tenant.name}`}
                     >
                       {Object.keys(PLAN_LABEL).map((plan) => (
@@ -519,7 +519,7 @@ function AdminDashboard({ admin, onLogout }: { admin: PlatformAdmin; onLogout: (
                     <span className="inline-flex items-center gap-1">
                       <CalendarDays size={12} /> {tenant.appointments_30d} citas
                     </span>
-                    <span className="money font-semibold text-ink">
+                    <span className="money font-semibold text-licorice">
                       {money(tenant.revenue_30d_cents)}
                     </span>
                   </div>
@@ -539,7 +539,7 @@ function AdminDashboard({ admin, onLogout }: { admin: PlatformAdmin; onLogout: (
                         value={tenant.status}
                         disabled={updating === tenant.business_id}
                         onChange={(event) => updateTenant(tenant, { status: event.target.value })}
-                        className="h-8 rounded-xl border border-line bg-white px-2 text-[10.5px] font-semibold text-ink"
+                        className="h-8 rounded-xl border border-border bg-surface px-2 text-[10.5px] font-semibold text-licorice"
                         aria-label={`Estado de ${tenant.name}`}
                       >
                         {EDITABLE_STATUSES.map((status) => (
@@ -553,7 +553,7 @@ function AdminDashboard({ admin, onLogout }: { admin: PlatformAdmin; onLogout: (
                       type="button"
                       onClick={() => openEdit(tenant)}
                       aria-label={`Editar ${tenant.name}`}
-                      className="flex h-8 w-8 items-center justify-center rounded-xl border border-line bg-white text-muted transition hover:border-ink/30 hover:text-ink"
+                      className="flex h-8 w-8 items-center justify-center rounded-xl border border-border bg-surface text-muted transition hover:border-licorice/30 hover:text-licorice"
                     >
                       <Pencil size={13} />
                     </button>
@@ -561,7 +561,7 @@ function AdminDashboard({ admin, onLogout }: { admin: PlatformAdmin; onLogout: (
                       href={`/reservar/${tenant.slug}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="flex h-8 items-center gap-1 rounded-xl border border-line bg-white px-2.5 text-[10.5px] font-semibold text-ink hover:border-rose/40"
+                      className="flex h-8 items-center gap-1 rounded-xl border border-border bg-surface px-2.5 text-[10.5px] font-semibold text-licorice hover:border-rose/40"
                     >
                       Web <ArrowUpRight size={12} />
                     </a>
@@ -570,7 +570,7 @@ function AdminDashboard({ admin, onLogout }: { admin: PlatformAdmin; onLogout: (
                         type="button"
                         onClick={() => setArchiveTarget(tenant)}
                         aria-label={`Archivar ${tenant.name}`}
-                        className="flex h-8 w-8 items-center justify-center rounded-xl border border-line bg-white text-muted transition hover:border-rose/30 hover:text-rose-deep"
+                        className="flex h-8 w-8 items-center justify-center rounded-xl border border-border bg-surface text-muted transition hover:border-rose/30 hover:text-blush-deep"
                       >
                         <Archive size={13} />
                       </button>
@@ -642,16 +642,16 @@ function AdminDashboard({ admin, onLogout }: { admin: PlatformAdmin; onLogout: (
         {credentials ? (
           <div className="space-y-3">
             <p className="text-[13px] text-muted">
-              <strong className="text-ink">{credentials.name}</strong> ya puede entrar al panel del
+              <strong className="text-licorice">{credentials.name}</strong> ya puede entrar al panel del
               salón.
             </p>
-            <div className="rounded-2xl border border-line bg-white p-4">
+            <div className="rounded-2xl border border-border bg-surface p-4">
               <p className="text-[10px] font-bold uppercase tracking-wider text-muted">Correo</p>
-              <p className="mt-0.5 break-all font-mono text-[12px] text-ink">{credentials.email}</p>
+              <p className="mt-0.5 break-all font-mono text-[12px] text-licorice">{credentials.email}</p>
               <p className="mt-3 text-[10px] font-bold uppercase tracking-wider text-muted">
                 Contraseña temporal
               </p>
-              <p className="mt-0.5 break-all font-mono text-[12px] text-ink">
+              <p className="mt-0.5 break-all font-mono text-[12px] text-licorice">
                 {credentials.password || 'La contraseña definida al crear el salón'}
               </p>
             </div>
@@ -884,7 +884,7 @@ function TenantFormModal({
         {error ? (
           <div
             role="alert"
-            className="flex items-start gap-2 rounded-2xl border border-rose/20 bg-rose-soft px-3.5 py-2.5 text-[12.5px] font-medium text-rose-deep"
+            className="flex items-start gap-2 rounded-2xl border border-rose/20 bg-blush-soft px-3.5 py-2.5 text-[12.5px] font-medium text-blush-deep"
           >
             <CircleAlert size={15} className="mt-0.5 shrink-0" /> {error}
           </div>
@@ -908,10 +908,10 @@ function PlatformKpi({
   tone: 'ink' | 'gold' | 'sage' | 'rose'
 }) {
   const tones = {
-    ink: 'bg-sand text-ink',
-    gold: 'bg-gold-soft text-[#7A5A18]',
+    ink: 'bg-sand text-licorice',
+    gold: 'bg-champagne-soft text-champagne-deep',
     sage: 'bg-sage-soft text-sage',
-    rose: 'bg-rose-soft text-rose-deep',
+    rose: 'bg-blush-soft text-blush-deep',
   }
   return (
     <Card className="p-4">
@@ -919,7 +919,7 @@ function PlatformKpi({
         {icon}
       </span>
       <p className="mt-3 text-[10px] font-bold uppercase tracking-[0.12em] text-muted">{label}</p>
-      <p className="money mt-0.5 font-display text-[24px] font-medium leading-none text-ink">{value}</p>
+      <p className="money mt-0.5 font-display text-[24px] font-medium leading-none text-licorice">{value}</p>
       <p className="mt-1 text-[10px] text-muted">{hint}</p>
     </Card>
   )

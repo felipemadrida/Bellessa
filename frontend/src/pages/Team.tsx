@@ -21,7 +21,9 @@ import {
   minutesToTime,
   timeToMinutes,
   todayKey,
+  weekdayNameByIndex,
 } from '../lib/format'
+import { usePreferences } from '../lib/preferences'
 import type { Staff, WorkingHour } from '../lib/types'
 import { PageHeader } from '../components/AppShell'
 import { useToast } from '../components/Toast'
@@ -38,12 +40,12 @@ import {
   Textarea,
 } from '../components/ui'
 
-const PALETTE = ['#C2415A', '#3E5C50', '#D9A441', '#D97757', '#8E5572', '#5C8374', '#7A4E3B', '#B56576']
-const WEEKDAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
-const WEEKDAYS_SHORT = ['L', 'M', 'X', 'J', 'V', 'S', 'D']
+const PALETTE = ['#9C5566', '#4A6B5D', '#A8842C', '#A9714B', '#7E3F4E', '#6B8A7D', '#8A6A5E', '#C08A96']
+const WEEKDAY_COUNT = 7
 
 export function TeamPage() {
   const { user, business } = useAuth()
+  const { t, locale } = usePreferences()
   const isOwner = user?.role === 'owner'
   const queryClient = useQueryClient()
   const { toast } = useToast()
@@ -82,13 +84,15 @@ export function TeamPage() {
   return (
     <div className="animate-fade-up">
       <PageHeader
-        eyebrow="Tu equipo"
-        title="Equipo"
-        subtitle={`${staff.filter((member) => member.active).length} personas activas · Su agenda, comisiones y horarios`}
+        eyebrow={t('team.eyebrow')}
+        title={t('team.title')}
+        subtitle={t('team.subtitle', {
+          n: staff.filter((member) => member.active).length,
+        })}
         actions={
           isOwner ? (
             <Button variant="rose" onClick={openCreate}>
-              <Plus size={17} /> Agregar al equipo
+              <Plus size={17} /> {t('team.addMember')}
             </Button>
           ) : null
         }
@@ -104,20 +108,20 @@ export function TeamPage() {
         <Card>
           <EmptyState
             icon={<CircleAlert size={22} />}
-            title="No pudimos cargar el equipo"
-            action={<Button onClick={() => query.refetch()}>Reintentar</Button>}
+            title={t('team.errorLoad')}
+            action={<Button onClick={() => query.refetch()}>{t('team.retry')}</Button>}
           />
         </Card>
       ) : staff.length === 0 ? (
         <Card>
           <EmptyState
             icon={<UserRound size={23} />}
-            title="Tu equipo está vacío"
-            description="Agrega a las personas que atienden en tu salón para asignar citas y comisiones."
+            title={t('team.emptyTitle')}
+            description={t('team.emptyDesc')}
             action={
               isOwner ? (
                 <Button variant="rose" onClick={openCreate}>
-                  <Plus size={16} /> Agregar persona
+                  <Plus size={16} /> {t('team.addPerson')}
                 </Button>
               ) : undefined
             }
@@ -138,12 +142,12 @@ export function TeamPage() {
                 <div className="flex items-center gap-3">
                   <Avatar name={member.name} color={member.color} size="lg" />
                   <div>
-                    <p className="font-display text-lg font-medium leading-tight text-ink">
+                    <p className="font-display text-lg font-medium leading-tight text-licorice">
                       {member.name}
                     </p>
                     <p className="mt-0.5 text-[11px] text-muted">
-                      {member.role === 'owner' ? 'Dueña del salón' : 'Profesional'}
-                      {!member.active ? ' · Inactiva' : ''}
+                      {member.role === 'owner' ? t('team.owner') : t('team.pro')}
+                      {!member.active ? ` · ${t('team.inactive')}` : ''}
                     </p>
                   </div>
                 </div>
@@ -156,8 +160,8 @@ export function TeamPage() {
                           setEditing(member)
                           setFormOpen(true)
                         }}
-                        aria-label={`Editar a ${member.name}`}
-                        className="flex h-8 w-8 items-center justify-center rounded-full text-muted transition hover:bg-sand hover:text-ink"
+                        aria-label={t('team.editAria', { name: member.name })}
+                        className="flex h-8 w-8 items-center justify-center rounded-full text-muted transition hover:bg-sand hover:text-licorice"
                       >
                         <Pencil size={14} />
                       </button>
@@ -166,7 +170,7 @@ export function TeamPage() {
                           type="button"
                           onClick={() => toggleActive(member)}
                           disabled={toggling === member.id}
-                          aria-label={member.active ? 'Desactivar' : 'Activar'}
+                          aria-label={member.active ? t('team.deactivate') : t('team.activate')}
                           className={cn(
                             'relative h-5 w-9 rounded-full transition',
                             member.active ? 'bg-sage' : 'bg-sand',
@@ -174,7 +178,7 @@ export function TeamPage() {
                         >
                           <span
                             className={cn(
-                              'absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all',
+                              'absolute top-0.5 h-4 w-4 rounded-full bg-surface shadow transition-all',
                               member.active ? 'left-[18px]' : 'left-0.5',
                             )}
                           />
@@ -191,23 +195,26 @@ export function TeamPage() {
 
               <div className="mt-4 flex flex-wrap gap-1.5">
                 <Badge className="bg-sand text-muted">
-                  <Sparkles size={11} /> {member.commission_bps ? `${member.commission_bps / 100}% comisión` : 'Sin comisión'}
+                  <Sparkles size={11} />{' '}
+                  {member.commission_bps
+                    ? t('team.commission', { n: member.commission_bps / 100 })
+                    : t('team.noCommission')}
                 </Badge>
                 <Badge className="bg-sand text-muted">
-                  <Clock3 size={11} /> {hoursSummary(member.working_hours)}
+                  <Clock3 size={11} /> {hoursSummary(member.working_hours, locale, t)}
                 </Badge>
               </div>
 
-              <div className="mt-4 border-t border-line/60 pt-3">
+              <div className="mt-4 border-t border-border/60 pt-3">
                 <p className="truncate text-[11px] text-muted">{member.email}</p>
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {isOwner ? (
                     <Button size="sm" variant="secondary" onClick={() => setHoursFor(member)}>
-                      <CalendarClock size={13} /> Horario
+                      <CalendarClock size={13} /> {t('team.schedule')}
                     </Button>
                   ) : (
                     <Button size="sm" variant="ghost" onClick={() => setHoursFor(member)}>
-                      Ver horario
+                      {t('team.viewSchedule')}
                     </Button>
                   )}
                   {isOwner || member.id === user?.id ? (
@@ -216,7 +223,7 @@ export function TeamPage() {
                       variant="secondary"
                       onClick={() => setTimeOffFor(member)}
                     >
-                      <CalendarOff size={13} /> Bloqueos
+                      <CalendarOff size={13} /> {t('team.timeOff')}
                     </Button>
                   ) : null}
                 </div>
@@ -227,18 +234,9 @@ export function TeamPage() {
       )}
 
       <div className="mt-5 grid gap-3 sm:grid-cols-3">
-        <InfoCard
-          title="Cada quien su horario"
-          text="Ajusta los días y horas de cada profesional. La agenda solo ofrecerá horarios reales."
-        />
-        <InfoCard
-          title="Comisiones claras"
-          text="Configura el porcentaje de cada persona y revísalo en los reportes del periodo."
-        />
-        <InfoCard
-          title="Acceso propio"
-          text="Cada profesional puede entrar con su correo para ver su agenda, sin tocar la configuración."
-        />
+        <InfoCard title={t('team.info1Title')} text={t('team.info1Text')} />
+        <InfoCard title={t('team.info2Title')} text={t('team.info2Text')} />
+        <InfoCard title={t('team.info3Title')} text={t('team.info3Text')} />
       </div>
 
       <StaffFormModal
@@ -261,22 +259,29 @@ export function TeamPage() {
 
 function InfoCard({ title, text }: { title: string; text: string }) {
   return (
-    <div className="rounded-3xl border border-dashed border-line bg-white/40 p-4">
-      <p className="text-[12px] font-bold text-ink">{title}</p>
+    <div className="rounded-3xl border border-dashed border-border bg-surface/40 p-4">
+      <p className="text-[12px] font-bold text-licorice">{title}</p>
       <p className="mt-1 text-[11.5px] leading-relaxed text-muted">{text}</p>
     </div>
   )
 }
 
-function hoursSummary(hours: WorkingHour[]): string {
+function hoursSummary(
+  hours: WorkingHour[],
+  locale: string,
+  t: (key: string, vars?: Record<string, string | number>) => string,
+): string {
   const open = hours.filter((hour) => !hour.closed).sort((a, b) => a.weekday - b.weekday)
-  if (!open.length) return 'Sin horario'
+  if (!open.length) return t('team.noHours')
   const signatures = new Set(open.map((hour) => `${hour.start_minute}-${hour.end_minute}`))
   if (signatures.size === 1) {
     const first = open[0]
-    return `${open.map((hour) => WEEKDAYS_SHORT[hour.weekday]).join(' ')} ${minutesToTime(first.start_minute)}–${minutesToTime(first.end_minute)}`
+    const days = open
+      .map((hour) => weekdayNameByIndex(hour.weekday, locale, 'narrow'))
+      .join(' ')
+    return `${days} ${minutesToTime(first.start_minute)}–${minutesToTime(first.end_minute)}`
   }
-  return `${open.length} días con horario`
+  return t('team.daysWithHours', { n: open.length })
 }
 
 function StaffFormModal({
@@ -294,6 +299,7 @@ function StaffFormModal({
 }) {
   const queryClient = useQueryClient()
   const { toast } = useToast()
+  const { t } = usePreferences()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
@@ -322,7 +328,7 @@ function StaffFormModal({
   async function submit(event: React.FormEvent) {
     event.preventDefault()
     if (!member && password.length < 8) {
-      setError('La contraseña debe tener al menos 8 caracteres.')
+      setError(t('team.errorPassword'))
       return
     }
     setSaving(true)
@@ -355,10 +361,10 @@ function StaffFormModal({
         queryClient.invalidateQueries({ queryKey: ['staff-all'] }),
         queryClient.invalidateQueries({ queryKey: ['staff'] }),
       ])
-      toast(member ? 'Equipo actualizado' : 'Persona agregada al equipo')
+      toast(member ? t('team.savedEdit') : t('team.savedNew'))
       onClose()
     } catch (caught) {
-      setError(caught instanceof ApiError ? caught.message : 'No pudimos guardar los datos.')
+      setError(caught instanceof ApiError ? caught.message : t('team.saveError'))
     } finally {
       setSaving(false)
     }
@@ -368,30 +374,30 @@ function StaffFormModal({
     <Modal
       open={open}
       onClose={onClose}
-      title={member ? 'Editar persona' : 'Agregar al equipo'}
-      subtitle={member ? 'Datos, comisión y acceso.' : 'Crea su acceso para que vea su agenda.'}
+      title={member ? t('team.formTitleEdit') : t('team.formTitleNew')}
+      subtitle={member ? t('team.formSubtitleEdit') : t('team.formSubtitleNew')}
       footer={
         <div className="flex justify-end gap-2">
           <Button variant="ghost" onClick={onClose} disabled={saving}>
-            Cancelar
+            {t('team.cancel')}
           </Button>
           <Button variant="rose" type="submit" form="staff-form" loading={saving}>
-            {member ? 'Guardar cambios' : 'Agregar persona'}
+            {member ? t('team.saveChanges') : t('team.addPerson')}
           </Button>
         </div>
       }
     >
       <form id="staff-form" onSubmit={submit} className="space-y-4">
         <Input
-          label="Nombre completo"
+          label={t('team.nameLabel')}
           value={name}
           onChange={(event) => setName(event.target.value)}
-          placeholder="Ej. Ximena Ríos"
+          placeholder={t('team.namePlaceholder')}
           required
         />
         <div className="grid gap-3 sm:grid-cols-2">
           <Input
-            label="Correo de acceso"
+            label={t('team.emailLabel')}
             type="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
@@ -400,7 +406,7 @@ function StaffFormModal({
             required
           />
           <Input
-            label="WhatsApp"
+            label={t('team.phoneLabel')}
             value={phone}
             onChange={(event) => setPhone(event.target.value)}
             placeholder="55 1234 5678"
@@ -408,16 +414,18 @@ function StaffFormModal({
           />
         </div>
         <Input
-          label={member ? 'Nueva contraseña (opcional)' : 'Contraseña'}
+          label={member ? t('team.passwordEdit') : t('team.passwordNew')}
           type="password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
-          placeholder={member ? 'Solo si quieres cambiarla' : 'Mínimo 8 caracteres'}
+          placeholder={
+            member ? t('team.passwordPlaceholderEdit') : t('team.passwordPlaceholderNew')
+          }
           minLength={member ? undefined : 8}
         />
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
-            <p className="mb-1.5 text-[13px] font-semibold text-ink">Color en agenda</p>
+            <p className="mb-1.5 text-[13px] font-semibold text-licorice">{t('team.colorLabel')}</p>
             <div className="flex flex-wrap gap-1.5">
               {PALETTE.map((item) => (
                 <button
@@ -427,7 +435,7 @@ function StaffFormModal({
                   onClick={() => setColor(item)}
                   className={cn(
                     'h-7 w-7 rounded-full border-2 transition',
-                    color === item ? 'border-ink scale-110' : 'border-transparent',
+                    color === item ? 'border-licorice scale-110' : 'border-transparent',
                   )}
                   style={{ backgroundColor: item }}
                 />
@@ -435,37 +443,37 @@ function StaffFormModal({
             </div>
           </div>
           <Input
-            label="Comisión (%)"
+            label={t('team.commissionLabel')}
             type="number"
             min={0}
             max={100}
             step={1}
             value={commission}
             onChange={(event) => setCommission(event.target.value)}
-            hint="Sobre el servicio, sin propina"
+            hint={t('team.commissionHint')}
           />
         </div>
         <Textarea
-          label="Especialidad (opcional)"
+          label={t('team.specialtyLabel')}
           value={bio}
           onChange={(event) => setBio(event.target.value)}
-          placeholder="Color y balayage, uñas de gel…"
+          placeholder={t('team.specialtyPlaceholder')}
         />
         {member && isOwner && !isSelf ? (
-          <label className="flex cursor-pointer items-center gap-2 text-[12.5px] font-semibold text-ink">
+          <label className="flex cursor-pointer items-center gap-2 text-[12.5px] font-semibold text-licorice">
             <input
               type="checkbox"
               checked={active}
               onChange={(event) => setActive(event.target.checked)}
-              className="h-4 w-4 accent-[#C2415A]"
+              className="h-4 w-4 accent-[#9C5566]"
             />
-            Puede recibir citas nuevas
+            {t('team.canReceive')}
           </label>
         ) : null}
         {error ? (
           <div
             role="alert"
-            className="flex items-start gap-2 rounded-2xl border border-rose/20 bg-rose-soft px-3.5 py-2.5 text-[12.5px] font-medium text-rose-deep"
+            className="flex items-start gap-2 rounded-2xl border border-rose/20 bg-blush-soft px-3.5 py-2.5 text-[12.5px] font-medium text-blush-deep"
           >
             <CircleAlert size={15} className="mt-0.5 shrink-0" /> {error}
           </div>
@@ -488,6 +496,7 @@ function TimeOffModal({
 }) {
   const queryClient = useQueryClient()
   const { toast } = useToast()
+  const { t } = usePreferences()
   const today = todayKey(timezone)
   const tomorrow = addDaysKey(today, 1)
   const [startDate, setStartDate] = useState(tomorrow)
@@ -518,7 +527,7 @@ function TimeOffModal({
     event.preventDefault()
     if (!member) return
     if (endDate < startDate) {
-      setError('La fecha final no puede ser anterior a la inicial.')
+      setError(t('team.errorRange'))
       return
     }
     setSaving(true)
@@ -534,10 +543,10 @@ function TimeOffModal({
         queryClient.invalidateQueries({ queryKey: ['availability'] }),
         queryClient.invalidateQueries({ queryKey: ['agenda'] }),
       ])
-      toast('Agenda bloqueada. Ya no se ofrecerán esos horarios.')
+      toast(t('team.blockedToast'))
       setReason('')
     } catch (caught) {
-      setError(caught instanceof ApiError ? caught.message : 'No pudimos bloquear la agenda.')
+      setError(caught instanceof ApiError ? caught.message : t('team.blockError'))
     } finally {
       setSaving(false)
     }
@@ -554,9 +563,9 @@ function TimeOffModal({
         queryClient.invalidateQueries({ queryKey: ['availability'] }),
         queryClient.invalidateQueries({ queryKey: ['agenda'] }),
       ])
-      toast('Bloqueo eliminado')
+      toast(t('team.unblockedToast'))
     } catch (caught) {
-      setError(caught instanceof ApiError ? caught.message : 'No pudimos quitar el bloqueo.')
+      setError(caught instanceof ApiError ? caught.message : t('team.unblockError'))
     } finally {
       setDeleting(null)
     }
@@ -574,20 +583,20 @@ function TimeOffModal({
     <Modal
       open={open}
       onClose={onClose}
-      title={`Bloqueos de ${member?.name.split(' ')[0] ?? ''}`}
-      subtitle="Días que no estarán disponibles para agendar."
+      title={t('team.timeOffTitle', { name: member?.name.split(' ')[0] ?? '' })}
+      subtitle={t('team.timeOffSubtitle')}
       footer={
         <div className="flex justify-end">
           <Button variant="ghost" onClick={onClose} disabled={saving}>
-            Cerrar
+            {t('team.close')}
           </Button>
         </div>
       }
     >
-      <form onSubmit={submit} className="space-y-3 rounded-3xl border border-line bg-white p-4">
+      <form onSubmit={submit} className="space-y-3 rounded-3xl border border-border bg-surface p-4">
         <div className="grid grid-cols-2 gap-3">
           <Input
-            label="Desde"
+            label={t('team.from')}
             type="date"
             min={today}
             value={startDate}
@@ -597,7 +606,7 @@ function TimeOffModal({
             }}
           />
           <Input
-            label="Hasta"
+            label={t('team.to')}
             type="date"
             min={startDate}
             value={endDate}
@@ -605,26 +614,25 @@ function TimeOffModal({
           />
         </div>
         <Input
-          label="Motivo (opcional)"
-          placeholder="Vacaciones, curso, día personal…"
+          label={t('team.reasonLabel')}
+          placeholder={t('team.reasonPlaceholder')}
           value={reason}
           onChange={(event) => setReason(event.target.value)}
           maxLength={160}
         />
-        <p className="rounded-xl bg-gold-soft/70 px-3 py-2 text-[10.5px] leading-relaxed text-[#7A5A18]">
-          Si hay citas pendientes o confirmadas en el rango, primero muévelas o cancélalas.
-          La agenda dejará de ofrecer estos horarios automáticamente.
+        <p className="rounded-xl bg-champagne-soft/70 px-3 py-2 text-[10.5px] leading-relaxed text-champagne-deep">
+          {t('team.timeOffWarning')}
         </p>
         <div className="flex justify-end">
           <Button type="submit" variant="rose" size="sm" loading={saving}>
-            <CalendarOff size={14} /> Bloquear días
+            <CalendarOff size={14} /> {t('team.blockDays')}
           </Button>
         </div>
       </form>
 
       <div className="mt-4">
         <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-muted">
-          Próximos bloqueos
+          {t('team.upcomingBlocks')}
         </p>
         {query.isLoading ? (
           <div className="flex justify-center py-6 text-muted">
@@ -635,23 +643,23 @@ function TimeOffModal({
             {blocks.map((block) => (
               <div
                 key={block.id}
-                className="flex items-center gap-2 rounded-2xl border border-line bg-cream px-3 py-2.5"
+                className="flex items-center gap-2 rounded-2xl border border-border bg-alabaster px-3 py-2.5"
               >
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-sand text-muted">
                   <CalendarOff size={15} />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[12px] font-semibold text-ink">{rangeLabel(block)}</p>
+                  <p className="truncate text-[12px] font-semibold text-licorice">{rangeLabel(block)}</p>
                   <p className="truncate text-[10.5px] text-muted">
-                    {block.reason || 'Día bloqueado'}
+                    {block.reason || t('team.blockedDay')}
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => remove(block.id)}
                   disabled={deleting === block.id}
-                  aria-label="Quitar bloqueo"
-                  className="flex h-8 w-8 items-center justify-center rounded-full text-muted transition hover:bg-rose-soft hover:text-rose-deep disabled:opacity-40"
+                  aria-label={t('team.removeBlockAria')}
+                  className="flex h-8 w-8 items-center justify-center rounded-full text-muted transition hover:bg-blush-soft hover:text-blush-deep disabled:opacity-40"
                 >
                   {deleting === block.id ? <Spinner size={13} /> : <Trash2 size={14} />}
                 </button>
@@ -661,8 +669,8 @@ function TimeOffModal({
         ) : (
           <EmptyState
             icon={<CalendarOff size={19} />}
-            title="Sin bloqueos próximos"
-            description="La agenda está abierta según el horario habitual."
+            title={t('team.noBlocksTitle')}
+            description={t('team.noBlocksDesc')}
             className="rounded-2xl bg-sand/40 py-7"
           />
         )}
@@ -671,7 +679,7 @@ function TimeOffModal({
       {error ? (
         <div
           role="alert"
-          className="mt-3 flex items-start gap-2 rounded-2xl border border-rose/20 bg-rose-soft px-3.5 py-2.5 text-[12.5px] font-medium text-rose-deep"
+          className="mt-3 flex items-start gap-2 rounded-2xl border border-rose/20 bg-blush-soft px-3.5 py-2.5 text-[12.5px] font-medium text-blush-deep"
         >
           <CircleAlert size={15} className="mt-0.5 shrink-0" /> {error}
         </div>
@@ -693,12 +701,13 @@ function HoursModal({
 }) {
   const queryClient = useQueryClient()
   const { toast } = useToast()
+  const { t, locale } = usePreferences()
   const [rows, setRows] = useState<WorkingHour[]>([])
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const initial = useMemo(() => {
-    return WEEKDAYS.map((_, weekday) => {
+    return Array.from({ length: WEEKDAY_COUNT }, (_, weekday) => {
       const existing = member?.working_hours.find((hour) => hour.weekday === weekday)
       return (
         existing ?? {
@@ -728,7 +737,11 @@ function HoursModal({
     if (!member) return
     for (const row of rows) {
       if (!row.closed && row.end_minute <= row.start_minute) {
-        setError(`Revisa el horario del ${WEEKDAYS[row.weekday].toLowerCase()}.`)
+        setError(
+          t('team.errorDay', {
+            day: weekdayNameByIndex(row.weekday, locale, 'long').toLowerCase(),
+          }),
+        )
         return
       }
     }
@@ -741,10 +754,10 @@ function HoursModal({
         queryClient.invalidateQueries({ queryKey: ['staff'] }),
         queryClient.invalidateQueries({ queryKey: ['availability'] }),
       ])
-      toast('Horario actualizado')
+      toast(t('team.hoursSaved'))
       onClose()
     } catch (caught) {
-      setError(caught instanceof ApiError ? caught.message : 'No pudimos guardar el horario.')
+      setError(caught instanceof ApiError ? caught.message : t('team.hoursSaveError'))
     } finally {
       setSaving(false)
     }
@@ -754,16 +767,16 @@ function HoursModal({
     <Modal
       open={open}
       onClose={onClose}
-      title={`Horario de ${member?.name.split(' ')[0] ?? ''}`}
-      subtitle="Solo se ofrecerán citas dentro de estas horas."
+      title={t('team.hoursTitle', { name: member?.name.split(' ')[0] ?? '' })}
+      subtitle={t('team.hoursSubtitle')}
       footer={
         <div className="flex justify-end gap-2">
           <Button variant="ghost" onClick={onClose} disabled={saving}>
-            Cerrar
+            {t('team.close')}
           </Button>
           {isOwner ? (
             <Button variant="rose" onClick={save} loading={saving}>
-              Guardar horario
+              {t('team.saveHours')}
             </Button>
           ) : null}
         </div>
@@ -775,19 +788,21 @@ function HoursModal({
             key={row.weekday}
             className={cn(
               'flex flex-wrap items-center gap-2 rounded-2xl border px-3 py-2.5 sm:flex-nowrap',
-              row.closed ? 'border-line bg-sand/40' : 'border-line bg-white',
+              row.closed ? 'border-border bg-sand/40' : 'border-border bg-surface',
             )}
           >
-            <span className="w-20 text-[12px] font-semibold text-ink">{WEEKDAYS[row.weekday]}</span>
+            <span className="w-20 text-[12px] font-semibold text-licorice">
+              {weekdayNameByIndex(row.weekday, locale, 'long')}
+            </span>
             <label className="flex items-center gap-1.5 text-[11px] text-muted">
               <input
                 type="checkbox"
                 checked={!row.closed}
                 disabled={!isOwner}
                 onChange={(event) => update(index, { closed: !event.target.checked })}
-                className="h-3.5 w-3.5 accent-[#C2415A]"
+                className="h-3.5 w-3.5 accent-[#9C5566]"
               />
-              Abierto
+              {t('team.open')}
             </label>
             <div className="ml-auto flex items-center gap-1.5">
               <input
@@ -795,17 +810,21 @@ function HoursModal({
                 value={minutesToTime(row.start_minute)}
                 disabled={row.closed || !isOwner}
                 onChange={(event) => update(index, { start_minute: timeToMinutes(event.target.value) })}
-                className="h-8 rounded-xl border border-line bg-cream px-2 text-[11px] text-ink disabled:opacity-40"
-                aria-label={`Entrada ${WEEKDAYS[row.weekday]}`}
+                className="h-8 rounded-xl border border-border bg-alabaster px-2 text-[11px] text-licorice disabled:opacity-40"
+                aria-label={t('team.entryAria', {
+                  day: weekdayNameByIndex(row.weekday, locale, 'long'),
+                })}
               />
-              <span className="text-[10px] text-muted">a</span>
+              <span className="text-[10px] text-muted">{t('team.timeSeparator')}</span>
               <input
                 type="time"
                 value={minutesToTime(row.end_minute)}
                 disabled={row.closed || !isOwner}
                 onChange={(event) => update(index, { end_minute: timeToMinutes(event.target.value) })}
-                className="h-8 rounded-xl border border-line bg-cream px-2 text-[11px] text-ink disabled:opacity-40"
-                aria-label={`Salida ${WEEKDAYS[row.weekday]}`}
+                className="h-8 rounded-xl border border-border bg-alabaster px-2 text-[11px] text-licorice disabled:opacity-40"
+                aria-label={t('team.exitAria', {
+                  day: weekdayNameByIndex(row.weekday, locale, 'long'),
+                })}
               />
             </div>
           </div>
@@ -813,7 +832,7 @@ function HoursModal({
         {error ? (
           <div
             role="alert"
-            className="flex items-start gap-2 rounded-2xl border border-rose/20 bg-rose-soft px-3.5 py-2.5 text-[12.5px] font-medium text-rose-deep"
+            className="flex items-start gap-2 rounded-2xl border border-rose/20 bg-blush-soft px-3.5 py-2.5 text-[12.5px] font-medium text-blush-deep"
           >
             <CircleAlert size={15} className="mt-0.5 shrink-0" /> {error}
           </div>

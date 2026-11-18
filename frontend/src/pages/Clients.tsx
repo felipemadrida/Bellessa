@@ -12,10 +12,11 @@ import {
 } from 'lucide-react'
 import { api } from '../lib/api'
 import { useAuth } from '../lib/auth'
+import { usePreferences } from '../lib/preferences'
+import { vocabularyLabel, splitTags } from '../lib/vocabulary'
 import {
   cn,
   formatDateShort,
-  initials,
   nextBirthdayDays,
   phoneDisplay,
   todayKey,
@@ -25,7 +26,7 @@ import { PageHeader } from '../components/AppShell'
 import { ClientFormModal } from '../components/ClientFormModal'
 import { Avatar, Button, Card, EmptyState, Input, Skeleton } from '../components/ui'
 
-const CLIENT_COLORS = ['#C2415A', '#3E5C50', '#D9A441', '#8E5572', '#5C8374', '#B56576']
+const CLIENT_COLORS = ['#9C5566', '#4A6B5D', '#A8842C', '#7E3F4E', '#6B8A7D', '#C08A96']
 
 function clientColor(id: number): string {
   return CLIENT_COLORS[id % CLIENT_COLORS.length]
@@ -33,6 +34,7 @@ function clientColor(id: number): string {
 
 export function ClientsPage() {
   const { business } = useAuth()
+  const { t } = usePreferences()
   const timezone = business?.timezone ?? 'America/Mexico_City'
   const today = todayKey(timezone)
   const [params, setParams] = useSearchParams()
@@ -86,26 +88,26 @@ export function ClientsPage() {
   return (
     <div className="animate-fade-up">
       <PageHeader
-        eyebrow="Tu comunidad"
-        title="Clientas"
-        subtitle={`${clients.length} fichas · ${vipCount} VIP · ${birthdays} cumpleaños esta semana`}
+        eyebrow={t('page.clients.eyebrow')}
+        title={t('page.clients.title')}
+        subtitle={`${clients.length} ${t('page.clients.cards')} · ${vipCount} VIP · ${birthdays} ${t('page.clients.birthdays')}`}
         actions={
-          <Button variant="rose" onClick={openCreate}>
-            <UserPlus size={17} /> Nueva clienta
+          <Button variant="rose" onClick={openCreate} className="rounded-pill bg-licorice hover:bg-licorice/90">
+            <UserPlus size={17} /> {t('page.clients.newClient')}
           </Button>
         }
       />
 
       <div className="mb-4 grid gap-3 sm:grid-cols-[1fr_auto]">
         <Input
-          placeholder="Busca por nombre, WhatsApp o correo…"
+          placeholder={t('common.searchClientsPlaceholder')}
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           leading={<Search size={16} />}
-          aria-label="Buscar clientas"
+          aria-label={t('common.searchClients')}
         />
-        <div className="flex items-center gap-2 rounded-2xl border border-line bg-white px-3 py-2 text-[11px] text-muted">
-          <Users size={14} className="text-rose" />
+        <div className="flex items-center gap-2 rounded-pill border border-border bg-alabaster px-3 py-2 text-[11px] text-taupe">
+          <Users size={14} className="text-blush" />
           {filtered.length} de {clients.length}
         </div>
       </div>
@@ -116,13 +118,13 @@ export function ClientsPage() {
             type="button"
             onClick={() => setTag(null)}
             className={cn(
-              'shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-semibold transition',
+              'shrink-0 rounded-pill border px-3 py-1.5 text-[11px] font-semibold transition',
               tag === null
-                ? 'border-ink bg-ink text-cream'
-                : 'border-line bg-white text-muted hover:border-rose/30',
+                ? 'border-licorice bg-licorice text-alabaster'
+                : 'border-border bg-alabaster text-taupe hover:border-blush/30',
             )}
           >
-            Todas
+            {t('common.all')}
           </button>
           {tags.map((item) => (
             <button
@@ -130,13 +132,13 @@ export function ClientsPage() {
               type="button"
               onClick={() => setTag(tag === item ? null : item)}
               className={cn(
-                'shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-semibold transition',
+                'shrink-0 rounded-pill border px-3 py-1.5 text-[11px] font-semibold transition',
                 tag === item
-                  ? 'border-rose bg-rose-soft text-rose-deep'
-                  : 'border-line bg-white text-muted hover:border-rose/30',
+                  ? 'border-blush bg-blush-soft text-blush-deep'
+                  : 'border-border bg-alabaster text-taupe hover:border-blush/30',
               )}
             >
-              {item}
+              {vocabularyLabel(item, t)}
             </button>
           ))}
         </div>
@@ -145,19 +147,19 @@ export function ClientsPage() {
       {query.isLoading ? (
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {Array.from({ length: 6 }, (_, index) => (
-            <Skeleton key={index} className="h-36 rounded-3xl" />
+            <Skeleton key={index} className="h-36 rounded-card" />
           ))}
         </div>
       ) : query.isError ? (
-        <Card>
+        <Card className="shadow-boutique">
           <EmptyState
             icon={<CircleAlert size={22} />}
-            title="No pudimos cargar tus clientas"
-            action={<Button onClick={() => query.refetch()}>Reintentar</Button>}
+            title={t('page.clients.errorTitle')}
+            action={<Button onClick={() => query.refetch()}>{t('common.retry')}</Button>}
           />
         </Card>
       ) : filtered.length === 0 ? (
-        <Card>
+        <Card className="shadow-boutique">
           <EmptyState
             icon={<Users size={23} />}
             title={search || tag ? 'Sin coincidencias' : 'Tu primera clienta te espera'}
@@ -172,7 +174,7 @@ export function ClientsPage() {
                   Limpiar filtros
                 </Button>
               ) : (
-                <Button variant="rose" onClick={openCreate}>
+                <Button variant="rose" onClick={openCreate} className="rounded-pill bg-licorice hover:bg-licorice/90">
                   <UserPlus size={16} /> Agregar clienta
                 </Button>
               )
@@ -201,26 +203,24 @@ function ClientCard({
   timezone: string
   today: string
 }) {
-  const tags = (client.tags ?? '')
-    .split(',')
-    .map((tag) => tag.trim())
-    .filter(Boolean)
+  const { t } = usePreferences()
+  const tags = splitTags(client.tags)
   const birthdaySoon = client.birthday ? nextBirthdayDays(client.birthday, today) : null
   return (
     <Link
       to={`/clientas/${client.id}`}
-      className="group flex flex-col rounded-3xl border border-line bg-white/80 p-4 shadow-soft transition hover:-translate-y-0.5 hover:border-rose/30 hover:shadow-lift"
+      className="group flex flex-col rounded-card border border-border bg-alabaster/80 p-4 shadow-boutique transition hover:-translate-y-0.5 hover:border-blush/30 hover:shadow-lift"
     >
       <div className="flex items-start gap-3">
         <Avatar name={client.name} color={clientColor(client.id)} size="lg" />
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-2">
-            <p className="truncate font-display text-lg font-medium leading-tight text-ink">
+            <p className="truncate font-display text-lg font-medium leading-tight text-licorice">
               {client.name}
             </p>
             <ChevronRight
               size={16}
-              className="shrink-0 text-muted/40 transition group-hover:translate-x-0.5 group-hover:text-rose"
+              className="shrink-0 text-muted/40 transition group-hover:translate-x-0.5 group-hover:text-blush"
             />
           </div>
           <p className="mt-0.5 text-[12px] text-muted">{phoneDisplay(client.phone)}</p>
@@ -228,27 +228,27 @@ function ClientCard({
             {tags.slice(0, 3).map((item) => (
               <span
                 key={item}
-                className="rounded-full bg-sand px-2 py-0.5 text-[9.5px] font-bold uppercase tracking-wide text-muted"
+                className="rounded-full bg-champ px-2 py-0.5 text-[9.5px] font-bold uppercase tracking-wide text-muted"
               >
-                {item}
+                {vocabularyLabel(item, t)}
               </span>
             ))}
           </div>
         </div>
       </div>
 
-      <div className="mt-4 flex items-center justify-between border-t border-line/60 pt-3 text-[11px]">
+      <div className="mt-4 flex items-center justify-between border-t border-border/60 pt-3 text-[11px]">
         <span className="text-muted">
           {client.last_visit_at
             ? `Última visita · ${formatDateShort(client.last_visit_at, timezone)}`
             : 'Sin visitas registradas'}
         </span>
         {birthdaySoon !== null && birthdaySoon <= 7 ? (
-          <span className="inline-flex items-center gap-1 rounded-full bg-gold-soft px-2 py-1 font-semibold text-[#7A5A18]">
+          <span className="inline-flex items-center gap-1 rounded-full bg-champagne-soft px-2 py-1 font-semibold text-champagne-deep">
             <Cake size={11} /> Pronto
           </span>
         ) : (
-          <span className="inline-flex items-center gap-1 font-semibold text-sage">
+          <span className="inline-flex items-center gap-1 font-semibold text-taupe">
             <MessageCircle size={11} /> WhatsApp
           </span>
         )}

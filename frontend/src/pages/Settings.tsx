@@ -6,17 +6,20 @@ import {
   Building2,
   Check,
   Clock3,
+  Coins,
   Copy,
   Globe2,
+  Languages,
   LogOut,
+  Palette,
   Percent,
   ShieldCheck,
   Sparkles,
-  UserRound,
 } from 'lucide-react'
 import { api, ApiError } from '../lib/api'
 import { useAuth } from '../lib/auth'
-import { cn, formatDateShort, formatTime, money, parseMoney } from '../lib/format'
+import { cn, formatDateShort, formatTime, parseMoney, weekdayNameByIndex } from '../lib/format'
+import { usePreferences } from '../lib/preferences'
 import type { BusinessHour } from '../lib/types'
 import { PageHeader } from '../components/AppShell'
 import { useToast } from '../components/Toast'
@@ -26,11 +29,8 @@ import {
   Field,
   Input,
   SectionTitle,
-  Segmented,
-  Textarea,
+  Select,
 } from '../components/ui'
-
-const WEEKDAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
 
 const AUDIT_LABELS: Record<string, string> = {
   'sesion.iniciada': 'Inicio de sesión',
@@ -55,6 +55,7 @@ const AUDIT_LABELS: Record<string, string> = {
 
 export function SettingsPage() {
   const { user, business, refresh, signOut } = useAuth()
+  const { t, locale } = usePreferences()
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const isOwner = user?.role === 'owner'
@@ -81,8 +82,14 @@ export function SettingsPage() {
     monthly_goal: '',
   })
   const [hours, setHours] = useState<BusinessHour[]>([])
+  const [experience, setExperience] = useState({
+    currency: 'MXN',
+    locale: 'es-MX',
+    brand_color: '#9C5566',
+  })
   const [account, setAccount] = useState({ name: '', phone: '' })
   const [savingProfile, setSavingProfile] = useState(false)
+  const [savingExperience, setSavingExperience] = useState(false)
   const [savingBooking, setSavingBooking] = useState(false)
   const [savingHours, setSavingHours] = useState(false)
   const [savingAccount, setSavingAccount] = useState(false)
@@ -131,6 +138,11 @@ export function SettingsPage() {
         )
       }),
     )
+    setExperience({
+      currency: business.currency,
+      locale: business.locale,
+      brand_color: business.brand_color,
+    })
   }, [business])
 
   useEffect(() => {
@@ -151,11 +163,29 @@ export function SettingsPage() {
       })
       await refresh()
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
-      toast('Datos del salón guardados')
+      toast(t('settings.profileSaved'))
     } catch (caught) {
-      toast(caught instanceof ApiError ? caught.message : 'No pudimos guardar', 'error')
+      toast(caught instanceof ApiError ? caught.message : t('settings.saveError'), 'error')
     } finally {
       setSavingProfile(false)
+    }
+  }
+
+  async function saveExperience(event: React.FormEvent) {
+    event.preventDefault()
+    setSavingExperience(true)
+    try {
+      await api.business.update({
+        currency: experience.currency,
+        locale: experience.locale,
+        brand_color: experience.brand_color,
+      })
+      await refresh()
+      toast(t('settings.experienceSaved'))
+    } catch (caught) {
+      toast(caught instanceof ApiError ? caught.message : t('settings.saveError'), 'error')
+    } finally {
+      setSavingExperience(false)
     }
   }
 
@@ -172,9 +202,9 @@ export function SettingsPage() {
         monthly_goal_cents: parseMoney(booking.monthly_goal),
       })
       await refresh()
-      toast('Reglas de reserva actualizadas')
+      toast(t('settings.rulesSaved'))
     } catch (caught) {
-      toast(caught instanceof ApiError ? caught.message : 'No pudimos guardar', 'error')
+      toast(caught instanceof ApiError ? caught.message : t('settings.saveError'), 'error')
     } finally {
       setSavingBooking(false)
     }
@@ -186,9 +216,9 @@ export function SettingsPage() {
       await api.business.updateHours(hours)
       await refresh()
       queryClient.invalidateQueries({ queryKey: ['availability'] })
-      toast('Horario del salón actualizado')
+      toast(t('team.hoursSaved'))
     } catch (caught) {
-      toast(caught instanceof ApiError ? caught.message : 'No pudimos guardar el horario', 'error')
+      toast(caught instanceof ApiError ? caught.message : t('team.hoursSaveError'), 'error')
     } finally {
       setSavingHours(false)
     }
@@ -200,9 +230,9 @@ export function SettingsPage() {
     try {
       await api.auth.updateMe(account)
       await refresh()
-      toast('Tu cuenta está actualizada')
+      toast(t('settings.accountSaved'))
     } catch (caught) {
-      toast(caught instanceof ApiError ? caught.message : 'No pudimos guardar', 'error')
+      toast(caught instanceof ApiError ? caught.message : t('settings.saveError'), 'error')
     } finally {
       setSavingAccount(false)
     }
@@ -212,10 +242,10 @@ export function SettingsPage() {
     try {
       await navigator.clipboard.writeText(publicUrl)
       setCopied(true)
-      toast('Link copiado')
+      toast(t('settings.linkCopied'))
       window.setTimeout(() => setCopied(false), 2000)
     } catch {
-      toast('No pudimos copiar el link', 'error')
+      toast(t('settings.linkCopyError'), 'error')
     }
   }
 
@@ -224,32 +254,32 @@ export function SettingsPage() {
   return (
     <div className="animate-fade-up">
       <PageHeader
-        eyebrow="Tu negocio"
-        title="Ajustes"
-        subtitle={`${business.name} · ${isOwner ? 'Vista de dueña' : 'Vista de equipo'}`}
+        eyebrow={t('settings.eyebrow')}
+        title={t('settings.title')}
+        subtitle={`${business.name} · ${isOwner ? t('settings.viewOwner') : t('settings.viewStaff')}`}
       />
 
       <div className="grid gap-5 lg:grid-cols-[1.5fr_1fr]">
         <div className="space-y-5">
           <Card className="p-4 sm:p-5">
             <SectionTitle
-              title="Perfil del salón"
-              subtitle="Así te ven tus clientas y cómo apareces en los recibos."
+              title={t('settings.profileTitle')}
+              subtitle={t('settings.profileSubtitle')}
             />
             <form onSubmit={saveProfile} className="space-y-4">
               <div className="grid gap-3 sm:grid-cols-2">
                 <Input
-                  label="Nombre comercial"
+                  label={t('settings.nameLabel')}
                   value={profile.name}
                   onChange={(event) => setProfile({ ...profile, name: event.target.value })}
                   disabled={!isOwner}
                 />
                 <Input
-                  label="Razón social"
+                  label={t('settings.legalName')}
                   value={profile.legal_name}
                   onChange={(event) => setProfile({ ...profile, legal_name: event.target.value })}
                   disabled={!isOwner}
-                  placeholder="Para tu recibo"
+                  placeholder={t('settings.legalNamePlaceholder')}
                 />
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
@@ -260,10 +290,10 @@ export function SettingsPage() {
                   maxLength={13}
                   disabled={!isOwner}
                   placeholder="XAXX010101000"
-                  hint="Datos fiscales para CFDI 4.0"
+                  hint={t('settings.rfcHint')}
                 />
                 <Input
-                  label="Instagram"
+                  label={t('settings.instagram')}
                   value={profile.instagram}
                   onChange={(event) => setProfile({ ...profile, instagram: event.target.value })}
                   disabled={!isOwner}
@@ -272,14 +302,14 @@ export function SettingsPage() {
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
                 <Input
-                  label="Teléfono"
+                  label={t('settings.phone')}
                   value={profile.phone}
                   onChange={(event) => setProfile({ ...profile, phone: event.target.value })}
                   disabled={!isOwner}
                   inputMode="tel"
                 />
                 <Input
-                  label="WhatsApp"
+                  label={t('settings.whatsapp')}
                   value={profile.whatsapp}
                   onChange={(event) => setProfile({ ...profile, whatsapp: event.target.value })}
                   disabled={!isOwner}
@@ -287,34 +317,34 @@ export function SettingsPage() {
                 />
               </div>
               <Input
-                label="Correo del salón"
+                label={t('settings.email')}
                 type="email"
                 value={profile.email}
                 onChange={(event) => setProfile({ ...profile, email: event.target.value })}
                 disabled={!isOwner}
               />
               <Input
-                label="Dirección"
+                label={t('settings.address')}
                 value={profile.address}
                 onChange={(event) => setProfile({ ...profile, address: event.target.value })}
                 disabled={!isOwner}
-                placeholder="Calle y número"
+                placeholder={t('settings.addressPlaceholder')}
               />
               <div className="grid gap-3 sm:grid-cols-3">
                 <Input
-                  label="Colonia"
+                  label={t('settings.neighborhood')}
                   value={profile.neighborhood}
                   onChange={(event) => setProfile({ ...profile, neighborhood: event.target.value })}
                   disabled={!isOwner}
                 />
                 <Input
-                  label="Ciudad"
+                  label={t('settings.city')}
                   value={profile.city}
                   onChange={(event) => setProfile({ ...profile, city: event.target.value })}
                   disabled={!isOwner}
                 />
                 <Input
-                  label="Estado"
+                  label={t('settings.state')}
                   value={profile.state}
                   onChange={(event) => setProfile({ ...profile, state: event.target.value })}
                   disabled={!isOwner}
@@ -323,7 +353,7 @@ export function SettingsPage() {
               {isOwner ? (
                 <div className="flex justify-end">
                   <Button type="submit" variant="rose" loading={savingProfile}>
-                    Guardar perfil
+                    {t('settings.saveProfile')}
                   </Button>
                 </div>
               ) : null}
@@ -332,31 +362,110 @@ export function SettingsPage() {
 
           <Card className="p-4 sm:p-5">
             <SectionTitle
-              title="Reservas y anticipos"
-              subtitle="Reglas claras para cuidar tu tiempo y tu agenda."
+              title={t('settings.expTitle')}
+              subtitle={t('settings.expSubtitle')}
+            />
+            <form onSubmit={saveExperience} className="space-y-4">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Field label={t('settings.currency')} hint={t('settings.currencyHint')} htmlFor="settings-currency">
+                  <div className="relative">
+                    <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-muted">
+                      <Coins size={16} />
+                    </span>
+                    <Select
+                      id="settings-currency"
+                      value={experience.currency}
+                      onChange={(event) => setExperience({ ...experience, currency: event.target.value })}
+                      disabled={!isOwner}
+                      className="pl-9"
+                    >
+                      <option value="MXN">{t('settings.currencyMxn')}</option>
+                      <option value="USD">{t('settings.currencyUsd')}</option>
+                    </Select>
+                  </div>
+                </Field>
+                <Field label={t('settings.locale')} hint={t('settings.localeHint')} htmlFor="settings-locale">
+                  <div className="relative">
+                    <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-muted">
+                      <Languages size={16} />
+                    </span>
+                    <Select
+                      id="settings-locale"
+                      value={experience.locale}
+                      onChange={(event) => setExperience({ ...experience, locale: event.target.value })}
+                      disabled={!isOwner}
+                      className="pl-9"
+                    >
+                      <option value="es-MX">{t('settings.localeEs')}</option>
+                      <option value="en-US">{t('settings.localeEn')}</option>
+                    </Select>
+                  </div>
+                </Field>
+              </div>
+              <Field
+                label={t('settings.accent')}
+                hint={t('settings.accentHint')}
+                htmlFor="settings-color"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="pointer-events-none flex h-11 w-11 items-center justify-center rounded-2xl border border-border bg-surface text-muted">
+                    <Palette size={18} />
+                  </span>
+                  <input
+                    type="color"
+                    aria-label={t('settings.pickColorAria')}
+                    value={experience.brand_color}
+                    onChange={(event) => setExperience({ ...experience, brand_color: event.target.value })}
+                    disabled={!isOwner}
+                    className="h-11 w-16 cursor-pointer rounded-xl border border-border bg-surface p-1"
+                  />
+                  <Input
+                    id="settings-color"
+                    aria-label={t('settings.colorCodeAria')}
+                    value={experience.brand_color}
+                    onChange={(event) => setExperience({ ...experience, brand_color: event.target.value })}
+                    disabled={!isOwner}
+                    maxLength={7}
+                    placeholder="#9C5566"
+                    className="max-w-[140px] font-mono uppercase"
+                  />
+                </div>
+              </Field>
+              {isOwner ? (
+                <div className="flex justify-end">
+                  <Button type="submit" variant="rose" loading={savingExperience}>
+                    {t('settings.saveExperience')}
+                  </Button>
+                </div>
+              ) : null}
+            </form>
+          </Card>
+
+          <Card className="p-4 sm:p-5">
+            <SectionTitle
+              title={t('settings.bookingTitle')}
+              subtitle={t('settings.bookingSubtitle')}
             />
             {isOwner ? (
               <form onSubmit={saveBooking} className="space-y-4">
-                <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-line bg-white px-3.5 py-3">
+                <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-border bg-surface px-3.5 py-3">
                   <input
                     type="checkbox"
                     checked={booking.require_deposit}
                     onChange={(event) =>
                       setBooking({ ...booking, require_deposit: event.target.checked })
                     }
-                    className="mt-0.5 h-4 w-4 accent-[#C2415A]"
+                    className="mt-0.5 h-4 w-4 accent-[#9C5566]"
                   />
                   <span className="text-[12px] leading-snug">
-                    <span className="font-semibold text-ink">Pedir anticipo para reservar</span>
+                    <span className="font-semibold text-licorice">{t('settings.requireDeposit')}</span>
                     <br />
-                    <span className="text-muted">
-                      Se muestra el monto sugerido y el link de WhatsApp para acordarlo.
-                    </span>
+                    <span className="text-muted">{t('settings.requireDepositHint')}</span>
                   </span>
                 </label>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <Input
-                    label="Anticipo (%)"
+                    label={t('settings.depositPercent')}
                     type="number"
                     min={0}
                     max={100}
@@ -367,7 +476,7 @@ export function SettingsPage() {
                     disabled={!booking.require_deposit}
                   />
                   <Input
-                    label="Cancelación sin cargo (horas)"
+                    label={t('settings.cancellationHours')}
                     type="number"
                     min={0}
                     value={booking.cancellation_hours}
@@ -376,7 +485,7 @@ export function SettingsPage() {
                     }
                   />
                   <Input
-                    label="Aviso mínimo para agendar (min)"
+                    label={t('settings.minNotice')}
                     type="number"
                     min={0}
                     value={booking.min_notice_minutes}
@@ -385,7 +494,7 @@ export function SettingsPage() {
                     }
                   />
                   <Input
-                    label="Reservas a futuro (días)"
+                    label={t('settings.windowDays')}
                     type="number"
                     min={1}
                     value={booking.booking_window_days}
@@ -395,34 +504,34 @@ export function SettingsPage() {
                   />
                 </div>
                 <Input
-                  label="Meta mensual de ingresos"
+                  label={t('settings.monthlyGoal')}
                   leading="$"
                   inputMode="decimal"
                   value={booking.monthly_goal}
                   onChange={(event) => setBooking({ ...booking, monthly_goal: event.target.value })}
-                  hint="Se usa en el anillo de tu dashboard"
+                  hint={t('settings.monthlyGoalHint')}
                 />
                 <div className="flex justify-end">
                   <Button type="submit" variant="rose" loading={savingBooking}>
-                    Guardar reglas
+                    {t('settings.saveRules')}
                   </Button>
                 </div>
               </form>
             ) : (
               <p className="rounded-2xl bg-sand/40 px-4 py-5 text-center text-xs text-muted">
-                Solo la persona dueña puede editar las reglas de reserva.
+                {t('settings.ownerOnlyRules')}
               </p>
             )}
           </Card>
 
           <Card className="p-4 sm:p-5">
             <SectionTitle
-              title="Horario del salón"
-              subtitle="La agenda y las reservas solo usarán estas horas."
+              title={t('settings.hoursTitle')}
+              subtitle={t('settings.hoursSubtitle')}
               action={
                 isOwner ? (
                   <Button size="sm" variant="secondary" onClick={saveHours} loading={savingHours}>
-                    Guardar horario
+                    {t('settings.saveHours')}
                   </Button>
                 ) : null
               }
@@ -433,11 +542,11 @@ export function SettingsPage() {
                   key={row.weekday}
                   className={cn(
                     'flex flex-wrap items-center gap-2 rounded-2xl border px-3 py-2.5',
-                    row.closed ? 'border-line bg-sand/40' : 'border-line bg-white',
+                    row.closed ? 'border-border bg-sand/40' : 'border-border bg-surface',
                   )}
                 >
-                  <span className="w-20 text-[12px] font-semibold text-ink">
-                    {WEEKDAYS[row.weekday]}
+                  <span className="w-20 text-[12px] font-semibold text-licorice">
+                    {weekdayNameByIndex(row.weekday, locale, 'long')}
                   </span>
                   <label className="flex items-center gap-1.5 text-[11px] text-muted">
                     <input
@@ -451,9 +560,9 @@ export function SettingsPage() {
                           ),
                         )
                       }
-                      className="h-3.5 w-3.5 accent-[#C2415A]"
+                      className="h-3.5 w-3.5 accent-[#9C5566]"
                     />
-                    Abierto
+                    {t('settings.open')}
                   </label>
                   <div className="ml-auto flex items-center gap-1.5">
                     <input
@@ -469,10 +578,12 @@ export function SettingsPage() {
                           ),
                         )
                       }
-                      className="h-8 rounded-xl border border-line bg-cream px-2 text-[11px] disabled:opacity-40"
-                      aria-label={`Apertura ${WEEKDAYS[row.weekday]}`}
+                      className="h-8 rounded-xl border border-border bg-alabaster px-2 text-[11px] disabled:opacity-40"
+                      aria-label={t('settings.openAria', {
+                        day: weekdayNameByIndex(row.weekday, locale, 'long'),
+                      })}
                     />
-                    <span className="text-[10px] text-muted">a</span>
+                    <span className="text-[10px] text-muted">{t('settings.timeSeparator')}</span>
                     <input
                       type="time"
                       value={minutesToTime(row.close_minute)}
@@ -486,8 +597,10 @@ export function SettingsPage() {
                           ),
                         )
                       }
-                      className="h-8 rounded-xl border border-line bg-cream px-2 text-[11px] disabled:opacity-40"
-                      aria-label={`Cierre ${WEEKDAYS[row.weekday]}`}
+                      className="h-8 rounded-xl border border-border bg-alabaster px-2 text-[11px] disabled:opacity-40"
+                      aria-label={t('settings.closeAria', {
+                        day: weekdayNameByIndex(row.weekday, locale, 'long'),
+                      })}
                     />
                   </div>
                 </div>
@@ -499,59 +612,56 @@ export function SettingsPage() {
         <div className="space-y-4">
           <Card className="overflow-hidden">
             <div className="bg-gradient-to-br from-rose-soft to-cream px-4 py-4">
-              <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] text-rose-deep">
-                <Globe2 size={13} /> Tu página pública
+              <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] text-blush-deep">
+                <Globe2 size={13} /> {t('settings.publicTitle')}
               </p>
-              <p className="mt-2 font-display text-[22px] font-medium leading-tight text-ink">
-                Reservas en línea, sin mensajes a medianoche.
+              <p className="mt-2 font-display text-[22px] font-medium leading-tight text-licorice">
+                {t('settings.publicClaim')}
               </p>
             </div>
             <div className="space-y-3 p-4">
-              <div className="flex items-center gap-2 rounded-xl border border-line bg-cream px-3 py-2.5">
+              <div className="flex items-center gap-2 rounded-xl border border-border bg-alabaster px-3 py-2.5">
                 <span className="min-w-0 flex-1 truncate font-mono text-[10.5px] text-muted">
                   {publicUrl}
                 </span>
                 <button
                   type="button"
                   onClick={copyLink}
-                  aria-label="Copiar link"
-                  className="flex h-7 w-7 items-center justify-center rounded-lg bg-white text-muted transition hover:text-ink"
+                  aria-label={t('settings.copyLinkAria')}
+                  className="flex h-7 w-7 items-center justify-center rounded-lg bg-surface text-muted transition hover:text-licorice"
                 >
                   {copied ? <Check size={14} className="text-sage" /> : <Copy size={14} />}
                 </button>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <Button variant="secondary" size="sm" onClick={copyLink}>
-                  <Copy size={14} /> Copiar
+                  <Copy size={14} /> {t('settings.copy')}
                 </Button>
                 <a href={`/reservar/${business.slug}`} target="_blank" rel="noreferrer">
                   <Button variant="rose" size="sm" className="w-full">
-                    <ArrowUpRight size={14} /> Abrir
+                    <ArrowUpRight size={14} /> {t('settings.openBtn')}
                   </Button>
                 </a>
               </div>
-              <p className="text-[10.5px] leading-relaxed text-muted">
-                Compártelo en Instagram, Google Maps y tu link de WhatsApp. Tus clientas eligen
-                servicio, día y hora; tú solo confirmas.
-              </p>
+              <p className="text-[10.5px] leading-relaxed text-muted">{t('settings.publicHint')}</p>
             </div>
           </Card>
 
           <Card className="p-4 sm:p-5">
-            <SectionTitle title="Modo México" subtitle="Hecho para operar aquí." />
+            <SectionTitle title={t('settings.mexicoTitle')} subtitle={t('settings.mexicoSubtitle')} />
             <div className="space-y-3">
               {[
-                { icon: Percent, title: 'IVA incluido', text: 'Precios finales con 16% y desglose en recibos.' },
-                { icon: ShieldCheck, title: 'RFC y CFDI 4.0', text: 'Datos fiscales listos; recibo interno descargable.' },
-                { icon: Sparkles, title: 'WhatsApp +52', text: 'Links wa.me con formato mexicano y plantillas.' },
-                { icon: Clock3, title: 'Hora de CDMX', text: 'Zona America/Mexico_City, sin importar dónde estés.' },
+                { icon: Percent, title: t('settings.mexicoVat'), text: t('settings.mexicoVatText') },
+                { icon: ShieldCheck, title: t('settings.mexicoRfc'), text: t('settings.mexicoRfcText') },
+                { icon: Sparkles, title: t('settings.mexicoWa'), text: t('settings.mexicoWaText') },
+                { icon: Clock3, title: t('settings.mexicoTz'), text: t('settings.mexicoTzText') },
               ].map((item) => (
                 <div key={item.title} className="flex gap-2.5">
                   <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sage-soft text-sage">
                     <item.icon size={14} />
                   </span>
                   <div>
-                    <p className="text-[11.5px] font-bold text-ink">{item.title}</p>
+                    <p className="text-[11.5px] font-bold text-licorice">{item.title}</p>
                     <p className="text-[10.5px] leading-snug text-muted">{item.text}</p>
                   </div>
                 </div>
@@ -562,8 +672,8 @@ export function SettingsPage() {
           {isOwner ? (
             <Card className="p-4 sm:p-5">
               <SectionTitle
-                title="Actividad reciente"
-                subtitle="Quién hizo qué y cuándo, sin datos sensibles."
+                title={t('settings.auditTitle')}
+                subtitle={t('settings.auditSubtitle')}
                 action={
                   <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-sand text-muted">
                     <Activity size={15} />
@@ -582,8 +692,10 @@ export function SettingsPage() {
                     <div key={entry.id} className="flex items-start gap-2.5">
                       <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-rose" />
                       <div className="min-w-0 flex-1">
-                        <p className="text-[11.5px] font-semibold leading-snug text-ink">
-                          {AUDIT_LABELS[entry.action] ?? entry.action}
+                        <p className="text-[11.5px] font-semibold leading-snug text-licorice">
+                          {AUDIT_LABELS[entry.action]
+                            ? t(`audit.${entry.action}`)
+                            : entry.action}
                         </p>
                         <p className="truncate text-[10px] text-muted">
                           {entry.detail ?? entry.entity_type}
@@ -599,53 +711,53 @@ export function SettingsPage() {
                 </div>
               ) : (
                 <p className="rounded-2xl bg-sand/40 px-3 py-4 text-center text-[11px] text-muted">
-                  La actividad aparecerá aquí en cuanto el equipo empiece a operar.
+                  {t('settings.auditEmpty')}
                 </p>
               )}
             </Card>
           ) : null}
 
           <Card className="p-4 sm:p-5">
-            <SectionTitle title="Tu cuenta" />
+            <SectionTitle title={t('settings.accountTitle')} />
             <form onSubmit={saveAccount} className="space-y-3">
               <Input
-                label="Nombre"
+                label={t('settings.accountName')}
                 value={account.name}
                 onChange={(event) => setAccount({ ...account, name: event.target.value })}
               />
               <Input
-                label="WhatsApp personal"
+                label={t('settings.accountPhone')}
                 value={account.phone}
                 onChange={(event) => setAccount({ ...account, phone: event.target.value })}
                 inputMode="tel"
               />
-              <Input label="Correo" value={user.email} disabled />
+              <Input label={t('settings.accountEmail')} value={user.email} disabled />
               <div className="flex items-center justify-between gap-2">
                 <span className="rounded-full bg-sand px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-muted">
-                  {isOwner ? 'Dueña' : 'Equipo'}
+                  {isOwner ? t('settings.roleOwner') : t('settings.roleStaff')}
                 </span>
                 <Button type="submit" size="sm" variant="secondary" loading={savingAccount}>
-                  Guardar
+                  {t('settings.save')}
                 </Button>
               </div>
             </form>
-            <div className="mt-4 border-t border-line/60 pt-3">
-              <Button variant="ghost" size="sm" className="w-full text-rose-deep" onClick={signOut}>
-                <LogOut size={14} /> Cerrar sesión
+            <div className="mt-4 border-t border-border/60 pt-3">
+              <Button variant="ghost" size="sm" className="w-full text-blush-deep" onClick={signOut}>
+                <LogOut size={14} /> {t('settings.signOut')}
               </Button>
             </div>
           </Card>
 
-          <div className="rounded-3xl border border-dashed border-line bg-white/40 p-4">
-            <p className="flex items-center gap-2 text-[11px] font-bold text-ink">
+          <div className="rounded-3xl border border-dashed border-border bg-surface/40 p-4">
+            <p className="flex items-center gap-2 text-[11px] font-bold text-licorice">
               <Building2 size={14} className="text-rose" /> {business.name}
             </p>
             <p className="mt-1 text-[10.5px] leading-relaxed text-muted">
-              {business.address ?? 'Sin dirección'} · {business.neighborhood ?? ''}{' '}
+              {business.address ?? t('settings.noAddress')} · {business.neighborhood ?? ''}{' '}
               {business.city ?? ''}
             </p>
             <p className="mt-2 text-[10px] text-muted/70">
-              Plan Bellessa · Datos en tu propia nube · Precios en {business.currency}
+              {t('settings.planLine', { currency: business.currency })}
             </p>
           </div>
         </div>

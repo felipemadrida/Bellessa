@@ -15,19 +15,19 @@ import {
 } from 'lucide-react'
 import { api, ApiError } from '../lib/api'
 import { useAuth } from '../lib/auth'
+import { usePreferences } from '../lib/preferences'
 import {
   addDaysKey,
   cn,
   dayNumber,
   formatDuration,
   formatTime,
-  initials,
   money,
   monthShort,
   todayKey,
   weekdayShort,
 } from '../lib/format'
-import type { Appointment, AvailabilitySlot, Client, Service, Staff } from '../lib/types'
+import type { Appointment, AvailabilitySlot, Client, Service } from '../lib/types'
 import { useToast } from './Toast'
 import {
   Avatar,
@@ -49,7 +49,7 @@ interface Props {
   onCreated?: (appointment: Appointment) => void
 }
 
-const STEPS = ['Servicio', 'Horario', 'Clienta']
+const STEPS = ['nap.stepService', 'nap.stepTime', 'nap.stepClient']
 
 export function NewAppointmentModal({
   open,
@@ -60,6 +60,7 @@ export function NewAppointmentModal({
   onCreated,
 }: Props) {
   const { business } = useAuth()
+  const { t } = usePreferences()
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
@@ -154,7 +155,7 @@ export function NewAppointmentModal({
     setError(null)
     if (step === 0) {
       if (!serviceId) {
-        setError('Elige el servicio que vas a realizar.')
+        setError(t('nap.errorService'))
         return
       }
       setStep(1)
@@ -162,7 +163,7 @@ export function NewAppointmentModal({
     }
     if (step === 1) {
       if (!slot) {
-        setError('Elige un horario disponible.')
+        setError(t('nap.errorSlot'))
         return
       }
       setStep(2)
@@ -178,11 +179,11 @@ export function NewAppointmentModal({
   async function submit() {
     if (!selectedService || !slot) return
     if (!selectedClient && !creatingClient) {
-      setError('Elige una clienta o crea una nueva.')
+      setError(t('nap.errorClient'))
       return
     }
     if (creatingClient && (!newClientName.trim() || newClientPhone.replace(/\D/g, '').length < 10)) {
-      setError('Escribe el nombre y un WhatsApp a 10 dígitos.')
+      setError(t('nap.errorNewClient'))
       return
     }
     setSaving(true)
@@ -211,11 +212,11 @@ export function NewAppointmentModal({
         queryClient.invalidateQueries({ queryKey: ['client'] }),
         queryClient.invalidateQueries({ queryKey: ['availability'] }),
       ])
-      toast('Cita agendada. Ya puedes mandar el recordatorio.')
+      toast(t('nap.created'))
       onCreated?.(appointment)
       onClose()
     } catch (caught) {
-      setError(caught instanceof ApiError ? caught.message : 'No pudimos crear la cita.')
+      setError(caught instanceof ApiError ? caught.message : t('nap.createError'))
     } finally {
       setSaving(false)
     }
@@ -225,16 +226,16 @@ export function NewAppointmentModal({
     <div className="flex items-center gap-2">
       <Button variant="ghost" onClick={goBack} disabled={saving}>
         <ArrowLeft size={16} />
-        {step === 0 ? 'Cancelar' : 'Atrás'}
+        {step === 0 ? t('nap.cancel') : t('nap.back')}
       </Button>
       <div className="flex-1" />
       {step < 2 ? (
         <Button variant="rose" onClick={goNext} disabled={saving}>
-          Continuar <ArrowRight size={16} />
+          {t('nap.continue')} <ArrowRight size={16} />
         </Button>
       ) : (
         <Button variant="rose" onClick={submit} loading={saving}>
-          <Check size={17} /> Confirmar cita
+          <Check size={17} /> {t('nap.confirm')}
         </Button>
       )}
     </div>
@@ -244,8 +245,8 @@ export function NewAppointmentModal({
     <Modal
       open={open}
       onClose={onClose}
-      title="Nueva cita"
-      subtitle={selectedService ? `${selectedService.name} · ${formatDuration(selectedService.duration_min)}` : 'Agenda en tres pasos'}
+      title={t('nap.title')}
+      subtitle={selectedService ? `${selectedService.name} · ${formatDuration(selectedService.duration_min)}` : t('nap.subtitleNew')}
       footer={footer}
       size="lg"
     >
@@ -259,7 +260,7 @@ export function NewAppointmentModal({
                 index < step
                   ? 'bg-sage text-white'
                   : index === step
-                    ? 'bg-ink text-cream'
+                    ? 'bg-licorice text-alabaster'
                     : 'bg-sand text-muted',
               )}
             >
@@ -268,12 +269,11 @@ export function NewAppointmentModal({
             <span
               className={cn(
                 'text-[11px] font-semibold',
-                index === step ? 'text-ink' : 'text-muted',
+                index === step ? 'text-licorice' : 'text-muted',
               )}
             >
-              {label}
-            </span>
-            {index < STEPS.length - 1 ? <span className="h-px flex-1 bg-line" /> : null}
+              {t(label)}
+            </span>            {index < STEPS.length - 1 ? <span className="h-px flex-1 bg-line" /> : null}
           </div>
         ))}
       </div>
@@ -281,7 +281,7 @@ export function NewAppointmentModal({
       {step === 0 ? (
         <div className="space-y-5">
           <div>
-            <p className="mb-2 text-[13px] font-semibold text-ink">¿Qué servicio va a llevar?</p>
+            <p className="mb-2 text-[13px] font-semibold text-licorice">{t('nap.serviceQuestion')}</p>
             {servicesQuery.isLoading ? (
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {[0, 1, 2, 3].map((item) => (
@@ -301,8 +301,8 @@ export function NewAppointmentModal({
                       className={cn(
                         'flex items-center gap-3 rounded-2xl border p-3 text-left transition',
                         active
-                          ? 'border-rose bg-rose-soft/60 shadow-soft'
-                          : 'border-line bg-white hover:border-rose/30',
+                          ? 'border-rose bg-blush-soft/60 shadow-boutique'
+                          : 'border-border bg-surface hover:border-rose/30',
                       )}
                     >
                       <span
@@ -310,7 +310,7 @@ export function NewAppointmentModal({
                         style={{ backgroundColor: service.color }}
                       />
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-[13px] font-bold text-ink">{service.name}</p>
+                        <p className="truncate text-[13px] font-bold text-licorice">{service.name}</p>
                         <p className="text-[11px] text-muted">
                           {formatDuration(service.duration_min)} · {money(service.price_cents)}
                         </p>
@@ -324,7 +324,7 @@ export function NewAppointmentModal({
           </div>
 
           <div>
-            <p className="mb-2 text-[13px] font-semibold text-ink">¿Quién la atiende?</p>
+            <p className="mb-2 text-[13px] font-semibold text-licorice">{t('nap.staffQuestion')}</p>
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
@@ -333,11 +333,11 @@ export function NewAppointmentModal({
                 className={cn(
                   'flex h-11 items-center gap-2 rounded-full border px-3 text-[12px] font-semibold transition',
                   staffId === null
-                    ? 'border-ink bg-ink text-cream'
-                    : 'border-line bg-white text-muted hover:border-rose/30',
+                    ? 'border-licorice bg-licorice text-alabaster'
+                    : 'border-border bg-surface text-muted hover:border-rose/30',
                 )}
               >
-                <Sparkles size={14} /> Cualquiera disponible
+                <Sparkles size={14} /> {t('nap.anyAvailable')}
               </button>
               {staff.map((member) => (
                 <button
@@ -348,8 +348,8 @@ export function NewAppointmentModal({
                   className={cn(
                     'flex h-11 items-center gap-2 rounded-full border px-3 text-[12px] font-semibold transition',
                     staffId === member.id
-                      ? 'border-ink bg-ink text-cream'
-                      : 'border-line bg-white text-muted hover:border-rose/30',
+                      ? 'border-licorice bg-licorice text-alabaster'
+                      : 'border-border bg-surface text-muted hover:border-rose/30',
                   )}
                 >
                   <Avatar name={member.name} color={member.color} size="xs" />
@@ -365,26 +365,26 @@ export function NewAppointmentModal({
         <div className="space-y-5">
           <div>
             <div className="mb-2 flex items-center justify-between">
-              <p className="text-[13px] font-semibold text-ink">Elige el día</p>
+              <p className="text-[13px] font-semibold text-licorice">{t('nap.pickDay')}</p>
               <div className="flex gap-1">
                 <button
                   type="button"
-                  aria-label="Días anteriores"
+                  aria-label={t('nap.prevDaysAria')}
                   onClick={() =>
                     setDate((value) => {
                       const next = addDaysKey(value, -7)
                       return next < today ? today : next
                     })
                   }
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-white text-muted"
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-surface text-muted"
                 >
                   <ChevronLeft size={15} />
                 </button>
                 <button
                   type="button"
-                  aria-label="Días siguientes"
+                  aria-label={t('nap.nextDaysAria')}
                   onClick={() => setDate((value) => addDaysKey(value, 7))}
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-white text-muted"
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-surface text-muted"
                 >
                   <ChevronRight size={15} />
                 </button>
@@ -405,8 +405,8 @@ export function NewAppointmentModal({
                     className={cn(
                       'flex h-[68px] w-[58px] shrink-0 flex-col items-center justify-center rounded-2xl border transition',
                       active
-                        ? 'border-ink bg-ink text-cream'
-                        : 'border-line bg-white text-muted hover:border-rose/30',
+                        ? 'border-licorice bg-licorice text-alabaster'
+                        : 'border-border bg-surface text-muted hover:border-rose/30',
                     )}
                   >
                     <span className="text-[9px] font-bold uppercase tracking-wider">
@@ -422,10 +422,12 @@ export function NewAppointmentModal({
 
           <div>
             <div className="mb-2 flex items-center gap-2">
-              <p className="flex-1 text-[13px] font-semibold text-ink">Horarios libres</p>
+              <p className="flex-1 text-[13px] font-semibold text-licorice">{t('nap.freeSlots')}</p>
               {availabilityQuery.isFetching ? <Spinner size={14} className="text-rose" /> : null}
               <span className="text-[11px] text-muted">
-                {selectedStaff ? `con ${selectedStaff.name.split(' ')[0]}` : 'cualquier profesional'}
+                {selectedStaff
+                  ? t('nap.withStaff', { name: selectedStaff.name.split(' ')[0] })
+                  : t('nap.anyPro')}
               </span>
             </div>
             {availabilityQuery.isLoading ? (
@@ -448,13 +450,13 @@ export function NewAppointmentModal({
                         'flex h-11 flex-col items-center justify-center rounded-xl border text-[12px] font-semibold transition',
                         active
                           ? 'border-rose bg-rose text-white'
-                          : 'border-line bg-white text-ink hover:border-rose/40',
+                          : 'border-border bg-surface text-licorice hover:border-rose/40',
                       )}
                     >
                       {group.label}
                       {group.items.length > 1 ? (
                         <span className={cn('text-[9px] font-medium', active ? 'text-white/70' : 'text-muted')}>
-                          {group.items.length} disponibles
+                          {t('nap.availableCount', { n: group.items.length })}
                         </span>
                       ) : null}
                     </button>
@@ -464,21 +466,21 @@ export function NewAppointmentModal({
             ) : (
               <EmptyState
                 icon={<CalendarDays size={20} />}
-                title="No hay horarios este día"
-                description="Prueba otro día o cambia de profesional."
+                title={t('nap.noSlotsTitle')}
+                description={t('nap.noSlotsDesc')}
                 className="rounded-2xl bg-sand/40 py-7"
               />
             )}
           </div>
 
           {selectedService && slot ? (
-            <div className="rounded-2xl border border-rose/15 bg-rose-soft/50 px-4 py-3">
+            <div className="rounded-2xl border border-rose/15 bg-blush-soft/50 px-4 py-3">
               <div className="flex items-center justify-between text-[13px]">
-                <span className="flex items-center gap-1.5 font-semibold text-rose-deep">
+                <span className="flex items-center gap-1.5 font-semibold text-blush-deep">
                   <Clock3 size={14} />
                   {weekdayShort(date)} {dayNumber(date)} · {formatTime(slot.start_at, timezone)}
                 </span>
-                <span className="money font-bold text-ink">{money(selectedService.price_cents)}</span>
+                <span className="money font-bold text-licorice">{money(selectedService.price_cents)}</span>
               </div>
               <p className="mt-1 text-[11px] text-muted">
                 {selectedService.name} con {slot.staff_name}
@@ -491,12 +493,12 @@ export function NewAppointmentModal({
       {step === 2 ? (
         <div className="space-y-5">
           <div>
-            <p className="mb-2 text-[13px] font-semibold text-ink">¿Para quién es la cita?</p>
+            <p className="mb-2 text-[13px] font-semibold text-licorice">{t('nap.clientQuestion')}</p>
             {selectedClient ? (
               <div className="flex items-center gap-3 rounded-2xl border border-sage/20 bg-sage-soft/50 p-3">
-                <Avatar name={selectedClient.name} color="#3E5C50" size="md" />
+                <Avatar name={selectedClient.name} color="#4A6B5D" size="md" />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[14px] font-bold text-ink">{selectedClient.name}</p>
+                  <p className="truncate text-[14px] font-bold text-licorice">{selectedClient.name}</p>
                   <p className="text-[11.5px] text-muted">{selectedClient.phone}</p>
                 </div>
                 <Button
@@ -505,30 +507,30 @@ export function NewAppointmentModal({
                   size="sm"
                   onClick={() => setSelectedClient(null)}
                 >
-                  Cambiar
+                  {t('nap.change')}
                 </Button>
               </div>
             ) : creatingClient ? (
-              <div className="space-y-3 rounded-2xl border border-line bg-white p-3">
+              <div className="space-y-3 rounded-2xl border border-border bg-surface p-3">
                 <div className="flex items-center justify-between">
-                  <p className="text-[12px] font-bold text-ink">Clienta nueva</p>
+                  <p className="text-[12px] font-bold text-licorice">{t('nap.newClient')}</p>
                   <button
                     type="button"
                     className="text-[11px] font-semibold text-rose"
                     onClick={() => setCreatingClient(false)}
                   >
-                    Buscar existente
+                    {t('nap.searchExisting')}
                   </button>
                 </div>
                 <Input
-                  label="Nombre completo"
+                  label={t('nap.fullName')}
                   value={newClientName}
                   onChange={(event) => setNewClientName(event.target.value)}
-                  placeholder="Ej. Fernanda Castillo"
+                  placeholder={t('nap.namePlaceholder')}
                   autoFocus
                 />
                 <Input
-                  label="WhatsApp"
+                  label={t('settings.whatsapp')}
                   value={newClientPhone}
                   onChange={(event) => setNewClientPhone(event.target.value)}
                   placeholder="55 1234 5678"
@@ -538,14 +540,14 @@ export function NewAppointmentModal({
             ) : (
               <>
                 <Input
-                  placeholder="Busca por nombre o teléfono…"
+                  placeholder={t('nap.searchPlaceholder')}
                   value={clientSearch}
                   onChange={(event) => setClientSearch(event.target.value)}
                   leading={<Search size={15} />}
-                  aria-label="Buscar clienta"
+                  aria-label={t('nap.searchAria')}
                 />
                 {clientSearch.trim().length >= 2 ? (
-                  <div className="mt-2 max-h-40 overflow-y-auto rounded-2xl border border-line bg-white">
+                  <div className="mt-2 max-h-40 overflow-y-auto rounded-2xl border border-border bg-surface">
                     {clientsQuery.isLoading ? (
                       <div className="space-y-1 p-2">
                         <Skeleton className="h-10" />
@@ -562,15 +564,15 @@ export function NewAppointmentModal({
                           }}
                           className="flex w-full items-center gap-2.5 px-3 py-2.5 text-left transition hover:bg-sand/50"
                         >
-                          <Avatar name={client.name} color="#C2415A" size="xs" />
+                          <Avatar name={client.name} color="#9C5566" size="xs" />
                           <div className="min-w-0 flex-1">
-                            <p className="truncate text-[12.5px] font-semibold text-ink">{client.name}</p>
+                            <p className="truncate text-[12.5px] font-semibold text-licorice">{client.name}</p>
                             <p className="text-[10.5px] text-muted">{client.phone}</p>
                           </div>
                         </button>
                       ))
                     ) : (
-                      <p className="px-3 py-4 text-center text-xs text-muted">Sin resultados.</p>
+                      <p className="px-3 py-4 text-center text-xs text-muted">{t('nap.noResults')}</p>
                     )}
                   </div>
                 ) : null}
@@ -583,47 +585,47 @@ export function NewAppointmentModal({
                   }}
                   className="mt-2 flex items-center gap-1.5 text-[12px] font-bold text-rose"
                 >
-                  <UserPlus size={14} /> Crear clienta nueva
+                  <UserPlus size={14} /> {t('nap.createNewClient')}
                 </button>
               </>
             )}
           </div>
 
           <Textarea
-            label="Notas para el equipo"
-            placeholder="Alergias, preferencias, referencias de color…"
+            label={t('nap.notesLabel')}
+            placeholder={t('nap.notesPlaceholder')}
             value={notes}
             onChange={(event) => setNotes(event.target.value)}
           />
 
           {selectedService && slot ? (
-            <div className="rounded-3xl border border-line bg-white p-4">
-              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted">Resumen</p>
+            <div className="rounded-3xl border border-border bg-surface p-4">
+              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted">{t('nap.summary')}</p>
               <div className="mt-3 space-y-2 text-[13px]">
                 <div className="flex justify-between gap-3">
-                  <span className="text-muted">Servicio</span>
-                  <span className="text-right font-semibold text-ink">{selectedService.name}</span>
+                  <span className="text-muted">{t('nap.service')}</span>
+                  <span className="text-right font-semibold text-licorice">{selectedService.name}</span>
                 </div>
                 <div className="flex justify-between gap-3">
-                  <span className="text-muted">Cuándo</span>
-                  <span className="text-right font-semibold text-ink">
+                  <span className="text-muted">{t('nap.when')}</span>
+                  <span className="text-right font-semibold text-licorice">
                     {weekdayShort(date)} {dayNumber(date)} · {formatTime(slot.start_at, timezone)}
                   </span>
                 </div>
                 <div className="flex justify-between gap-3">
-                  <span className="text-muted">Profesional</span>
-                  <span className="text-right font-semibold text-ink">{slot.staff_name}</span>
+                  <span className="text-muted">{t('nap.professional')}</span>
+                  <span className="text-right font-semibold text-licorice">{slot.staff_name}</span>
                 </div>
-                <div className="flex justify-between gap-3 border-t border-line/60 pt-2">
-                  <span className="font-semibold text-ink">Total</span>
-                  <span className="money font-display text-lg font-medium text-ink">
+                <div className="flex justify-between gap-3 border-t border-border/60 pt-2">
+                  <span className="font-semibold text-licorice">{t('nap.total')}</span>
+                  <span className="money font-display text-lg font-medium text-licorice">
                     {money(selectedService.price_cents)}
                   </span>
                 </div>
               </div>
               {selectedService.deposit_cents > 0 ? (
-                <p className="mt-2 rounded-xl bg-gold-soft px-3 py-2 text-[11px] text-[#7A5A18]">
-                  Sugerido pedir anticipo de {money(selectedService.deposit_cents)}.
+                <p className="mt-2 rounded-xl bg-champagne-soft px-3 py-2 text-[11px] text-champagne-deep">
+                  {t('nap.depositHint', { amount: money(selectedService.deposit_cents) })}
                 </p>
               ) : null}
             </div>
@@ -634,7 +636,7 @@ export function NewAppointmentModal({
       {error ? (
         <div
           role="alert"
-          className="mt-4 flex items-start gap-2 rounded-2xl border border-rose/20 bg-rose-soft px-3.5 py-2.5 text-[12.5px] font-medium text-rose-deep"
+          className="mt-4 flex items-start gap-2 rounded-2xl border border-rose/20 bg-blush-soft px-3.5 py-2.5 text-[12.5px] font-medium text-blush-deep"
         >
           <CircleAlert size={15} className="mt-0.5 shrink-0" />
           {error}

@@ -4,96 +4,339 @@
 
 @layer utilities {
   .metal-gold {
-    background-image: linear-gradient(135deg, #f8eed9 0%, #ecd08f 45%, #d9a441 100%);
+    background-image: linear-gradient(135deg, #f8eed9 0%, #ecd08f 45%, #d4af37 100%);
   }
   .metal-silver {
-    background-image: linear-gradient(135deg, #fbfbfa 0%, #e7e4e0 50%, #c9c6c2 100%);
+    background-image: linear-gradient(135deg, #fdfbf7 0%, #eee3d5 50%, #d9cbba 100%);
   }
   .metal-ring {
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65),
       0 10px 28px -16px rgba(37, 29, 27, 0.4);
   }
   .text-gold-metal {
-    background-image: linear-gradient(135deg, #a97e24, #e7c065, #d9a441);
+    background-image: linear-gradient(135deg, #a8842c, #e7c065, #d4af37);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
   .text-silver-metal {
-    background-image: linear-gradient(135deg, #6e6b67, #c9c6c2, #f4f2f0);
+    background-image: linear-gradient(135deg, #8a7264, #d9cbba, #fdfbf7);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
   .silver-card {
-    background-image: linear-gradient(180deg, #ffffff, #f4f2f0);
-    border-color: rgba(201, 198, 194, 0.6);
+    background-image: linear-gradient(180deg, #ffffff, #f7f0e6);
+    border-color: rgba(217, 203, 186, 0.6);
   }
 }
 
-/* Tema negro: sobrescribe las superficies claras sin tocar cada componente. */
+/* ==========================================================================
+   TEMA NEGRO — "Quiet Luxury" nocturno
+   --------------------------------------------------------------------------
+   Negros cálidos (nunca grises) y elevación por capas:
+     canvas #12100D → surface #1A1613 → raised #221D19 → sunken #262019 → chip #2B241D
+   Los acentos bajan a tono joya (blush #5A3A44, oro #6E5518) para conservar
+   contraste AA con texto claro. Cada par está verificado en
+   scripts/audit-contrast.mjs (bloque "TEMA NEGRO").
+
+   Roles que NO se invierten: las clases que en el diseño claro ya eran
+   "tinte claro sobre panel oscuro" (bg-alabaster/5-15, border-cream/*,
+   text-alabaster/*) siguen claras, porque su fondo es oscuro en ambos temas.
+   ========================================================================== */
 html.dark {
   color-scheme: dark;
-  background-color: #0f0d0b;
+  background-color: #12100d;
 }
 html.dark body {
-  background-color: #0f0d0b;
-  color: #f2ece4;
+  background-color: #12100d;
+  color: #f3ebe1;
 }
-html.dark .bg-cream {
-  background-color: #0f0d0b !important;
+
+/* --- Superficies --------------------------------------------------------- */
+html.dark .bg-alabaster,
+html.dark .bg-cream,
+html.dark [class*='bg-alabaster/4'],
+html.dark [class*='bg-alabaster/6'],
+html.dark [class*='bg-alabaster/8'],
+html.dark [class*='bg-alabaster/9'] {
+  background-color: #12100d !important;
 }
+html.dark .bg-surface,
 html.dark .bg-white,
-html.dark [class*="bg-white/"] {
-  background-color: #1b1714 !important;
+html.dark [class*='bg-surface/'],
+html.dark [class*='bg-white/'] {
+  background-color: #1a1613 !important;
+}
+html.dark .bg-porcelain {
+  background-color: #221d19 !important;
+}
+html.dark .bg-bisque {
+  background-color: #262019 !important;
 }
 html.dark .bg-sand,
-html.dark [class*="bg-sand/"] {
-  background-color: #241f1b !important;
+html.dark .bg-champ,
+html.dark [class*='bg-sand/'],
+html.dark [class*='bg-champ/'] {
+  background-color: #2b241d !important;
 }
-html.dark .bg-ink {
-  background-color: #1b1714 !important;
+html.dark .bg-silver {
+  background-color: #2e2822 !important;
 }
+html.dark .bg-mocha {
+  background-color: #2a221d !important;
+}
+html.dark .bg-licorice,
+html.dark .bg-ink,
+html.dark [class*='bg-licorice/'] {
+  background-color: #0c0a08 !important;
+}
+
+/* --- Texto --------------------------------------------------------------- */
+html.dark .text-licorice,
 html.dark .text-ink {
-  color: #f2ece4 !important;
+  color: #f3ebe1 !important;
 }
-html.dark .text-muted {
-  color: #b7aba1 !important;
+html.dark .text-muted,
+html.dark [class*='text-muted/'] {
+  color: #b9a898 !important;
 }
-html.dark .text-cream {
-  color: #f2ece4 !important;
+html.dark .text-taupe,
+html.dark [class*='text-taupe/'] {
+  color: #c6b2a0 !important;
 }
+html.dark .text-mocha {
+  color: #e6d5c6 !important;
+}
+html.dark .text-cream,
+html.dark .text-alabaster {
+  color: #f7f1e8 !important;
+}
+html.dark .text-blush {
+  color: #eac3c9 !important;
+}
+html.dark .text-blush-deep,
+html.dark [class*='text-blush-deep/'] {
+  color: #e9aeb9 !important;
+}
+html.dark .text-rose,
+html.dark .text-rose-deep {
+  color: #e4a3af !important;
+}
+html.dark .text-champagne {
+  color: #e0be5c !important;
+}
+html.dark .text-champagne-deep,
+html.dark [class*='text-champagne-deep/'] {
+  color: #e7c87f !important;
+}
+html.dark .text-gold {
+  color: #d9b85c !important;
+}
+html.dark .text-gold-deep {
+  color: #e0c07a !important;
+}
+html.dark .text-sage,
+html.dark .text-sage-deep {
+  color: #a9c6b6 !important;
+}
+html.dark .text-silver-deep {
+  color: #c3ae9a !important;
+}
+
+/* --- Bordes -------------------------------------------------------------- */
+html.dark .border-border,
 html.dark .border-line,
-html.dark [class*="border-line"] {
-  border-color: #38302a !important;
+html.dark [class*='border-border/'] {
+  border-color: #3a322a !important;
 }
+html.dark .border-silver,
+html.dark [class*='border-silver/'] {
+  border-color: #8a7563 !important;
+}
+html.dark .divide-border > :not([hidden]) ~ :not([hidden]),
 html.dark .divide-line > :not([hidden]) ~ :not([hidden]) {
-  border-color: #38302a !important;
+  border-color: #3a322a !important;
 }
-html.dark .bg-rose-soft {
-  background-color: #3a1f26 !important;
+
+/* --- Superficies de acento ---------------------------------------------- */
+html.dark .bg-blush,
+html.dark [class*='bg-blush/'] {
+  background-color: #5a3a44 !important;
 }
-html.dark .bg-sage-soft {
-  background-color: #1f2e28 !important;
+html.dark .bg-blush-light,
+html.dark .bg-blush-soft,
+html.dark .bg-rose-soft,
+html.dark [class*='bg-blush-soft/'] {
+  background-color: #3a2630 !important;
 }
-html.dark .bg-gold-soft {
-  background-color: #3a2f1b !important;
+html.dark .bg-champagne {
+  background-color: #6e5518 !important;
+}
+html.dark .bg-champagne-soft,
+html.dark .bg-gold-soft,
+html.dark [class*='bg-champagne-soft/'] {
+  background-color: #352b18 !important;
+}
+html.dark .bg-sage {
+  background-color: #2f4438 !important;
+}
+html.dark .bg-sage-soft,
+html.dark [class*='bg-sage-soft/'] {
+  background-color: #1f2a25 !important;
+}
+
+/* --- Estados ------------------------------------------------------------- */
+html.dark .bg-status-confirmed-bg {
+  background-color: #1f2a25 !important;
+}
+html.dark .text-status-confirmed-text {
+  color: #9fc7b3 !important;
+}
+html.dark .bg-status-pending-bg {
+  background-color: #352b18 !important;
+}
+html.dark .text-status-pending-text {
+  color: #ebc77e !important;
+}
+html.dark .bg-status-cancelled-bg {
+  background-color: #3b2224 !important;
+}
+html.dark .text-status-cancelled-text {
+  color: #f0a9ac !important;
+}
+html.dark .bg-status-completed-bg {
+  background-color: #2b241d !important;
+}
+html.dark .text-status-completed-text {
+  color: #c6b2a0 !important;
+}
+html.dark .bg-status-noShow-bg,
+html.dark .bg-status-no-show-bg {
+  background-color: #3a2630 !important;
+}
+html.dark .text-status-noShow-text,
+html.dark .text-status-no-show-text {
+  color: #e9aeb9 !important;
+}
+
+/* --- Gradientes ----------------------------------------------------------
+   Tailwind expone cada parada como variable; reasignarla basta para que el
+   degradado herede la paleta nocturna sin tocar los componentes. */
+html.dark .from-blush {
+  --tw-gradient-from: #3a2630 var(--tw-gradient-from-position);
+}
+html.dark .via-blush {
+  --tw-gradient-via: #2e2028 var(--tw-gradient-via-position);
+}
+html.dark .to-alabaster,
+html.dark .to-cream {
+  --tw-gradient-to: #12100d var(--tw-gradient-to-position);
+}
+html.dark .from-alabaster {
+  --tw-gradient-from: #12100d var(--tw-gradient-from-position);
+}
+html.dark [class*='from-alabaster/'] {
+  --tw-gradient-from: rgb(18 16 13 / 0.95) var(--tw-gradient-from-position);
+}
+html.dark .to-sand {
+  --tw-gradient-to: #262019 var(--tw-gradient-to-position);
+}
+html.dark [class*='to-sand/'] {
+  --tw-gradient-to: rgb(38 32 25 / 0.9) var(--tw-gradient-to-position);
+}
+html.dark .from-licorice {
+  --tw-gradient-from: #0c0a08 var(--tw-gradient-from-position);
+}
+html.dark .to-mocha {
+  --tw-gradient-to: #2a221d var(--tw-gradient-to-position);
+}
+html.dark .from-sage {
+  --tw-gradient-from: #22302a var(--tw-gradient-from-position);
+}
+html.dark [class*='from-sage-soft/'] {
+  --tw-gradient-from: rgb(31 42 37 / 0.7) var(--tw-gradient-from-position);
+}
+html.dark [class*='from-gold-soft/'] {
+  --tw-gradient-from: rgb(53 43 24 / 0.7) var(--tw-gradient-from-position);
+}
+html.dark [class*='via-white/'] {
+  --tw-gradient-via: rgb(255 255 255 / 0.06) var(--tw-gradient-via-position);
+}
+
+/* --- Líneas, divisores y bordes de selección ----------------------------- */
+html.dark .bg-line,
+html.dark .bg-border {
+  background-color: #3a322a !important;
+}
+html.dark .text-line {
+  color: #4a4038 !important;
+}
+html.dark .border-licorice,
+html.dark [class*='border-licorice/'] {
+  border-color: #7a6552 !important;
+}
+html.dark .border-cream {
+  border-color: #12100d !important;
+}
+html.dark .from-blush-light {
+  --tw-gradient-from: #3a2630 var(--tw-gradient-from-position);
+}
+html.dark .via-blush-light {
+  --tw-gradient-via: #2e2028 var(--tw-gradient-via-position);
+}
+html.dark .from-rose-soft {
+  --tw-gradient-from: #3a2630 var(--tw-gradient-from-position);
+}
+/* --- Sombras y metales --------------------------------------------------- */
+html.dark .shadow-boutique {
+  box-shadow: 0 10px 30px -8px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+html.dark .shadow-soft {
+  box-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.55);
+}
+html.dark .shadow-lift {
+  box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 html.dark .metal-silver {
-  background-image: linear-gradient(135deg, #23201d, #3a3632, #23201d) !important;
+  background-image: linear-gradient(135deg, #221d18, #3a322a, #221d18) !important;
 }
 html.dark .silver-card {
-  background-image: linear-gradient(180deg, #1b1714, #23201d) !important;
-  border-color: #38302a !important;
+  background-image: linear-gradient(180deg, #1a1613, #221d19) !important;
+  border-color: #3a322a !important;
 }
+html.dark .metal-ring {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 10px 28px -16px rgba(0, 0, 0, 0.7);
+}
+
+/* --- Controles y detalles ------------------------------------------------ */
 html.dark input,
 html.dark select,
 html.dark textarea {
-  color: #f2ece4;
+  color: #f3ebe1;
 }
 html.dark input::placeholder,
 html.dark textarea::placeholder {
-  color: #8d8178;
+  color: #8f7f71;
+}
+html.dark input:-webkit-autofill,
+html.dark input:-webkit-autofill:hover,
+html.dark input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #f3ebe1;
+  box-shadow: inset 0 0 0 100px #1a1613;
+  caret-color: #f3ebe1;
+}
+html.dark .ring-offset-alabaster,
+html.dark .ring-offset-cream {
+  --tw-ring-offset-color: #12100d;
+}
+html.dark ::selection {
+  background: #5a3a44;
+  color: #f7f1e8;
+}
+html.dark ::-webkit-scrollbar-thumb {
+  background: #3a322a;
+  border-color: #12100d;
 }
 
 @layer base {
@@ -112,7 +355,7 @@ html.dark textarea::placeholder {
   }
 
   body {
-    @apply bg-cream font-sans text-ink antialiased;
+    @apply bg-alabaster font-sans text-licorice antialiased;
     min-height: 100dvh;
   }
 
@@ -133,8 +376,14 @@ html.dark textarea::placeholder {
   }
 
   ::selection {
-    background: #f0cdd4;
-    color: #251d1b;
+    background: #e8c5c8;
+    color: #1e1e1e;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-display;
   }
 
   button,
@@ -163,9 +412,9 @@ html.dark textarea::placeholder {
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: #dfd2c4;
+    background: #ddcdbb;
     border-radius: 999px;
-    border: 2px solid #fbf7f2;
+    border: 2px solid #f9f6f0;
   }
 }
 
@@ -192,11 +441,11 @@ html.dark textarea::placeholder {
   }
 
   .hairline {
-    @apply border-line/70;
+    @apply border-border/70;
   }
 
   .focus-ring {
-    @apply focus-visible:ring-2 focus-visible:ring-rose/50 focus-visible:ring-offset-2 focus-visible:ring-offset-cream;
+    @apply focus-visible:ring-2 focus-visible:ring-blush/60 focus-visible:ring-offset-2 focus-visible:ring-offset-alabaster;
   }
 }
 

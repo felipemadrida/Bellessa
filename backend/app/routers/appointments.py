@@ -28,7 +28,7 @@ from ..schemas import (
     WhatsAppOut,
 )
 from ..services.availability import compute_slots, is_slot_available, slot_payload
-from ..services.booking import ensure_client_has_no_overlap
+from ..services.booking import ensure_client_has_no_overlap, lock_staff_row
 from ..utils import (
     format_datetime_es,
     local_day_bounds,
@@ -137,7 +137,7 @@ def create_appointment(
     service = db.get(Service, payload.service_id)
     if service is None or service.business_id != business.id or not service.active:
         raise HTTPException(status_code=404, detail="Servicio no disponible.")
-    member = db.get(User, payload.staff_id)
+    member = lock_staff_row(db, payload.staff_id)
     if member is None or member.business_id != business.id or not member.active:
         raise HTTPException(status_code=404, detail="Profesional no disponible.")
     if payload.status not in (AppointmentStatus.pending, AppointmentStatus.confirmed):
@@ -202,7 +202,10 @@ def update_appointment(
     service = db.get(Service, payload.service_id) if payload.service_id else appointment.service
     if service is None or service.business_id != business.id or not service.active:
         raise HTTPException(status_code=404, detail="Servicio no disponible.")
-    member = db.get(User, payload.staff_id) if payload.staff_id else appointment.staff
+    if payload.staff_id:
+        member = lock_staff_row(db, payload.staff_id)
+    else:
+        member = appointment.staff
     if member is None or member.business_id != business.id or not member.active:
         raise HTTPException(status_code=404, detail="Profesional no disponible.")
     start_at = to_naive_utc(payload.start_at) if payload.start_at else appointment.start_at

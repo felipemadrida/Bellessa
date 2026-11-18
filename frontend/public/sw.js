@@ -1,7 +1,16 @@
 /* Bellessa · service worker mínimo para instalar la PWA y abrir rápido.
    Las rutas /api siempre van a la red: la agenda no se sirve de caché. */
-const CACHE = 'bellessa-v1'
-const SHELL = ['/', '/manifest.webmanifest', '/icon.svg', '/icon-192.png', '/icon-512.png']
+const CACHE = 'bellessa-v3'
+const SHELL = [
+  '/',
+  '/manifest.webmanifest',
+  '/brand-mark.png',
+  '/favicon-16.png',
+  '/favicon-32.png',
+  '/icon-180.png',
+  '/icon-192.png',
+  '/icon-512.png',
+]
 
 self.addEventListener('install', (event) => {
   event.waitUntil(

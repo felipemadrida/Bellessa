@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { AlertTriangle, CheckCircle2, Info, X } from 'lucide-react'
 import { cn } from '../lib/format'
+import { usePreferences } from '../lib/preferences'
 
 type Tone = 'success' | 'error' | 'info'
 
@@ -24,6 +25,7 @@ const ICONS = {
 }
 
 export function ToastProvider({ children }: { children: ReactNode }) {
+  const { t } = usePreferences()
   const [items, setItems] = useState<ToastItem[]>([])
   const sequence = useRef(0)
 
@@ -49,9 +51,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               key={item.id}
               className={cn(
                 'pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-2xl border px-4 py-3 text-sm shadow-lift backdrop-blur animate-scale-in',
-                item.tone === 'success' && 'border-sage/20 bg-white/95 text-ink',
-                item.tone === 'error' && 'border-rose/20 bg-white/95 text-ink',
-                item.tone === 'info' && 'border-line bg-white/95 text-ink',
+                item.tone === 'success' && 'border-sage/20 bg-surface/95 text-licorice',
+                item.tone === 'error' && 'border-rose/20 bg-surface/95 text-licorice',
+                item.tone === 'info' && 'border-border bg-surface/95 text-licorice',
               )}
             >
               <Icon
@@ -67,8 +69,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               <button
                 type="button"
                 onClick={() => setItems((current) => current.filter((entry) => entry.id !== item.id))}
-                className="rounded-full p-0.5 text-muted transition hover:text-ink"
-                aria-label="Cerrar aviso"
+                className="rounded-full p-0.5 text-muted transition hover:text-licorice"
+                aria-label={t('common.closeToast')}
               >
                 <X size={15} />
               </button>

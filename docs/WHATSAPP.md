@@ -74,7 +74,7 @@ En Docker, usa los equivalentes sin prefijo en `.env` y `docker-compose.yml` los
    - Suscribe el campo **messages**.
 5. En **App Settings → Basic**, copia el **App Secret** a `BELLESSA_WHATSAPP_APP_SECRET` para validar la firma `X-Hub-Signature-256`.
 6. Cambia `BELLESSA_WHATSAPP_PROVIDER=cloud`.
-7. Para desarrollo local con webhook real, expón el backend con un túnel HTTPS (por ejemplo `cloudflared tunnel --url http://localhost:8000` o ngrok) y usa esa URL en Meta. El simulador no requiere túnel.
+7. Para desarrollo local con webhook real, expón el backend con un túnel HTTPS (por ejemplo `cloudflared tunnel --url http://localhost:8011` o ngrok) y usa esa URL en Meta. El simulador no requiere túnel.
 
 ### Verificación
 

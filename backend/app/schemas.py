@@ -64,6 +64,8 @@ class BusinessOut(ORMModel):
     instagram: str | None = None
     timezone: str
     currency: str
+    locale: str
+    brand_color: str
     tax_rate_bps: int
     require_deposit: bool
     deposit_percent: int
@@ -87,6 +89,9 @@ class BusinessUpdate(BaseModel):
     city: str | None = None
     state: str | None = None
     instagram: str | None = None
+    currency: str | None = Field(default=None, pattern="^(MXN|USD)$")
+    locale: str | None = Field(default=None, pattern="^(es-MX|en-US|es|en)$")
+    brand_color: str | None = Field(default=None, pattern="^#[0-9A-Fa-f]{6}$")
     require_deposit: bool | None = None
     deposit_percent: int | None = Field(default=None, ge=0, le=100)
     cancellation_hours: int | None = Field(default=None, ge=0, le=168)
@@ -551,6 +556,8 @@ class PublicBusinessOut(BaseModel):
     instagram: str | None = None
     timezone: str
     currency: str
+    locale: str
+    brand_color: str
     require_deposit: bool
     deposit_percent: int
     cancellation_hours: int

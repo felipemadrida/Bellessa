@@ -12,7 +12,9 @@ import {
 import { api, ApiError, type ServiceInput } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { cn, formatDuration, money, parseMoney } from '../lib/format'
+import { usePreferences } from '../lib/preferences'
 import type { Service } from '../lib/types'
+import { vocabularyLabel } from '../lib/vocabulary'
 import { PageHeader } from '../components/AppShell'
 import { useToast } from '../components/Toast'
 import {
@@ -26,12 +28,13 @@ import {
   Textarea,
 } from '../components/ui'
 
-const PALETTE = ['#C2415A', '#3E5C50', '#D9A441', '#D97757', '#8E5572', '#5C8374', '#7A4E3B', '#B56576']
+const PALETTE = ['#9C5566', '#4A6B5D', '#A8842C', '#8A6A5E', '#7E3F4E', '#6F5A50', '#A8842C', '#C08A96']
 
 export function ServicesPage() {
   const { user } = useAuth()
   const queryClient = useQueryClient()
   const { toast } = useToast()
+  const { t } = usePreferences()
   const isOwner = user?.role === 'owner'
 
   const [formOpen, setFormOpen] = useState(false)
@@ -77,9 +80,9 @@ export function ServicesPage() {
         queryClient.invalidateQueries({ queryKey: ['services-all'] }),
         queryClient.invalidateQueries({ queryKey: ['services'] }),
       ])
-      toast(service.active ? 'Servicio oculto del menú' : 'Servicio visible otra vez')
+      toast(service.active ? t('services.hiddenToast') : t('services.visibleToast'))
     } catch (caught) {
-      toast(caught instanceof ApiError ? caught.message : 'No pudimos actualizar', 'error')
+      toast(caught instanceof ApiError ? caught.message : t('services.updateError'), 'error')
     } finally {
       setToggling(null)
     }
@@ -88,31 +91,33 @@ export function ServicesPage() {
   return (
     <div className="animate-fade-up">
       <PageHeader
-        eyebrow="Tu menú"
-        title="Servicios"
-        subtitle={`${services.filter((service) => service.active).length} servicios activos · Precios con IVA incluido`}
+        eyebrow={t('services.eyebrow')}
+        title={t('services.title')}
+        subtitle={t('services.subtitle', {
+          n: services.filter((service) => service.active).length,
+        })}
         actions={
           isOwner ? (
             <Button variant="rose" onClick={openCreate}>
-              <Plus size={17} /> Nuevo servicio
+              <Plus size={17} /> {t('services.newService')}
             </Button>
           ) : null
         }
       />
 
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <p className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[11px] font-semibold text-muted">
+        <p className="inline-flex items-center gap-1.5 rounded-pill border border-border bg-surface px-3 py-1.5 text-[11px] font-semibold text-muted">
           <Sparkles size={13} className="text-gold" />
-          Los colores te ayudan a leer la agenda de un vistazo
+          {t('services.colorsHint')}
         </p>
         <label className="flex cursor-pointer items-center gap-2 text-[11.5px] font-semibold text-muted">
           <input
             type="checkbox"
             checked={showInactive}
             onChange={(event) => setShowInactive(event.target.checked)}
-            className="h-4 w-4 accent-[#C2415A]"
+            className="h-4 w-4 accent-[#9C5566]"
           />
-          Ver servicios ocultos
+          {t('services.showHidden')}
         </label>
       </div>
 
@@ -126,20 +131,20 @@ export function ServicesPage() {
         <Card>
           <EmptyState
             icon={<CircleAlert size={22} />}
-            title="No pudimos cargar tu menú"
-            action={<Button onClick={() => query.refetch()}>Reintentar</Button>}
+            title={t('services.errorLoad')}
+            action={<Button onClick={() => query.refetch()}>{t('services.retry')}</Button>}
           />
         </Card>
       ) : visible.length === 0 ? (
         <Card>
           <EmptyState
             icon={<Scissors size={23} />}
-            title="Tu menú está vacío"
-            description="Agrega los servicios que ofreces con precio y duración para empezar a agendar."
+            title={t('services.emptyTitle')}
+            description={t('services.emptyDesc')}
             action={
               isOwner ? (
                 <Button variant="rose" onClick={openCreate}>
-                  <Plus size={16} /> Crear primer servicio
+                  <Plus size={16} /> {t('services.createFirst')}
                 </Button>
               ) : undefined
             }
@@ -150,7 +155,7 @@ export function ServicesPage() {
           {categories.map(([category, items]) => (
             <section key={category}>
               <SectionTitle
-                title={category}
+                title={vocabularyLabel(category, t)}
                 subtitle={`${items.length} servicio${items.length === 1 ? '' : 's'}`}
               />
               <div className="grid gap-3 sm:grid-cols-2">
@@ -173,7 +178,7 @@ export function ServicesPage() {
                             className="h-2.5 w-2.5 rounded-full"
                             style={{ backgroundColor: service.color }}
                           />
-                          <h3 className="truncate font-display text-lg font-medium text-ink">
+                          <h3 className="truncate font-display text-lg font-medium text-licorice">
                             {service.name}
                           </h3>
                         </div>
@@ -189,8 +194,8 @@ export function ServicesPage() {
                             <button
                               type="button"
                               onClick={() => openEdit(service)}
-                              aria-label={`Editar ${service.name}`}
-                              className="flex h-8 w-8 items-center justify-center rounded-full text-muted transition hover:bg-sand hover:text-ink"
+                              aria-label={t('services.editAria', { name: service.name })}
+                              className="flex h-8 w-8 items-center justify-center rounded-full text-muted transition hover:bg-sand hover:text-licorice"
                             >
                               <Pencil size={14} />
                             </button>
@@ -198,7 +203,7 @@ export function ServicesPage() {
                               type="button"
                               onClick={() => toggleActive(service)}
                               disabled={toggling === service.id}
-                              aria-label={service.active ? 'Ocultar servicio' : 'Mostrar servicio'}
+                              aria-label={service.active ? t('services.hideAria') : t('services.showAria')}
                               className={cn(
                                 'relative h-5 w-9 rounded-full transition',
                                 service.active ? 'bg-sage' : 'bg-sand',
@@ -206,7 +211,7 @@ export function ServicesPage() {
                             >
                               <span
                                 className={cn(
-                                  'absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all',
+                                  'absolute top-0.5 h-4 w-4 rounded-full bg-surface shadow transition-all',
                                   service.active ? 'left-[18px]' : 'left-0.5',
                                 )}
                               />
@@ -223,16 +228,17 @@ export function ServicesPage() {
                         </span>
                         {service.buffer_min > 0 ? (
                           <span className="rounded-full bg-sand px-2 py-1">
-                            +{service.buffer_min} min limpieza
+                            {t('services.bufferSuffix', { n: service.buffer_min })}
                           </span>
                         ) : null}
                         {service.deposit_cents > 0 ? (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-gold-soft px-2 py-1 font-semibold text-[#7A5A18]">
-                            <Wallet size={11} /> Anticipo {money(service.deposit_cents)}
+                          <span className="inline-flex items-center gap-1 rounded-full bg-champagne-soft px-2 py-1 font-semibold text-champagne-deep">
+                            <Wallet size={11} />{' '}
+                            {t('services.deposit', { amount: money(service.deposit_cents) })}
                           </span>
                         ) : null}
                       </div>
-                      <p className="money shrink-0 font-display text-[24px] font-medium leading-none text-ink">
+                      <p className="money shrink-0 font-display text-[24px] font-medium leading-none text-licorice">
                         {money(service.price_cents)}
                       </p>
                     </div>
@@ -267,6 +273,7 @@ function ServiceFormModal({
 }) {
   const queryClient = useQueryClient()
   const { toast } = useToast()
+  const { t } = usePreferences()
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [category, setCategory] = useState('Cabello')
@@ -297,11 +304,11 @@ function ServiceFormModal({
   async function submit(event: React.FormEvent) {
     event.preventDefault()
     if (!name.trim()) {
-      setError('Ponle un nombre al servicio.')
+      setError(t('services.errorName'))
       return
     }
     if (parseMoney(price) <= 0) {
-      setError('Escribe un precio mayor a cero.')
+      setError(t('services.errorPrice'))
       return
     }
     setSaving(true)
@@ -328,10 +335,10 @@ function ServiceFormModal({
         queryClient.invalidateQueries({ queryKey: ['services'] }),
         queryClient.invalidateQueries({ queryKey: ['dashboard'] }),
       ])
-      toast(service ? 'Servicio actualizado' : 'Servicio agregado a tu menú')
+      toast(service ? t('services.savedEdit') : t('services.savedNew'))
       onClose()
     } catch (caught) {
-      setError(caught instanceof ApiError ? caught.message : 'No pudimos guardar el servicio.')
+      setError(caught instanceof ApiError ? caught.message : t('services.saveError'))
     } finally {
       setSaving(false)
     }
@@ -341,37 +348,37 @@ function ServiceFormModal({
     <Modal
       open={open}
       onClose={onClose}
-      title={service ? 'Editar servicio' : 'Nuevo servicio'}
-      subtitle="Precio final con IVA incluido, como se lo dices a tu clienta."
+      title={service ? t('services.formTitleEdit') : t('services.formTitleNew')}
+      subtitle={t('services.formSubtitle')}
       footer={
         <div className="flex justify-end gap-2">
           <Button variant="ghost" onClick={onClose} disabled={saving}>
-            Cancelar
+            {t('services.cancel')}
           </Button>
           <Button variant="rose" type="submit" form="service-form" loading={saving}>
-            {service ? 'Guardar cambios' : 'Agregar servicio'}
+            {service ? t('services.saveChanges') : t('services.addService')}
           </Button>
         </div>
       }
     >
       <form id="service-form" onSubmit={submit} className="space-y-4">
         <Input
-          label="Nombre del servicio"
+          label={t('services.nameLabel')}
           value={name}
           onChange={(event) => setName(event.target.value)}
-          placeholder="Ej. Balayage"
+          placeholder={t('services.namePlaceholder')}
           required
         />
         <div className="grid grid-cols-2 gap-3">
           <Input
-            label="Categoría"
+            label={t('services.categoryLabel')}
             value={category}
             onChange={(event) => setCategory(event.target.value)}
             list="service-categories"
-            placeholder="Cabello, Uñas…"
+            placeholder={t('services.categoryPlaceholder')}
           />
           <div>
-            <p className="mb-1.5 text-[13px] font-semibold text-ink">Color en agenda</p>
+            <p className="mb-1.5 text-[13px] font-semibold text-licorice">{t('services.colorLabel')}</p>
             <div className="flex flex-wrap gap-1.5">
               {PALETTE.map((item) => (
                 <button
@@ -381,7 +388,7 @@ function ServiceFormModal({
                   onClick={() => setColor(item)}
                   className={cn(
                     'h-7 w-7 rounded-full border-2 transition',
-                    color === item ? 'border-ink scale-110' : 'border-transparent',
+                    color === item ? 'border-licorice scale-110' : 'border-transparent',
                   )}
                   style={{ backgroundColor: item }}
                 />
@@ -395,14 +402,14 @@ function ServiceFormModal({
           </datalist>
         </div>
         <Textarea
-          label="Descripción (opcional)"
+          label={t('services.descriptionLabel')}
           value={description}
           onChange={(event) => setDescription(event.target.value)}
-          placeholder="Qué incluye, recomendaciones, duración real…"
+          placeholder={t('services.descriptionPlaceholder')}
         />
         <div className="grid grid-cols-2 gap-3">
           <Input
-            label="Duración (min)"
+            label={t('services.durationLabel')}
             type="number"
             min={5}
             step={5}
@@ -410,18 +417,18 @@ function ServiceFormModal({
             onChange={(event) => setDuration(event.target.value)}
           />
           <Input
-            label="Limpieza entre citas"
+            label={t('services.bufferLabel')}
             type="number"
             min={0}
             step={5}
             value={buffer}
             onChange={(event) => setBuffer(event.target.value)}
-            hint="Minutos de margen"
+            hint={t('services.bufferHint')}
           />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <Input
-            label="Precio"
+            label={t('services.priceLabel')}
             leading="$"
             inputMode="decimal"
             value={price}
@@ -429,30 +436,30 @@ function ServiceFormModal({
             placeholder="380"
           />
           <Input
-            label="Anticipo sugerido"
+            label={t('services.depositLabel')}
             leading="$"
             inputMode="decimal"
             value={deposit}
             onChange={(event) => setDeposit(event.target.value)}
             placeholder="0"
-            hint="Opcional"
+            hint={t('services.optional')}
           />
         </div>
         {service ? (
-          <label className="flex cursor-pointer items-center gap-2 text-[12.5px] font-semibold text-ink">
+          <label className="flex cursor-pointer items-center gap-2 text-[12.5px] font-semibold text-licorice">
             <input
               type="checkbox"
               checked={active}
               onChange={(event) => setActive(event.target.checked)}
-              className="h-4 w-4 accent-[#C2415A]"
+              className="h-4 w-4 accent-[#9C5566]"
             />
-            Servicio visible para agendar
+            {t('services.visibleToggle')}
           </label>
         ) : null}
         {error ? (
           <div
             role="alert"
-            className="flex items-start gap-2 rounded-2xl border border-rose/20 bg-rose-soft px-3.5 py-2.5 text-[12.5px] font-medium text-rose-deep"
+            className="flex items-start gap-2 rounded-2xl border border-blush-deep/20 bg-blush-soft px-3.5 py-2.5 text-[12.5px] font-medium text-blush-deep"
           >
             <CircleAlert size={15} className="mt-0.5 shrink-0" /> {error}
           </div>

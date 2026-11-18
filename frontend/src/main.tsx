@@ -7,6 +7,7 @@ import { AuthProvider } from './lib/auth'
 import { PreferencesProvider } from './lib/preferences'
 import { ToastProvider } from './components/Toast'
 import './index.css'
+import './i18n'
 
 const queryClient = new QueryClient({
   defaultOptions: {

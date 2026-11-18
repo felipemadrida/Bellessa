@@ -62,6 +62,8 @@ class Business(Base):
     instagram: Mapped[str | None] = mapped_column(String(80), nullable=True)
     timezone: Mapped[str] = mapped_column(String(60), default="America/Mexico_City")
     currency: Mapped[str] = mapped_column(String(3), default="MXN")
+    locale: Mapped[str] = mapped_column(String(10), default="es-MX")  # idioma de la interfaz
+    brand_color: Mapped[str] = mapped_column(String(9), default="#9C5566")  # acento del salón
     tax_rate_bps: Mapped[int] = mapped_column(Integer, default=1600)  # IVA 16% incluido en precios
     require_deposit: Mapped[bool] = mapped_column(Boolean, default=False)
     deposit_percent: Mapped[int] = mapped_column(Integer, default=30)

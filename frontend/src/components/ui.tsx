@@ -14,9 +14,10 @@ import {
 } from 'react'
 import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { cn } from '../lib/format'
 import type { AppointmentStatus } from '../lib/types'
-import { STATUS_LABEL, STATUS_TONE } from '../lib/format'
+import { STATUS_TONE } from '../lib/format'
 
 // ---------------------------------------------------------------------------
 // Botones
@@ -25,12 +26,12 @@ type ButtonVariant = 'primary' | 'rose' | 'secondary' | 'ghost' | 'danger' | 'sa
 type ButtonSize = 'sm' | 'md' | 'lg' | 'icon'
 
 const BUTTON_VARIANTS: Record<ButtonVariant, string> = {
-  primary: 'bg-ink text-cream hover:bg-[#3A2D28] shadow-soft',
-  rose: 'bg-rose text-white hover:bg-rose-deep shadow-soft',
-  secondary: 'bg-white text-ink border border-line hover:bg-[#FCFAF7]',
-  ghost: 'text-ink hover:bg-sand/70',
-  danger: 'bg-rose-soft text-rose-deep hover:bg-[#F1D5DA]',
-  sage: 'bg-sage text-white hover:bg-[#324B41]',
+  primary: 'bg-licorice text-alabaster hover:bg-licorice/90 shadow-boutique',
+  rose: 'bg-blush-deep text-alabaster hover:bg-rose-deep shadow-boutique',
+  secondary: 'bg-surface text-licorice border border-border hover:bg-alabaster',
+  ghost: 'text-licorice hover:bg-sand/70',
+  danger: 'bg-blush-soft text-blush-deep hover:bg-blush/40',
+  sage: 'bg-sage text-alabaster hover:bg-sage-deep shadow-boutique',
 }
 
 const BUTTON_SIZES: Record<ButtonSize, string> = {
@@ -55,8 +56,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       ref={ref}
       disabled={disabled || loading}
       className={cn(
-        'inline-flex select-none items-center justify-center rounded-2xl font-semibold transition-all duration-200',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose/50 focus-visible:ring-offset-2 focus-visible:ring-offset-cream',
+        'inline-flex select-none items-center justify-center rounded-pill font-semibold transition-all duration-200',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blush-deep/40 focus-visible:ring-offset-2 focus-visible:ring-offset-alabaster',
         'disabled:cursor-not-allowed disabled:opacity-50 active:scale-[.98]',
         BUTTON_VARIANTS[variant],
         BUTTON_SIZES[size],
@@ -81,8 +82,8 @@ export function IconButton({
       type="button"
       aria-label={label}
       className={cn(
-        'inline-flex h-10 w-10 items-center justify-center rounded-full text-muted transition hover:bg-sand hover:text-ink',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose/50',
+        'inline-flex h-10 w-10 items-center justify-center rounded-full text-muted transition hover:bg-sand hover:text-licorice',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blush-deep/40',
         className,
       )}
       {...props}
@@ -105,7 +106,7 @@ export function Card({
   as?: 'div' | 'section' | 'article'
 }) {
   return (
-    <Tag className={cn('rounded-3xl border border-line bg-white/80 shadow-soft backdrop-blur-sm', className)}>
+    <Tag className={cn('rounded-card border border-border bg-surface/85 shadow-boutique backdrop-blur-sm', className)}>
       {children}
     </Tag>
   )
@@ -125,7 +126,7 @@ export function SectionTitle({
   return (
     <div className={cn('mb-4 flex items-end justify-between gap-3', className)}>
       <div>
-        <h2 className="font-display text-xl font-medium tracking-tight text-ink sm:text-[22px]">{title}</h2>
+        <h2 className="font-display text-xl font-medium tracking-tight text-licorice sm:text-[22px]">{title}</h2>
         {subtitle ? <p className="mt-0.5 text-[13px] text-muted">{subtitle}</p> : null}
       </div>
       {action}
@@ -137,8 +138,8 @@ export function SectionTitle({
 // Formularios
 // ---------------------------------------------------------------------------
 const controlClass =
-  'w-full rounded-2xl border border-line bg-white px-3.5 text-sm text-ink placeholder:text-muted/60 transition ' +
-  'focus:border-rose/50 focus:outline-none focus:ring-4 focus:ring-rose/10 disabled:bg-sand/40'
+  'w-full rounded-2xl border border-border bg-surface px-3.5 text-sm text-licorice placeholder:text-muted/60 transition ' +
+  'focus:border-blush-deep/50 focus:outline-none focus:ring-4 focus:ring-blush/25 disabled:bg-sand/40'
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string
@@ -156,7 +157,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   return (
     <div className="w-full">
       {label ? (
-        <label htmlFor={inputId} className="mb-1.5 block text-[13px] font-semibold text-ink">
+        <label htmlFor={inputId} className="mb-1.5 block text-[13px] font-semibold text-licorice">
           {label}
         </label>
       ) : null}
@@ -176,7 +177,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         />
       </div>
       {error ? (
-        <p id={`${inputId}-help`} className="mt-1 text-xs text-rose-deep">
+        <p id={`${inputId}-help`} className="mt-1 text-xs text-blush-deep">
           {error}
         </p>
       ) : hint ? (
@@ -202,7 +203,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
   return (
     <div className="w-full">
       {label ? (
-        <label htmlFor={selectId} className="mb-1.5 block text-[13px] font-semibold text-ink">
+        <label htmlFor={selectId} className="mb-1.5 block text-[13px] font-semibold text-licorice">
           {label}
         </label>
       ) : null}
@@ -238,7 +239,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function 
   return (
     <div className="w-full">
       {label ? (
-        <label htmlFor={textareaId} className="mb-1.5 block text-[13px] font-semibold text-ink">
+        <label htmlFor={textareaId} className="mb-1.5 block text-[13px] font-semibold text-licorice">
           {label}
         </label>
       ) : null}
@@ -271,7 +272,7 @@ export function Field({
 }) {
   return (
     <div>
-      <label htmlFor={htmlFor} className="mb-1.5 block text-[13px] font-semibold text-ink">
+      <label htmlFor={htmlFor} className="mb-1.5 block text-[13px] font-semibold text-licorice">
         {label}
       </label>
       {children}
@@ -303,12 +304,31 @@ export function Badge({
 }
 
 export function StatusBadge({ status }: { status: AppointmentStatus }) {
-  return <Badge className={STATUS_TONE[status]}>{STATUS_LABEL[status]}</Badge>
+  const { t } = useTranslation()
+  return <Badge className={STATUS_TONE[status]}>{t(`status.${status}`)}</Badge>
+}
+
+const STATUS_DOT_COLOR: Record<AppointmentStatus, string> = {
+  pending: '#D4AF37', // champagne
+  confirmed: '#4A6B5D', // sage
+  completed: '#6F5A50', // muted
+  canceled: '#A8383B', // status.cancelled.text
+  no_show: '#9C5566', // blush deep
+}
+
+export function StatusDot({ status }: { status: AppointmentStatus }) {
+  return (
+    <span
+      aria-hidden="true"
+      className="inline-block h-1.5 w-1.5 shrink-0 rounded-full"
+      style={{ backgroundColor: STATUS_DOT_COLOR[status] }}
+    />
+  )
 }
 
 export function Avatar({
   name,
-  color = '#C2415A',
+  color,
   size = 'md',
   className,
 }: {
@@ -338,7 +358,14 @@ export function Avatar({
         sizes[size],
         className,
       )}
-      style={{ backgroundColor: `${color}1F`, color }}
+      style={
+        color
+          ? { backgroundColor: `${color}1F`, color }
+          : {
+              backgroundColor: 'var(--brand-soft, #9C55661F)',
+              color: 'var(--brand, #9C5566)',
+            }
+      }
     >
       {letters}
     </span>
@@ -382,7 +409,7 @@ export function EmptyState({
       <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-sand text-muted">
         {icon}
       </div>
-      <h3 className="font-display text-lg font-medium text-ink">{title}</h3>
+      <h3 className="font-display text-lg font-medium text-licorice">{title}</h3>
       {description ? <p className="mt-1 max-w-sm text-sm text-muted">{description}</p> : null}
       {action ? <div className="mt-5">{action}</div> : null}
     </div>
@@ -391,7 +418,7 @@ export function EmptyState({
 
 export function ProgressBar({
   value,
-  color = '#C2415A',
+  color,
   className,
 }: {
   value: number
@@ -402,7 +429,10 @@ export function ProgressBar({
     <div className={cn('h-1.5 w-full overflow-hidden rounded-full bg-sand', className)}>
       <div
         className="h-full rounded-full transition-all duration-500"
-        style={{ width: `${Math.max(0, Math.min(100, value))}%`, backgroundColor: color }}
+        style={{
+          width: `${Math.max(0, Math.min(100, value))}%`,
+          backgroundColor: color ?? 'var(--brand, #9C5566)',
+        }}
       />
     </div>
   )
@@ -428,7 +458,7 @@ export function Segmented<T extends string>({
     <div
       role="tablist"
       className={cn(
-        'inline-flex items-center gap-0.5 rounded-full border border-line bg-white/70 p-1',
+        'inline-flex items-center gap-0.5 rounded-pill border border-border bg-surface/70 p-1',
         className,
       )}
     >
@@ -442,7 +472,7 @@ export function Segmented<T extends string>({
           className={cn(
             'rounded-full font-semibold transition',
             size === 'sm' ? 'px-3 py-1.5 text-xs' : 'px-4 py-2 text-[13px]',
-            value === option.value ? 'bg-ink text-cream shadow-soft' : 'text-muted hover:text-ink',
+            value === option.value ? 'bg-licorice text-alabaster shadow-boutique' : 'text-muted hover:text-licorice',
           )}
         >
           {option.label}
@@ -483,6 +513,7 @@ export function Modal({
   size = 'md',
   className,
 }: ModalProps) {
+  const { t } = useTranslation()
   const panelRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -506,7 +537,7 @@ export function Modal({
   return createPortal(
     <div className="fixed inset-0 z-[70] flex items-end justify-center sm:items-center sm:p-6">
       <div
-        className="absolute inset-0 bg-ink/35 backdrop-blur-[3px] animate-scale-in"
+        className="absolute inset-0 bg-licorice/35 backdrop-blur-[3px] animate-scale-in"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -517,27 +548,27 @@ export function Modal({
         aria-label={title}
         tabIndex={-1}
         className={cn(
-          'relative flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-[2rem] border border-line bg-cream shadow-lift outline-none animate-fade-up sm:rounded-[2rem]',
+          'relative flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-[2rem] border border-border bg-alabaster shadow-lift outline-none animate-fade-up sm:rounded-[2rem]',
           MODAL_SIZES[size],
           className,
         )}
       >
         {(title || subtitle) && (
-          <div className="flex items-start justify-between gap-3 border-b border-line/70 px-5 py-4 sm:px-6">
+          <div className="flex items-start justify-between gap-3 border-b border-border/70 px-5 py-4 sm:px-6">
             <div>
               {title ? (
-                <h2 className="font-display text-xl font-medium tracking-tight text-ink">{title}</h2>
+                <h2 className="font-display text-xl font-medium tracking-tight text-licorice">{title}</h2>
               ) : null}
               {subtitle ? <p className="mt-0.5 text-[13px] text-muted">{subtitle}</p> : null}
             </div>
-            <IconButton label="Cerrar" onClick={onClose} className="-mr-1 -mt-1">
+            <IconButton label={t('common.close')} onClick={onClose} className="-mr-1 -mt-1">
               <X size={19} />
             </IconButton>
           </div>
         )}
         <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-5 sm:px-6">{children}</div>
         {footer ? (
-          <div className="border-t border-line/70 bg-cream/95 px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6">
+          <div className="border-t border-border/70 bg-alabaster/95 px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6">
             {footer}
           </div>
         ) : null}
@@ -570,7 +601,7 @@ export function Menu({ trigger, children }: { trigger: ReactNode; children: Reac
       <div onClick={() => setOpen((value) => !value)}>{trigger}</div>
       {open ? (
         <MenuContext.Provider value={{ close: () => setOpen(false) }}>
-          <div className="absolute right-0 z-40 mt-2 w-56 overflow-hidden rounded-2xl border border-line bg-white p-1.5 shadow-lift animate-scale-in">
+          <div className="absolute right-0 z-40 mt-2 w-56 overflow-hidden rounded-2xl border border-border bg-surface p-1.5 shadow-lift animate-scale-in">
             {children}
           </div>
         </MenuContext.Provider>
@@ -598,7 +629,7 @@ export function MenuItem({
       }}
       className={cn(
         'flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm transition hover:bg-sand/70',
-        danger ? 'text-rose-deep' : 'text-ink',
+        danger ? 'text-blush-deep' : 'text-licorice',
       )}
     >
       {children}

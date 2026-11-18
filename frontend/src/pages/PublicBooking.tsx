@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import {
   ArrowLeft,
   ArrowRight,
@@ -23,6 +24,7 @@ import { api, ApiError } from '../lib/api'
 import {
   addDaysKey,
   cn,
+  configureMoney,
   dayNumber,
   formatDuration,
   formatTime,
@@ -32,11 +34,7 @@ import {
   todayKey,
   weekdayShort,
 } from '../lib/format'
-import type {
-  AvailabilitySlot,
-  PublicBookingResponse,
-  PublicBusiness,
-} from '../lib/types'
+import type { AvailabilitySlot, PublicBookingResponse } from '../lib/types'
 import { BrandMark, Wordmark } from '../components/AppShell'
 import {
   Avatar,
@@ -48,7 +46,7 @@ import {
   Textarea,
 } from '../components/ui'
 
-const STEP_LABELS = ['Servicio', 'Horario', 'Tus datos']
+const STEP_LABELS = ['pb.stepService', 'pb.stepTime', 'pb.stepClient']
 
 export function PublicBookingPage() {
   const { slug } = useParams()
@@ -61,7 +59,16 @@ export function PublicBookingPage() {
     retry: false,
   })
   const business = businessQuery.data
-
+  const { t, i18n } = useTranslation()
+  // La página pública usa el nombre, la moneda y el idioma del salón.
+  if (business) {
+    configureMoney({ currency: business.currency, locale: business.locale })
+    if (typeof document !== 'undefined') document.title = business.name
+  }
+  useEffect(() => {
+    if (!business?.locale) return
+    void i18n.changeLanguage(business.locale.toLowerCase().startsWith('en') ? 'en' : 'es')
+  }, [business?.locale, i18n])
   const [step, setStep] = useState(0)
   const [serviceId, setServiceId] = useState<number | null>(null)
   const [staffId, setStaffId] = useState<number | null>(null)
@@ -113,10 +120,10 @@ export function PublicBookingPage() {
 
   if (businessQuery.isLoading) {
     return (
-      <div className="min-h-dvh bg-cream px-4 py-8">
+      <div className="min-h-dvh bg-alabaster px-4 py-8">
         <div className="mx-auto max-w-3xl space-y-4">
           <Skeleton className="h-12 w-48" />
-          <Skeleton className="h-44 rounded-4xl" />
+          <Skeleton className="h-44 rounded-[28px]" />
           <Skeleton className="h-32 rounded-3xl" />
         </div>
       </div>
@@ -125,17 +132,15 @@ export function PublicBookingPage() {
 
   if (businessQuery.isError || !business) {
     return (
-      <div className="flex min-h-dvh flex-col items-center justify-center bg-cream px-6 text-center">
+      <div className="flex min-h-dvh flex-col items-center justify-center bg-alabaster px-6 text-center">
         <BrandMark size={46} />
-        <h1 className="mt-6 font-display text-3xl font-medium text-ink">No encontramos este salón</h1>
-        <p className="mt-2 max-w-sm text-sm text-muted">
-          Revisa que el link esté completo o pide a tu salón que te comparta su página de reservas.
-        </p>
+        <h1 className="mt-6 font-display text-3xl font-medium text-licorice">{t('pb.notFoundTitle')}</h1>
+        <p className="mt-2 max-w-sm text-sm text-muted">{t('pb.notFoundDesc')}</p>
         <a
           href="/"
-          className="mt-6 inline-flex h-11 items-center rounded-2xl bg-ink px-5 text-sm font-semibold text-cream"
+          className="mt-6 inline-flex h-11 items-center rounded-2xl bg-licorice px-5 text-sm font-semibold text-alabaster"
         >
-          Ir a Bellessa
+          {t('pb.goToApp')}
         </a>
       </div>
     )
@@ -244,41 +249,41 @@ export function PublicBookingPage() {
   }
 
   return (
-    <div className="min-h-dvh bg-cream">
+    <div className="min-h-dvh bg-alabaster">
       <header className="mx-auto flex max-w-4xl items-center justify-between px-4 py-5 sm:px-6">
         <div className="flex items-center gap-2.5">
           <BrandMark size={36} />
           <div className="leading-none">
-            <Wordmark className="text-[20px]" />
+            <Wordmark name={business.name} className="text-[20px]" />
             <p className="mt-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-muted">
-              Reservas en línea
+              {t('pb.onlineBooking')}
             </p>
           </div>
         </div>
-        <span className="hidden items-center gap-1.5 rounded-full border border-line bg-white px-3 py-1.5 text-[10px] font-semibold text-muted sm:flex">
+        <span className="hidden items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1.5 text-[10px] font-semibold text-muted sm:flex">
           <Sparkles size={12} className="text-gold" /> Hecho en México
         </span>
       </header>
 
       <main className="mx-auto max-w-4xl px-4 pb-16 sm:px-6">
         {/* Hero del salón */}
-        <section className="relative overflow-hidden rounded-4xl bg-sage px-5 py-7 text-cream shadow-lift sm:px-8 sm:py-9">
+        <section className="relative overflow-hidden rounded-[28px] bg-sage px-5 py-7 text-alabaster shadow-lift sm:px-8 sm:py-9">
           <div
             className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full opacity-60 blur-2xl"
-            style={{ background: 'radial-gradient(circle, #D9A44166, transparent 70%)' }}
+            style={{ background: 'radial-gradient(circle, #A8842C66, transparent 70%)' }}
           />
           <div
             className="pointer-events-none absolute -bottom-28 -left-16 h-64 w-64 rounded-full opacity-40 blur-2xl"
-            style={{ background: 'radial-gradient(circle, #C2415A77, transparent 70%)' }}
+            style={{ background: 'radial-gradient(circle, #9C556677, transparent 70%)' }}
           />
           <div className="relative">
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-cream/50">
-              Bienvenida a
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-alabaster/50">
+              {t('pb.welcome')}
             </p>
             <h1 className="mt-2 font-display text-[40px] font-normal leading-[0.98] tracking-[-0.03em] sm:text-[54px]">
               {business.name}
             </h1>
-            <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-[12px] text-cream/70">
+            <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-[12px] text-alabaster/70">
               {business.address ? (
                 <span className="inline-flex items-center gap-1.5">
                   <MapPin size={13} className="text-gold" />
@@ -289,8 +294,11 @@ export function PublicBookingPage() {
               <span className="inline-flex items-center gap-1.5">
                 <Clock3 size={13} className="text-gold" />
                 {openHour && !openHour.closed
-                  ? `Hoy ${minutesLabel(openHour.open_minute)} – ${minutesLabel(openHour.close_minute)}`
-                  : 'Hoy cerrado'}
+                  ? t('pb.todayOpen', {
+                      open: minutesLabel(openHour.open_minute),
+                      close: minutesLabel(openHour.close_minute),
+                    })
+                  : t('pb.todayClosed')}
               </span>
               {business.instagram ? (
                 <span className="inline-flex items-center gap-1.5">
@@ -298,10 +306,7 @@ export function PublicBookingPage() {
                 </span>
               ) : null}
             </div>
-            <p className="mt-5 max-w-lg text-[13px] leading-relaxed text-cream/70">
-              Elige tu servicio, tu horario y listo. Nosotras confirmamos por WhatsApp y te esperamos
-              con todo listo.
-            </p>
+            <p className="mt-5 max-w-lg text-[13px] leading-relaxed text-alabaster/70">{t('pb.hero')}</p>
           </div>
         </section>
 
@@ -317,7 +322,7 @@ export function PublicBookingPage() {
                       index < step
                         ? 'bg-sage text-white'
                         : index === step
-                          ? 'bg-ink text-cream'
+                          ? 'bg-licorice text-alabaster'
                           : 'bg-sand text-muted',
                     )}
                   >
@@ -326,22 +331,22 @@ export function PublicBookingPage() {
                   <span
                     className={cn(
                       'text-[11px] font-semibold',
-                      index === step ? 'text-ink' : 'text-muted',
+                      index === step ? 'text-licorice' : 'text-muted',
                     )}
                   >
-                    {label}
+                    {t(label)}
                   </span>
                   {index < STEP_LABELS.length - 1 ? <span className="h-px flex-1 bg-line" /> : null}
                 </div>
               ))}
             </div>
 
-            <div className="mt-5 rounded-4xl border border-line bg-white/80 p-4 shadow-soft sm:p-6">
+            <div className="mt-5 rounded-[28px] border border-border bg-surface/80 p-4 shadow-boutique sm:p-6">
               {step === 0 ? (
                 <div className="animate-fade-up">
-                  <h2 className="font-display text-2xl font-medium text-ink">¿Qué te vas a hacer?</h2>
+                  <h2 className="font-display text-2xl font-medium text-licorice">{t('pb.pickServiceTitle')}</h2>
                   <p className="mt-1 text-[12.5px] text-muted">
-                    Elige el servicio. Los precios ya incluyen IVA.
+                    {t('pb.chooseService')}
                   </p>
                   <div className="mt-4 grid gap-2 sm:grid-cols-2">
                     {business.services.map((service) => {
@@ -355,8 +360,8 @@ export function PublicBookingPage() {
                           className={cn(
                             'flex items-center gap-3 rounded-2xl border p-3.5 text-left transition',
                             active
-                              ? 'border-rose bg-rose-soft/60 shadow-soft'
-                              : 'border-line bg-white hover:border-rose/30',
+                              ? 'border-rose bg-blush-soft/60 shadow-boutique'
+                              : 'border-border bg-surface hover:border-rose/30',
                           )}
                         >
                           <span
@@ -364,7 +369,7 @@ export function PublicBookingPage() {
                             style={{ backgroundColor: service.color }}
                           />
                           <div className="min-w-0 flex-1">
-                            <p className="truncate text-[13.5px] font-bold text-ink">{service.name}</p>
+                            <p className="truncate text-[13.5px] font-bold text-licorice">{service.name}</p>
                             <p className="text-[11px] text-muted">
                               {formatDuration(service.duration_min)} · {money(service.price_cents)}
                             </p>
@@ -381,7 +386,7 @@ export function PublicBookingPage() {
                   {business.services.length === 0 ? (
                     <EmptyState
                       icon={<Scissors size={20} />}
-                      title="Sin servicios disponibles"
+                      title={t('pb.noServicesTitle')}
                       description="Este salón todavía no abrió su menú en línea."
                       className="py-8"
                     />
@@ -392,14 +397,14 @@ export function PublicBookingPage() {
               {step === 1 ? (
                 <div className="animate-fade-up space-y-5">
                   <div>
-                    <h2 className="font-display text-2xl font-medium text-ink">¿Con quién y cuándo?</h2>
+                    <h2 className="font-display text-2xl font-medium text-licorice">{t('pb.pickStaffTitle')}</h2>
                     <p className="mt-1 text-[12.5px] text-muted">
                       {selectedService?.name} · {formatDuration(selectedService?.duration_min ?? 0)}
                     </p>
                   </div>
 
                   <div>
-                    <p className="mb-2 text-[12px] font-semibold text-ink">Profesional</p>
+                    <p className="mb-2 text-[12px] font-semibold text-licorice">Profesional</p>
                     <div className="flex flex-wrap gap-2">
                       <button
                         type="button"
@@ -410,8 +415,8 @@ export function PublicBookingPage() {
                         className={cn(
                           'flex h-10 items-center gap-2 rounded-full border px-3 text-[11.5px] font-semibold transition',
                           staffId === null
-                            ? 'border-ink bg-ink text-cream'
-                            : 'border-line bg-white text-muted',
+                            ? 'border-licorice bg-licorice text-alabaster'
+                            : 'border-border bg-surface text-muted',
                         )}
                       >
                         <Sparkles size={13} /> Cualquiera disponible
@@ -427,8 +432,8 @@ export function PublicBookingPage() {
                           className={cn(
                             'flex h-10 items-center gap-1.5 rounded-full border pl-1 pr-3 text-[11.5px] font-semibold transition',
                             staffId === member.id
-                              ? 'border-ink bg-white text-ink shadow-soft'
-                              : 'border-line bg-white text-muted',
+                              ? 'border-licorice bg-surface text-licorice shadow-boutique'
+                              : 'border-border bg-surface text-muted',
                           )}
                         >
                           <Avatar name={member.name} color={member.color} size="xs" />
@@ -440,26 +445,26 @@ export function PublicBookingPage() {
 
                   <div>
                     <div className="mb-2 flex items-center justify-between">
-                      <p className="text-[12px] font-semibold text-ink">Fecha</p>
+                      <p className="text-[12px] font-semibold text-licorice">Fecha</p>
                       <div className="flex gap-1">
                         <button
                           type="button"
-                          aria-label="Semana anterior"
+                          aria-label={t('common.prevWeek')}
                           onClick={() =>
                             setDate((current) => {
                               const next = addDaysKey(current, -7)
                               return next < today ? today : next
                             })
                           }
-                          className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-white text-muted"
+                          className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-surface text-muted"
                         >
                           <ChevronLeft size={14} />
                         </button>
                         <button
                           type="button"
-                          aria-label="Semana siguiente"
+                          aria-label={t('common.nextWeek')}
                           onClick={() => setDate((current) => addDaysKey(current, 7))}
-                          className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-white text-muted"
+                          className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-surface text-muted"
                         >
                           <ChevronRight size={14} />
                         </button>
@@ -480,8 +485,8 @@ export function PublicBookingPage() {
                             className={cn(
                               'flex h-[66px] w-[56px] shrink-0 flex-col items-center justify-center rounded-2xl border transition',
                               active
-                                ? 'border-ink bg-ink text-cream'
-                                : 'border-line bg-white text-muted',
+                                ? 'border-licorice bg-licorice text-alabaster'
+                                : 'border-border bg-surface text-muted',
                             )}
                           >
                             <span className="text-[9px] font-bold uppercase tracking-wider">
@@ -499,7 +504,7 @@ export function PublicBookingPage() {
 
                   <div>
                     <div className="mb-2 flex items-center justify-between">
-                      <p className="text-[12px] font-semibold text-ink">Horarios disponibles</p>
+                      <p className="text-[12px] font-semibold text-licorice">{t('pb.availableSlots')}</p>
                       {availabilityQuery.isFetching ? (
                         <Spinner size={13} className="text-rose" />
                       ) : null}
@@ -524,7 +529,7 @@ export function PublicBookingPage() {
                                 'flex h-10 flex-col items-center justify-center rounded-xl border text-[11.5px] font-semibold transition',
                                 active
                                   ? 'border-rose bg-rose text-white'
-                                  : 'border-line bg-white text-ink hover:border-rose/40',
+                                  : 'border-border bg-surface text-licorice hover:border-rose/40',
                               )}
                             >
                               {group.label}
@@ -545,7 +550,7 @@ export function PublicBookingPage() {
                     ) : (
                       <EmptyState
                         icon={<CalendarDays size={20} />}
-                        title="No hay horarios ese día"
+                        title={t('pb.noSlotsTitle')}
                         description="Prueba con otra fecha o elige a otra profesional."
                         className="rounded-2xl bg-sand/40 py-7"
                       />
@@ -553,8 +558,8 @@ export function PublicBookingPage() {
                   </div>
 
                   {slot ? (
-                    <div className="rounded-2xl border border-rose/15 bg-rose-soft/50 px-4 py-3 text-[12px]">
-                      <p className="font-semibold text-rose-deep">
+                    <div className="rounded-2xl border border-rose/15 bg-blush-soft/50 px-4 py-3 text-[12px]">
+                      <p className="font-semibold text-blush-deep">
                         {weekdayShort(date)} {dayNumber(date)} · {formatTime(slot.start_at, timezone)}
                       </p>
                       <p className="mt-0.5 text-muted">
@@ -568,7 +573,7 @@ export function PublicBookingPage() {
               {step === 2 ? (
                 <form onSubmit={submit} className="animate-fade-up space-y-4">
                   <div>
-                    <h2 className="font-display text-2xl font-medium text-ink">Tus datos</h2>
+                    <h2 className="font-display text-2xl font-medium text-licorice">{t('pb.yourDetails')}</h2>
                     <p className="mt-1 text-[12.5px] text-muted">
                       Te mandamos la confirmación por WhatsApp.
                     </p>
@@ -578,7 +583,7 @@ export function PublicBookingPage() {
                       label="Nombre completo"
                       value={name}
                       onChange={(event) => setName(event.target.value)}
-                      placeholder="Ej. Ana Sofía Martínez"
+                      placeholder={t('pb.namePlaceholder')}
                       autoComplete="name"
                       required
                     />
@@ -593,25 +598,25 @@ export function PublicBookingPage() {
                     />
                   </div>
                   <Input
-                    label="Correo (opcional)"
+                    label={t('cfm.email')}
                     type="email"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
-                    placeholder="tucorreo@ejemplo.mx"
+                    placeholder={t('login.emailPlaceholder')}
                     autoComplete="email"
                   />
                   <Textarea
-                    label="¿Algo que debamos saber? (opcional)"
+                    label={t('pb.notesLabel')}
                     value={notes}
                     onChange={(event) => setNotes(event.target.value)}
-                    placeholder="Alergias, referencia de color, primera visita…"
+                    placeholder={t('pb.notesPlaceholder')}
                   />
-                  <label className="flex cursor-pointer items-start gap-2.5 rounded-2xl border border-line bg-white px-3.5 py-3">
+                  <label className="flex cursor-pointer items-start gap-2.5 rounded-2xl border border-border bg-surface px-3.5 py-3">
                     <input
                       type="checkbox"
                       checked={marketing}
                       onChange={(event) => setMarketing(event.target.checked)}
-                      className="mt-0.5 h-4 w-4 accent-[#C2415A]"
+                      className="mt-0.5 h-4 w-4 accent-[#9C5566]"
                     />
                     <span className="text-[11.5px] leading-snug text-muted">
                       Quiero recibir recordatorios y promociones de {business.name}.
@@ -619,35 +624,35 @@ export function PublicBookingPage() {
                   </label>
 
                   {selectedService && slot ? (
-                    <div className="rounded-3xl border border-line bg-cream px-4 py-4">
+                    <div className="rounded-3xl border border-border bg-alabaster px-4 py-4">
                       <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">
-                        Tu reserva
+                        {t('pb.yourBooking')}
                       </p>
                       <div className="mt-2 space-y-1.5 text-[12px]">
                         <div className="flex justify-between gap-3">
-                          <span className="text-muted">Servicio</span>
-                          <span className="text-right font-semibold text-ink">{selectedService.name}</span>
+                          <span className="text-muted">{t('nap.service')}</span>
+                          <span className="text-right font-semibold text-licorice">{selectedService.name}</span>
                         </div>
                         <div className="flex justify-between gap-3">
-                          <span className="text-muted">Cuándo</span>
-                          <span className="text-right font-semibold text-ink">
+                          <span className="text-muted">{t('nap.when')}</span>
+                          <span className="text-right font-semibold text-licorice">
                             {weekdayShort(date)} {dayNumber(date)} ·{' '}
                             {formatTime(slot.start_at, timezone)}
                           </span>
                         </div>
                         <div className="flex justify-between gap-3">
-                          <span className="text-muted">Profesional</span>
-                          <span className="text-right font-semibold text-ink">{slot.staff_name}</span>
+                          <span className="text-muted">{t('nap.professional')}</span>
+                          <span className="text-right font-semibold text-licorice">{slot.staff_name}</span>
                         </div>
-                        <div className="flex justify-between gap-3 border-t border-line/60 pt-2">
-                          <span className="font-semibold text-ink">Total</span>
-                          <span className="money font-display text-lg font-medium text-ink">
+                        <div className="flex justify-between gap-3 border-t border-border/60 pt-2">
+                          <span className="font-semibold text-licorice">{t('nap.total')}</span>
+                          <span className="money font-display text-lg font-medium text-licorice">
                             {money(selectedService.price_cents)}
                           </span>
                         </div>
                       </div>
                       {business.require_deposit ? (
-                        <p className="mt-2 rounded-xl bg-gold-soft px-3 py-2 text-[10.5px] text-[#7A5A18]">
+                        <p className="mt-2 rounded-xl bg-champagne-soft px-3 py-2 text-[10.5px] text-champagne-deep">
                           Para apartar se sugiere un anticipo de{' '}
                           {money((selectedService.price_cents * business.deposit_percent) / 100)}. El
                           salón te contactará por WhatsApp.
@@ -659,32 +664,30 @@ export function PublicBookingPage() {
                   {error ? (
                     <div
                       role="alert"
-                      className="flex items-start gap-2 rounded-2xl border border-rose/20 bg-rose-soft px-3.5 py-2.5 text-[12.5px] font-medium text-rose-deep"
+                      className="flex items-start gap-2 rounded-2xl border border-rose/20 bg-blush-soft px-3.5 py-2.5 text-[12.5px] font-medium text-blush-deep"
                     >
                       <CircleAlert size={15} className="mt-0.5 shrink-0" /> {error}
                     </div>
                   ) : null}
 
                   <Button type="submit" variant="rose" size="lg" className="w-full" loading={booking}>
-                    Apartar mi cita <ArrowRight size={17} />
+                    {t('pb.bookCta')} <ArrowRight size={17} />
                   </Button>
-                  <p className="text-center text-[10px] text-muted">
-                    Aún no se cobra nada. El salón confirmará tu cita por WhatsApp.
-                  </p>
+                  <p className="text-center text-[10px] text-muted">{t('pb.bookNote')}</p>
                 </form>
               ) : null}
 
               {error && step < 2 ? (
                 <div
                   role="alert"
-                  className="mt-4 flex items-start gap-2 rounded-2xl border border-rose/20 bg-rose-soft px-3.5 py-2.5 text-[12.5px] font-medium text-rose-deep"
+                  className="mt-4 flex items-start gap-2 rounded-2xl border border-rose/20 bg-blush-soft px-3.5 py-2.5 text-[12.5px] font-medium text-blush-deep"
                 >
                   <CircleAlert size={15} className="mt-0.5 shrink-0" /> {error}
                 </div>
               ) : null}
 
               {step < 2 ? (
-                <div className="mt-5 flex items-center justify-between gap-2 border-t border-line/60 pt-4">
+                <div className="mt-5 flex items-center justify-between gap-2 border-t border-border/60 pt-4">
                   <Button
                     variant="ghost"
                     onClick={step === 0 ? () => window.history.back() : goBack}
@@ -692,7 +695,7 @@ export function PublicBookingPage() {
                     <ArrowLeft size={15} /> {step === 0 ? 'Salir' : 'Atrás'}
                   </Button>
                   <Button variant="rose" onClick={goNext} disabled={step === 0 ? !serviceId : !slot}>
-                    Continuar <ArrowRight size={16} />
+                    {t('pb.continue')} <ArrowRight size={16} />
                   </Button>
                 </div>
               ) : (
@@ -708,45 +711,46 @@ export function PublicBookingPage() {
 
         {step === 3 && confirmation ? (
           <section className="animate-fade-up mt-6">
-            <div className="overflow-hidden rounded-4xl border border-line bg-white shadow-lift">
-              <div className="relative bg-sage px-5 py-8 text-center text-cream sm:px-8">
+            <div className="overflow-hidden rounded-[28px] border border-border bg-surface shadow-lift">
+              <div className="relative bg-sage px-5 py-8 text-center text-alabaster sm:px-8">
                 <div
                   className="pointer-events-none absolute inset-0 opacity-40"
-                  style={{ background: 'radial-gradient(circle at 50% 0%, #D9A44166, transparent 60%)' }}
+                  style={{ background: 'radial-gradient(circle at 50% 0%, #A8842C66, transparent 60%)' }}
                 />
-                <span className="relative mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-cream text-sage">
+                <span className="relative mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-alabaster text-sage">
                   <Check size={30} strokeWidth={2.5} />
                 </span>
                 <h2 className="relative mt-4 font-display text-[34px] font-normal leading-tight tracking-[-0.02em]">
-                  ¡Tu cita está apartada!
+                  {t('pb.confirmedTitle')}
                 </h2>
-                <p className="relative mt-2 text-[13px] text-cream/70">
-                  Código <span className="font-mono font-bold text-gold">{confirmation.confirmation_code}</span>
+                <p className="relative mt-2 text-[13px] text-alabaster/70">
+                  {t('pb.codeLabel')}{' '}
+                  <span className="font-mono font-bold text-gold">{confirmation.confirmation_code}</span>
                 </p>
               </div>
 
               <div className="px-5 py-6 sm:px-8">
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="rounded-3xl bg-cream p-4">
+                  <div className="rounded-3xl bg-alabaster p-4">
                     <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">
-                      Tu servicio
+                      {t('pb.yourService')}
                     </p>
-                    <p className="mt-1 font-display text-xl font-medium text-ink">
+                    <p className="mt-1 font-display text-xl font-medium text-licorice">
                       {confirmation.appointment.service.name}
                     </p>
                     <p className="mt-1 text-[12px] text-muted">
-                      con {confirmation.appointment.staff.name} ·{' '}
+                      {t('nap.withStaff', { name: confirmation.appointment.staff.name })} ·{' '}
                       {formatDuration(confirmation.appointment.service.duration_min)}
                     </p>
-                    <p className="money mt-3 font-display text-2xl font-medium text-ink">
+                    <p className="money mt-3 font-display text-2xl font-medium text-licorice">
                       {money(confirmation.appointment.price_cents)}
                     </p>
                   </div>
-                  <div className="rounded-3xl bg-cream p-4">
+                  <div className="rounded-3xl bg-alabaster p-4">
                     <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">
-                      Cuándo y dónde
+                      {t('pb.whenAndWhere')}
                     </p>
-                    <p className="mt-1 flex items-center gap-1.5 text-[13px] font-bold text-ink">
+                    <p className="mt-1 flex items-center gap-1.5 text-[13px] font-bold text-licorice">
                       <CalendarDays size={15} className="text-rose" />
                       {weekdayShort(dateKeyOf(confirmation.appointment.start_at, timezone))}{' '}
                       {dayNumber(dateKeyOf(confirmation.appointment.start_at, timezone))} ·{' '}
@@ -765,13 +769,13 @@ export function PublicBookingPage() {
                 </div>
 
                 {confirmation.appointment.deposit_cents > 0 ? (
-                  <div className="mt-4 rounded-2xl border border-gold/30 bg-gold-soft px-4 py-3 text-[11.5px] text-[#7A5A18]">
+                  <div className="mt-4 rounded-2xl border border-gold/30 bg-champagne-soft px-4 py-3 text-[11.5px] text-champagne-deep">
                     <p className="font-bold">
-                      Anticipo sugerido: {money(confirmation.appointment.deposit_cents)}
+                      {t('pb.suggestedDeposit', {
+                        amount: money(confirmation.appointment.deposit_cents),
+                      })}
                     </p>
-                    <p className="mt-0.5">
-                      El salón te contactará por WhatsApp para acordar el pago y dejar tu lugar fijo.
-                    </p>
+                    <p className="mt-0.5">{t('pb.contactNote')}</p>
                   </div>
                 ) : null}
 
@@ -786,24 +790,26 @@ export function PublicBookingPage() {
                   </Button>
                 </div>
 
-                <div className="mt-4 rounded-2xl bg-cream px-4 py-3 text-[11px] leading-relaxed text-muted">
-                  <p className="flex items-center gap-1.5 font-semibold text-ink">
-                    <UserRound size={13} className="text-sage" /> Guarda tu código
+                <div className="mt-4 rounded-2xl bg-alabaster px-4 py-3 text-[11px] leading-relaxed text-muted">
+                  <p className="flex items-center gap-1.5 font-semibold text-licorice">
+                    <UserRound size={13} className="text-sage" /> {t('pb.saveCode')}
                   </p>
                   <p className="mt-1">
-                    Si necesitas mover o cancelar tu cita, escribe al salón con tu código{' '}
-                    <span className="font-mono font-bold text-ink">
+                    {t('pb.rescheduleNote', { code: '' })}
+                    <span className="font-mono font-bold text-licorice">
                       {confirmation.confirmation_code}
                     </span>{' '}
-                    y avísales con al menos {business.cancellation_hours} horas.
+                    {t('pb.cancelWindow', { hours: business.cancellation_hours })}
                   </p>
                 </div>
 
-                <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-line/60 pt-4">
+                <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-4">
                   <button type="button" onClick={reset} className="text-[12px] font-semibold text-rose">
-                    Reservar otra cita
+                    {t('pb.bookAnother')}
                   </button>
-                  <p className="text-[10px] text-muted">Te esperamos en {business.name} ✨</p>
+                  <p className="text-[10px] text-muted">
+                    {t('pb.seeYou', { name: business.name })}
+                  </p>
                 </div>
               </div>
             </div>
@@ -812,11 +818,13 @@ export function PublicBookingPage() {
 
         <footer className="mt-8 flex flex-col items-center gap-2 text-center">
           <div className="flex items-center gap-1.5 text-[10px] font-semibold text-muted">
-            <BrandMark size={20} /> Agenda con Bellessa
+            <BrandMark size={20} /> {t('pb.poweredBy')}
           </div>
           <p className="max-w-md text-[10px] leading-relaxed text-muted/70">
-            Reservas seguras · Precios en MXN con IVA incluido · Cancelación con{' '}
-            {business.cancellation_hours} h de anticipación
+            {t('pb.footer', {
+              currency: business.currency,
+              hours: business.cancellation_hours,
+            })}
           </p>
         </footer>
       </main>

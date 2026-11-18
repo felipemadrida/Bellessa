@@ -5,9 +5,12 @@ import {
   CalendarCheck2,
   Eye,
   EyeOff,
+  Languages,
   MessageCircle,
+  Moon,
   Scissors,
   Sparkles,
+  Sun,
   Wallet,
 } from 'lucide-react'
 import { BrandMark, Wordmark } from '../components/AppShell'
@@ -84,43 +87,43 @@ export function LoginPage({ register = false }: { register?: boolean }) {
   }
 
   return (
-    <div className="min-h-dvh bg-cream">
+    <div className="min-h-dvh bg-alabaster">
       <div className="grid min-h-dvh lg:grid-cols-[1.08fr_.92fr]">
         {/* Lado editorial */}
-        <section className="relative hidden overflow-hidden bg-ink px-12 py-12 text-cream lg:flex lg:flex-col xl:px-16">
+        <section className="relative hidden overflow-hidden bg-licorice px-12 py-12 text-alabaster lg:flex lg:flex-col xl:px-16">
           <div
             className="pointer-events-none absolute -right-32 -top-32 h-[520px] w-[520px] rounded-full opacity-60 blur-2xl"
-            style={{ background: 'radial-gradient(circle, #D9A44155 0%, transparent 65%)' }}
+            style={{ background: 'radial-gradient(circle, #A8842C55 0%, transparent 65%)' }}
           />
           <div
             className="pointer-events-none absolute -bottom-48 -left-24 h-[520px] w-[520px] rounded-full opacity-50 blur-2xl"
-            style={{ background: 'radial-gradient(circle, #C9C6C244 0%, transparent 65%)' }}
+            style={{ background: 'radial-gradient(circle, #D9CBBA44 0%, transparent 65%)' }}
           />
           <div className="relative flex items-center gap-2.5">
             <BrandMark size={40} />
-            <Wordmark className="text-cream" />
+            <Wordmark className="text-alabaster" />
           </div>
 
           <div className="relative my-auto max-w-lg py-14">
-            <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-cream/20 bg-cream/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-cream/80">
+            <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-cream/20 bg-alabaster/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-alabaster/80">
               <Sparkles size={13} className="text-gold" />
               {t('login.madeFor')}
             </p>
             <h1 className="text-balance font-display text-[54px] font-normal leading-[0.98] tracking-[-0.035em] xl:text-[64px]">
               {t('login.head1')}
               <br />
-              <span className="italic text-[#F0CFA7]">{t('login.head2')}</span>
+              <span className="italic text-champagne-soft">{t('login.head2')}</span>
               <br />
               {t('login.head3')}
             </h1>
-            <p className="mt-6 max-w-md text-[15px] leading-relaxed text-cream/75">
+            <p className="mt-6 max-w-md text-[15px] leading-relaxed text-alabaster/75">
               {t('login.subtitle')}
             </p>
 
             <ul className="mt-9 space-y-3.5">
               {FEATURES.map((feature) => (
-                <li key={feature.text} className="flex items-center gap-3 text-sm text-cream/85">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-cream/15 bg-cream/10">
+                <li key={feature.text} className="flex items-center gap-3 text-sm text-alabaster/85">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-cream/15 bg-alabaster/10">
                     <feature.icon size={16} className="text-gold" />
                   </span>
                   {t(feature.text)}
@@ -130,33 +133,33 @@ export function LoginPage({ register = false }: { register?: boolean }) {
           </div>
 
           {/* Mini agenda decorativa */}
-          <div className="relative rounded-3xl border border-cream/15 bg-cream/10 p-4 backdrop-blur-md">
-            <div className="mb-3 flex items-center justify-between text-[11px] uppercase tracking-[0.14em] text-cream/60">
+          <div className="relative rounded-3xl border border-cream/15 bg-alabaster/10 p-4 backdrop-blur-md">
+            <div className="mb-3 flex items-center justify-between text-[11px] uppercase tracking-[0.14em] text-alabaster/60">
               <span>{t('login.today')}</span>
-              <span className="rounded-full bg-cream/15 px-2 py-0.5 text-[10px] normal-case tracking-normal text-cream">
+              <span className="rounded-full bg-alabaster/15 px-2 py-0.5 text-[10px] normal-case tracking-normal text-alabaster">
                 6 citas
               </span>
             </div>
             <div className="space-y-2">
               {[
-                { time: '10:00', name: 'Fernanda C.', service: 'Balayage', color: '#D9A441' },
-                { time: '12:30', name: 'Sofía R.', service: 'Manicure gel', color: '#C2415A' },
-                { time: '17:00', name: 'Valeria M.', service: 'Peinado', color: '#D97757' },
+                { time: '10:00', name: 'Fernanda C.', service: 'Balayage', color: '#A8842C' },
+                { time: '12:30', name: 'Sofía R.', service: 'Manicure gel', color: '#9C5566' },
+                { time: '17:00', name: 'Valeria M.', service: 'Peinado', color: '#A9714B' },
               ].map((item) => (
                 <div
                   key={item.time}
-                  className="flex items-center gap-3 rounded-2xl bg-cream/10 px-3 py-2.5"
+                  className="flex items-center gap-3 rounded-2xl bg-alabaster/10 px-3 py-2.5"
                 >
-                  <span className="w-10 text-xs font-semibold text-cream/70">{item.time}</span>
+                  <span className="w-10 text-xs font-semibold text-alabaster/70">{item.time}</span>
                   <span
                     className="h-8 w-1 rounded-full"
                     style={{ backgroundColor: item.color }}
                   />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-[13px] font-semibold text-cream">{item.name}</p>
-                    <p className="truncate text-[11px] text-cream/60">{item.service}</p>
+                    <p className="truncate text-[13px] font-semibold text-alabaster">{item.name}</p>
+                    <p className="truncate text-[11px] text-alabaster/60">{item.service}</p>
                   </div>
-                  <Scissors size={14} className="text-cream/40" />
+                  <Scissors size={14} className="text-alabaster/40" />
                 </div>
               ))}
             </div>
@@ -182,16 +185,21 @@ export function LoginPage({ register = false }: { register?: boolean }) {
             <button
               type="button"
               onClick={() => setLocale(locale === 'es' ? 'en' : 'es')}
-              className="rounded-xl border border-line bg-white/70 px-3 py-1.5 text-[10px] font-bold text-ink"
+              aria-label={locale === 'es' ? 'Switch to English' : 'Cambiar a español'}
+              title={locale === 'es' ? 'English' : 'Español'}
+              className="flex items-center gap-1.5 rounded-xl border border-border bg-surface/70 px-2.5 py-1.5 text-[10px] font-bold uppercase text-licorice transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blush-deep/40"
             >
-              {locale === 'es' ? 'English' : 'Español'}
+              <Languages size={14} strokeWidth={1.9} />
+              {locale}
             </button>
             <button
               type="button"
               onClick={toggleTheme}
-              className="rounded-xl border border-line bg-white/70 px-3 py-1.5 text-[10px] font-bold text-ink"
+              aria-label={theme === 'dark' ? t('common.light') : t('common.dark')}
+              title={theme === 'dark' ? t('common.light') : t('common.dark')}
+              className="flex h-8 w-9 items-center justify-center rounded-xl border border-border bg-surface/70 text-licorice transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blush-deep/40"
             >
-              {theme === 'dark' ? t('common.light') : t('common.dark')}
+              {theme === 'dark' ? <Sun size={14} strokeWidth={1.9} /> : <Moon size={14} strokeWidth={1.9} />}
             </button>
           </div>
 
@@ -199,7 +207,7 @@ export function LoginPage({ register = false }: { register?: boolean }) {
             <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-rose">
               {register ? t('login.startFree') : t('login.welcome')}
             </p>
-            <h2 className="mt-2 font-display text-[34px] font-medium leading-tight tracking-[-0.025em] text-ink sm:text-[40px]">
+            <h2 className="mt-2 font-display text-[34px] font-medium leading-tight tracking-[-0.025em] text-licorice sm:text-[40px]">
               {register ? t('login.registerHeadline') : t('login.welcomeSub')}
             </h2>
             <p className="mt-2 text-sm text-muted">
@@ -211,7 +219,7 @@ export function LoginPage({ register = false }: { register?: boolean }) {
                 <>
                   <Input
                     label={t('login.businessName')}
-                    placeholder="Ej. Salón Demo"
+                    placeholder={t('login.businessNamePlaceholder')}
                     value={businessName}
                     onChange={(event) => setBusinessName(event.target.value)}
                     autoComplete="organization"
@@ -219,7 +227,7 @@ export function LoginPage({ register = false }: { register?: boolean }) {
                   />
                   <Input
                     label={t('login.yourName')}
-                    placeholder="Ej. Lucía Herrera"
+                    placeholder={t('login.ownerNamePlaceholder')}
                     value={ownerName}
                     onChange={(event) => setOwnerName(event.target.value)}
                     autoComplete="name"
@@ -239,7 +247,7 @@ export function LoginPage({ register = false }: { register?: boolean }) {
               <Input
                 label={t('login.email')}
                 type="email"
-                placeholder="tu@salon.mx"
+                placeholder={t('login.emailPlaceholder')}
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 autoComplete="email"
@@ -250,7 +258,7 @@ export function LoginPage({ register = false }: { register?: boolean }) {
                 <Input
                   label={t('login.password')}
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="Mínimo 8 caracteres"
+                  placeholder={t('login.passwordPlaceholder')}
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   autoComplete={register ? 'new-password' : 'current-password'}
@@ -261,8 +269,8 @@ export function LoginPage({ register = false }: { register?: boolean }) {
                 <button
                   type="button"
                   onClick={() => setShowPassword((value) => !value)}
-                  className="absolute bottom-0 right-0 flex h-11 w-11 items-center justify-center text-muted transition hover:text-ink"
-                  aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                  className="absolute bottom-0 right-0 flex h-11 w-11 items-center justify-center text-muted transition hover:text-licorice"
+                  aria-label={showPassword ? t('login.hidePassword') : t('login.showPassword')}
                 >
                   {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
                 </button>
@@ -271,7 +279,7 @@ export function LoginPage({ register = false }: { register?: boolean }) {
               {error ? (
                 <div
                   role="alert"
-                  className="rounded-2xl border border-rose/20 bg-rose-soft px-3.5 py-3 text-[13px] font-medium text-rose-deep"
+                  className="rounded-2xl border border-rose/20 bg-blush-soft px-3.5 py-3 text-[13px] font-medium text-blush-deep"
                 >
                   {error}
                 </div>
@@ -315,12 +323,12 @@ export function LoginPage({ register = false }: { register?: boolean }) {
                 {register ? t('login.haveAccount') : t('login.create')}
               </Link>
               <span className="text-line">|</span>
-              <Link to="/reservar/salon-lucia" className="font-semibold text-muted hover:text-ink">
+              <Link to="/reservar/salon-lucia" className="font-semibold text-muted hover:text-licorice">
                 {t('login.viewBooking')}
               </Link>
               <span className="text-line">|</span>
-              <Link to="/admin" className="font-semibold text-muted hover:text-ink">
-                Admin SaaS
+              <Link to="/admin" className="font-semibold text-muted hover:text-licorice">
+                {t('login.admin')}
               </Link>
             </div>
           </div>

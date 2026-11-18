@@ -124,10 +124,10 @@ cp .env.example .env
 docker compose up --build
 ```
 
-Abre **http://localhost:8080** e inicia sesión con el demo.
+Abre **http://localhost:8090** e inicia sesión con el demo.
 
-- Web + API proxificada: `http://localhost:8080`
-- Documentación interactiva: `http://localhost:8000/api/docs`
+- Web + API proxificada: `http://localhost:8090`
+- Documentación interactiva: `http://localhost:8011/api/docs`
 - PostgreSQL persistente en el volumen `bellessa_pgdata`.
 
 > Cambia `POSTGRES_PASSWORD` y `JWT_SECRET` antes de publicar. Para producción pon `SEED_DEMO=false`.
@@ -143,7 +143,7 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements-dev.txt
 cp .env.example .env
-uvicorn app.main:app --reload --port 8000
+uvicorn app.main:app --reload --port 8011
 ```
 
 **Frontend** (Node 20+):
@@ -154,7 +154,9 @@ npm install
 npm run dev
 ```
 
-Abre `http://localhost:5173`. Vite hace proxy de `/api` a `http://127.0.0.1:8000`.
+Abre `http://localhost:5180`. Vite hace proxy de `/api` a `http://127.0.0.1:8011`.
+
+> **Puertos de este proyecto.** Bellessa usa `5180` (dev), `4180` (preview), `8011` (API) y `8090` (Docker) para no chocar con otros proyectos locales que ocupan 3000, 5173, 8000 y 8080. Se pueden cambiar sin editar código con `BELLESSA_WEB_PORT`, `BELLESSA_WEB_PREVIEW` y `BELLESSA_API_PORT`.
 
 La primera vez se crea `backend/bellessa.db` con el salón demo, 3 profesionales, 10 servicios, 12 clientas y ~100 citas alrededor de la fecha actual.
 
@@ -172,7 +174,7 @@ La primera vez se crea `backend/bellessa.db` con el salón demo, 3 profesionales
 | Reportes y exportación CSV | `/reportes` |
 | Bot de WhatsApp y campañas | `/whatsapp` (escribe “Hola” en el simulador) |
 | Bloqueos y auditoría | `/equipo` → Bloqueos · `/ajustes` → Actividad |
-| Reserva pública (sin login) | `http://localhost:8080/reservar/salon-lucia` |
+| Reserva pública (sin login) | `http://localhost:5180/reservar/salon-lucia` |
 
 La reserva pública crea una cita **pendiente** y aparece al instante en la agenda del salón. En **WhatsApp & marketing** puedes simular el bot, ver la bandeja y preparar campañas; en modo `mock` nada sale a Meta, y en modo `cloud` se usa la API oficial con las credenciales configuradas.
 
@@ -224,7 +226,7 @@ bellessa/
 
 ## API
 
-Swagger: `http://localhost:8000/api/docs`
+Swagger: `http://localhost:8011/api/docs`
 
 | Grupo | Endpoints |
 |---|---|

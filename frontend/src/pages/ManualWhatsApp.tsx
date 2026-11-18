@@ -14,6 +14,8 @@ import { Link } from 'react-router-dom'
 import { api, ApiError } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { formatTime } from '../lib/format'
+import { usePreferences } from '../lib/preferences'
+import { catalogKeyLabel } from '../lib/vocabulary'
 import { PageHeader } from '../components/AppShell'
 import { useToast } from '../components/Toast'
 import {
@@ -39,8 +41,8 @@ const STATUS_LABEL: Record<string, string> = {
 
 function statusTone(status: string): string {
   if (status === 'confirmed') return 'bg-sage-soft text-sage'
-  if (status === 'failed') return 'bg-rose-soft text-rose-deep'
-  if (status === 'opened' || status === 'prepared') return 'bg-gold-soft text-[#7A5A18]'
+  if (status === 'failed') return 'bg-blush-soft text-blush-deep'
+  if (status === 'opened' || status === 'prepared') return 'bg-champagne-soft text-champagne-deep'
   return 'bg-sand text-muted'
 }
 
@@ -48,6 +50,7 @@ export function ManualWhatsAppPage() {
   const { business } = useAuth()
   const timezone = business?.timezone ?? 'America/Mexico_City'
   const { toast } = useToast()
+  const { t } = usePreferences()
   const queryClient = useQueryClient()
   const [date, setDate] = useState(() =>
     new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Mexico_City' }).format(new Date()),
@@ -62,17 +65,12 @@ export function ManualWhatsAppPage() {
     queryKey: ['appointments', date],
     queryFn: () => api.appointments.list(date),
   })
-  const templatesQuery = useQuery({
-    queryKey: ['marketing-templates'],
-    queryFn: api.marketing.templates,
-  })
   const manualQuery = useQuery({
     queryKey: ['whatsapp-manual'],
     queryFn: api.whatsapp.manual.list,
   })
 
   const appointments = appointmentsQuery.data ?? []
-  const templates = templatesQuery.data ?? []
   const messages = manualQuery.data ?? []
 
   const counts = useMemo(() => {
@@ -95,7 +93,7 @@ export function ManualWhatsAppPage() {
   async function createMessage() {
     const selected = Number(appointmentId)
     if (!selected) {
-      toast('Selecciona una cita para preparar el mensaje', 'error')
+      toast(t('manual.selectAppointmentError'), 'error')
       return
     }
     setSaving(true)
@@ -107,9 +105,9 @@ export function ManualWhatsAppPage() {
       })
       setBody('')
       await refresh()
-      toast('Mensaje preparado en la bandeja manual')
+      toast(t('manual.prepared'))
     } catch (caught) {
-      toast(caught instanceof ApiError ? caught.message : 'No pudimos preparar el mensaje', 'error')
+      toast(caught instanceof ApiError ? caught.message : t('manual.prepareError'), 'error')
     } finally {
       setSaving(false)
     }
@@ -119,19 +117,19 @@ export function ManualWhatsAppPage() {
     setBusyId(message.id)
     try {
       if (kind === 'failed') {
-        const reason = window.prompt('Motivo por el que no se envió (opcional):') ?? undefined
+        const reason = window.prompt(t('manual.failedReasonPrompt')) ?? undefined
         await api.whatsapp.manual.failed(message.id, reason)
-        toast('Marcado como fallido; no se registrará como enviado')
+        toast(t('manual.failedToast'))
       } else if (kind === 'confirm') {
         await api.whatsapp.manual.confirm(message.id)
-        toast('Envío confirmado por el operador')
+        toast(t('manual.confirmedToast'))
       } else {
         await api.whatsapp.manual.opened(message.id)
-        toast('Abierto en WhatsApp; confirma el envío al terminar')
+        toast(t('manual.openedToast'))
       }
       await refresh()
     } catch (caught) {
-      toast(caught instanceof ApiError ? caught.message : 'No pudimos actualizar el mensaje', 'error')
+      toast(caught instanceof ApiError ? caught.message : t('manual.updateError'), 'error')
     } finally {
       setBusyId(null)
     }
@@ -151,24 +149,24 @@ export function ManualWhatsAppPage() {
   async function copyBody(message: ManualMessage) {
     try {
       await navigator.clipboard.writeText(message.body)
-      toast('Mensaje copiado')
+      toast(t('manual.copied'))
     } catch {
-      toast('No pudimos copiar el mensaje', 'error')
+      toast(t('manual.copyError'), 'error')
     }
   }
 
   return (
     <div className="animate-fade-up">
       <PageHeader
-        eyebrow="WhatsApp sin API"
-        title="Bandeja manual"
-        subtitle="Prepara mensajes con datos reales, abre WhatsApp y confirma el envío. Abrir el chat no significa que el mensaje se haya enviado."
+        eyebrow={t('manual.eyebrow')}
+        title={t('manual.title')}
+        subtitle={t('manual.subtitle')}
         actions={
           <Link
             to="/whatsapp"
-            className="inline-flex h-10 items-center gap-1.5 rounded-2xl border border-line bg-white px-3.5 text-[12px] font-semibold text-ink hover:bg-[#FCFAF7]"
+            className="inline-flex h-10 items-center gap-1.5 rounded-2xl border border-border bg-surface px-3.5 text-[12px] font-semibold text-licorice hover:bg-alabaster"
           >
-            <ArrowLeft size={14} /> Volver
+            <ArrowLeft size={14} /> {t('manual.back')}
           </Link>
         }
       />
@@ -177,20 +175,18 @@ export function ManualWhatsAppPage() {
         <Card className="p-4 sm:p-5">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h2 className="font-display text-xl font-medium text-ink">Preparar mensaje</h2>
-              <p className="mt-0.5 text-[11px] text-muted">
-                La app registra el mensaje, pero el envío lo haces tú.
-              </p>
+              <h2 className="font-display text-xl font-medium text-licorice">{t('manual.prepareTitle')}</h2>
+              <p className="mt-0.5 text-[11px] text-muted">{t('manual.prepareDesc')}</p>
             </div>
-            <Badge className="bg-gold-soft text-[#7A5A18]">
-              <MessageCircle size={11} /> Manual
+            <Badge className="bg-champagne-soft text-champagne-deep">
+              <MessageCircle size={11} /> {t('manual.manual')}
             </Badge>
           </div>
 
           <div className="mt-4 space-y-3">
             <div className="grid gap-3 sm:grid-cols-2">
               <Input
-                label="Fecha de citas"
+                label={t('manual.dateLabel')}
                 type="date"
                 value={date}
                 onChange={(event) => {
@@ -199,29 +195,29 @@ export function ManualWhatsAppPage() {
                 }}
               />
               <Select
-                label="Plantilla"
+                label={t('manual.templateLabel')}
                 value={templateKey}
                 onChange={(event) => setTemplateKey(event.target.value)}
               >
-                <option value="reminder_24h">Recordatorio 24 h</option>
-                <option value="reminder_2h">Recordatorio 2 h</option>
-                <option value="birthday">Cumpleaños</option>
-                <option value="review">Solicitar reseña</option>
-                <option value="winback_30">Reactivación</option>
+                <option value="reminder_24h">{t('manual.tplReminder24')}</option>
+                <option value="reminder_2h">{t('manual.tplReminder2')}</option>
+                <option value="birthday">{t('manual.tplBirthday')}</option>
+                <option value="review">{t('manual.tplReview')}</option>
+                <option value="winback_30">{t('manual.tplWinback30')}</option>
               </Select>
             </div>
 
             <Select
-              label="Cita"
+              label={t('manual.appointmentLabel')}
               value={appointmentId}
               onChange={(event) => setAppointmentId(event.target.value)}
               hint={
                 !appointments.length && !appointmentsQuery.isLoading
-                  ? 'No hay citas para esta fecha. Cambia la fecha o agenda una cita.'
+                  ? t('manual.noAppointments')
                   : undefined
               }
             >
-              <option value="">Selecciona una cita…</option>
+              <option value="">{t('manual.selectAppointment')}</option>
               {appointments.map((appointment) => (
                 <option key={appointment.id} value={appointment.id}>
                   {formatTime(appointment.start_at, timezone)} · {appointment.client.name} ·{' '}
@@ -231,10 +227,10 @@ export function ManualWhatsAppPage() {
             </Select>
 
             <Textarea
-              label="Mensaje personalizado (opcional)"
+              label={t('manual.customBody')}
               value={body}
               onChange={(event) => setBody(event.target.value)}
-              placeholder="Si lo dejas vacío, se usa la plantilla con los datos de la cita."
+              placeholder={t('manual.customBodyPlaceholder')}
             />
 
             <Button
@@ -244,30 +240,29 @@ export function ManualWhatsAppPage() {
               loading={saving}
               disabled={!appointments.length}
             >
-              <Send size={14} /> Preparar en bandeja
+              <Send size={14} /> {t('manual.prepareInbox')}
             </Button>
-            <p className="text-[10px] leading-relaxed text-muted">
-              El mensaje queda <strong>pendiente</strong>. Al abrir WhatsApp pasa a{' '}
-              <strong>abierto</strong> y solo se marca <strong>confirmado</strong> cuando el
-              operador lo confirma.
-            </p>
+            <p className="text-[10px] leading-relaxed text-muted">{t('manual.pendingNote')}</p>
           </div>
         </Card>
 
         <Card className="overflow-hidden">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line/70 px-4 py-4 sm:px-5">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/70 px-4 py-4 sm:px-5">
             <div>
-              <h2 className="font-display text-xl font-medium text-ink">Cola manual</h2>
+              <h2 className="font-display text-xl font-medium text-licorice">{t('manual.queueTitle')}</h2>
               <p className="text-[11px] text-muted">
-                {counts.pending} pendientes · {counts.confirmed} confirmados · {counts.failed}{' '}
-                fallidos
+                {t('manual.queueCounts', {
+                  p: counts.pending,
+                  c: counts.confirmed,
+                  f: counts.failed,
+                })}
               </p>
             </div>
             <button
               type="button"
               onClick={() => manualQuery.refetch()}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-white text-muted transition hover:text-ink"
-              aria-label="Actualizar cola manual"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface text-muted transition hover:text-licorice"
+              aria-label={t('manual.refreshAria')}
             >
               <RefreshCw size={14} />
             </button>
@@ -280,15 +275,20 @@ export function ManualWhatsAppPage() {
               ))}
             </div>
           ) : messages.length ? (
-            <div className="divide-y divide-line/60">
+            <div className="divide-y divide-border/60">
               {messages.map((message) => (
                 <div key={message.id} className="px-4 py-4 sm:px-5">
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-[12px] font-bold text-ink">
+                    <p className="text-[12px] font-bold text-licorice">
                       {message.client_name ?? message.phone}
                     </p>
                     <Badge className={statusTone(message.status)}>
-                      {STATUS_LABEL[message.status] ?? message.status}
+                      {catalogKeyLabel(
+                        'manual.status',
+                        message.status,
+                        STATUS_LABEL[message.status] ?? message.status,
+                        t,
+                      )}
                     </Badge>
                     <span className="text-[10px] text-muted">
                       {message.template_key ?? 'manual'}
@@ -298,7 +298,7 @@ export function ManualWhatsAppPage() {
                     {message.body}
                   </p>
                   {message.error ? (
-                    <p className="mt-1 text-[10px] font-medium text-rose-deep">{message.error}</p>
+                    <p className="mt-1 text-[10px] font-medium text-blush-deep">{message.error}</p>
                   ) : null}
                   <div className="mt-3 flex flex-wrap items-center gap-1.5">
                     <a
@@ -306,16 +306,16 @@ export function ManualWhatsAppPage() {
                       target="_blank"
                       rel="noreferrer"
                       onClick={() => void markOpened(message)}
-                      className="inline-flex h-8 items-center gap-1 rounded-xl border border-line bg-white px-2.5 text-[10.5px] font-semibold text-ink hover:border-sage/40"
+                      className="inline-flex h-8 items-center gap-1 rounded-xl border border-border bg-surface px-2.5 text-[10.5px] font-semibold text-licorice hover:border-sage/40"
                     >
-                      <ExternalLink size={12} /> Abrir WhatsApp
+                      <ExternalLink size={12} /> {t('manual.openWhatsapp')}
                     </a>
                     <button
                       type="button"
                       onClick={() => copyBody(message)}
-                      className="inline-flex h-8 items-center gap-1 rounded-xl border border-line bg-white px-2.5 text-[10.5px] font-semibold text-muted hover:text-ink"
+                      className="inline-flex h-8 items-center gap-1 rounded-xl border border-border bg-surface px-2.5 text-[10.5px] font-semibold text-muted hover:text-licorice"
                     >
-                      <ClipboardCopy size={12} /> Copiar
+                      <ClipboardCopy size={12} /> {t('manual.copy')}
                     </button>
                     <button
                       type="button"
@@ -324,15 +324,15 @@ export function ManualWhatsAppPage() {
                       className="inline-flex h-8 items-center gap-1 rounded-xl border border-sage/30 bg-sage-soft px-2.5 text-[10.5px] font-semibold text-sage disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {busyId === message.id ? <Spinner size={12} /> : <Check size={12} />}
-                      Confirmar envío
+                      {t('manual.confirmSend')}
                     </button>
                     <button
                       type="button"
                       disabled={busyId === message.id || message.status === 'failed'}
                       onClick={() => action(message, 'failed')}
-                      className="inline-flex h-8 items-center gap-1 rounded-xl border border-rose/20 bg-rose-soft px-2.5 text-[10.5px] font-semibold text-rose-deep disabled:cursor-not-allowed disabled:opacity-50"
+                      className="inline-flex h-8 items-center gap-1 rounded-xl border border-rose/20 bg-blush-soft px-2.5 text-[10.5px] font-semibold text-blush-deep disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      <X size={12} /> No enviado
+                      <X size={12} /> {t('manual.notSent')}
                     </button>
                   </div>
                 </div>
@@ -342,8 +342,8 @@ export function ManualWhatsAppPage() {
             <div className="p-4">
               <EmptyState
                 icon={<MessageCircle size={22} />}
-                title="Sin mensajes manuales"
-                description="Selecciona una cita y prepara el primer recordatorio. Nada se envía automáticamente."
+                title={t('manual.emptyTitle')}
+                description={t('manual.emptyDesc')}
               />
             </div>
           )}
