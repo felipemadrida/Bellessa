@@ -4,7 +4,7 @@
 
 > Demo lista: **Salón Demo**, Roma Norte, CDMX.
 > Dueña: `demo@bellessa.mx` · Contraseña: `demo1234`
-> Admin SaaS: `/admin` · `admin@bellessa.mx` / `admin1234`
+> Admin SaaS: `/admin` (acceso restringido; las credenciales no se publican)
 > Página pública de reservas: `/reservar/salon-lucia`
 >
 > **Demo en Vercel:** https://bellessa-web.vercel.app

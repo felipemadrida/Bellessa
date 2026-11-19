@@ -1,96 +1,221 @@
-# Marketing de retención para el salón
+# Mensajes de marketing de Bellessa
 
-Bellessa automatiza lo que más mueve la aguja en un salón pequeño: **que la clienta vuelva y que no falte a su cita**. Todo se apoya en datos que ya viven en la base: última visita, frecuencia, cumpleaños, servicio y consentimiento.
+Plantillas listas para copiar y personalizar. Todo lo que está entre `{{ }}` se
+reemplaza antes de enviar.
 
-## 1. Consentimiento primero
+> **Regla de oro:** nada de lo que digas aquí debe prometer más de lo que la app
+> hace. Cada afirmación de estas plantillas está respaldada por una función real.
 
-- Cada ficha tiene `accepts_marketing`.
-- Las campañas omiten a quien dijo **BAJA** (el bot la marca automáticamente).
-- Los recordatorios de cita son transaccionales y no dependen del consentimiento promocional.
-- La plantilla de marketing incluye siempre una vía de baja.
-- Meta exige plantillas aprobadas para iniciar conversación fuera de la ventana de 24 h.
+---
 
-## 2. Segmentos disponibles
+## 1. Variables que vas a personalizar
 
-| Segmento | Regla | Uso |
+| Variable | Ejemplo | Dónde la consigues |
 |---|---|---|
-| Todas | Base completa | Anuncios generales y temporada |
-| VIP | Top 20% de gasto en 12 meses | Lealtad, upgrades, acceso anticipado |
-| Frecuentes | 3+ visitas completadas | Lealtad, upgrades, acceso anticipado |
-| Ocasionales | 1–2 visitas completadas | Segundo servicio, paquete de entrada |
-| Inactivas 30/60/90 | Sin visita en 30, 60 o 90 días | Win-back escalonado con oferta |
-| Cumpleaños hoy | Mismo día/mes | Regalo y reserva de la semana |
+| `{{dueña}}` | Lucía | Nombre de pila de la dueña |
+| `{{salon}}` | Salón Lucía | Nombre comercial |
+| `{{ciudad}}` | Roma Norte, CDMX | Colonia o ciudad |
+| `{{link}}` | https://bellessa-web.vercel.app/reservar/salon-demo | Tu página pública |
+| `{{app}}` | https://bellessa-web.vercel.app | La app |
+| `{{demo}}` | demo@bellessa.mx / demo1234 | Acceso de prueba |
+| `{{tunombre}}` | Felipe | Quien firma el mensaje |
+| `{{dias_prueba}}` | 14 | Si manejas periodo de prueba |
 
-La API expone `GET /api/marketing/segments` con conteos y `GET /api/marketing/templates` con las plantillas.
+**Variables por salón (el diferenciador).** Bellessa se personaliza por negocio:
+nombre comercial, color de acento, idioma (español/inglés) y moneda base
+(MXN/USD). Úsalo como gancho cuando vendas a salones fuera de México o con
+clientas extranjeras.
 
-## 3. Automatizaciones activas
+---
 
-El scheduler interno corre cada 5 minutos y es idempotente (no duplica el mismo mensaje):
+## 2. WhatsApp — primer contacto (mensaje frío)
 
-1. **Recordatorio 24 h** antes de la cita.
-2. **Recordatorio 2 h** antes de la cita.
-3. **Cumpleaños 7 días antes**, con 15% válido 30 días.
-4. **Win-back escalonado** a los 30, 60 y 90 días sin visita.
-5. **Reseña** 22–26 h después de una cita completada.
+> Hola {{dueña}}, soy {{tunombre}}. Vi {{salon}} en Instagram y me llamó cómo
+> trabajan el color.
+>
+> Hice Bellessa, una app mexicana para salones: agenda por estilista que no deja
+> que se encimen las citas, expediente de cada clienta y corte de caja diario.
+> Todo en pesos, con IVA desglosado.
+>
+> Te dejo una prueba sin costo para que la veas con tus propios servicios:
+> {{demo}}
+>
+> Si te sirve, te la configuro con el nombre y los colores de {{salon}}.
+> ¿Te la mando o prefieres que te mande un video de 1 minuto?
 
-La ficha de cada clienta muestra **puntos** (1 por cada $10 de servicio), **nivel** (Nueva / Frecuente / VIP) y progreso a la recompensa de la 6ta visita. La plantilla `loyalty` puede enviarse manualmente al segmento VIP o frecuentes.
+**Por qué funciona:** nombra algo concreto del salón (no es plantilla genérica),
+explica en una línea qué resuelve, y cierra con una pregunta de dos opciones
+fáciles de responder.
 
-### Campañas manuales
+---
 
-En **WhatsApp & marketing** eliges segmento + plantilla y preparas la campaña. En modo `mock` los mensajes se registran en la bandeja; en modo `cloud` se envían por Meta. La campaña queda en auditoría.
+## 3. WhatsApp — referido (mensaje cálido)
 
-Plantillas incluidas:
+> Hola {{dueña}}, ¿cómo estás? {{quien_te_recomendo}} me dijo que te pasara esto.
+>
+> Es Bellessa, la app con la que lleva su agenda y su caja. Lo que más le sirvió
+> fue dejar de perseguir confirmaciones: los recordatorios salen solos por
+> WhatsApp 24 h y 2 h antes.
+>
+> Te abro un acceso de prueba con tus servicios ya cargados: {{demo}}
+>
+> ¿La revisas hoy o mañana?
 
-- `reminder_24h`
-- `reminder_2h`
-- `birthday` (día) y `birthday_week` (7 días antes)
-- `winback_30`, `winback_60`, `winback_90`
-- `valley` (lunes y martes)
-- `review`
-- `referral` (trae a una amiga, ambas 20% off)
-- `seasonal` (temporada / Día de la Madre / fin de año)
-- `loyalty` (puntos, nivel y siguiente recompensa)
+**Nota:** el referido convierte 3 a 5 veces más que el frío. Si tienes clientas
+contentas, pídeles permiso de nombrarlas.
 
-## 4. Las 5 tácticas que prioriza el producto
+---
 
-1. **No-shows:** dos recordatorios automáticos + confirmación/cancelación por chat. La cita liberada se puede reasignar a lista de espera en la siguiente fase.
-2. **Reactivación:** segmento inactivas + oferta de 15% + enlace de reservas.
-3. **Upselling / cross-selling:** el menú muestra duración y precio para facilitar la elección; la recomendación automática basada en historial queda como fase 2.
-4. **Lealtad:** puntos por gasto, niveles Nueva/Frecuente/VIP y progreso a la 6ta visita; la tarjeta digital y el canje automático están en roadmap.
-5. **Cumpleaños y temporada:** automatización mensual + plantillas estacionales con calendario editorial.
+## 4. WhatsApp — seguimiento (a los 3 días, si no contestó)
 
-## 5. Calendario editorial sugerido
+> Hola {{dueña}}, te escribo una sola vez más para no llenarte el chat.
+>
+> Sé que el día en el salón no da tregua. Por eso Bellessa se instala en 5
+> minutos y no necesitas migrar nada: cargas tus servicios, pones tus horarios y
+> empiezas a agendar.
+>
+> Si en este momento no es prioridad, dime y no te vuelvo a escribir.
+> Si quieres verla, aquí está: {{app}}
 
-| Mes | Enfoque | Acción de software |
-|---|---|---|
-| Enero | Año nuevo, nuevo look | Reactivación + reseñas de diciembre |
-| Febrero | San Valentín | Paquete de autocuidado / pareja; recordatorios 24 h |
-| Marzo | Primavera | Color y tratamiento; segmento frecuentes |
-| Abril | Pre-Día de la Madre | Anticipos y paquetes; campaña segmentada |
-| Mayo | Día de la Madre | Regalo + cupón para acompañante |
-| Junio | Vacaciones | Peinados y uñas; horarios extendidos |
-| Julio | Verano | Hidratación y protección; win-back |
-| Agosto | Regreso a clases | Cortes prácticos; referidos |
-| Septiembre | Independencia | Color; contenido local |
-| Octubre | Halloween | Maquillaje temático; lista de espera |
-| Noviembre | Buen Fin | Paquetes y bonos; campaña anticipada |
-| Diciembre | Fin de año | Novias, posadas y regalos; cierre de agenda |
+**Por qué funciona:** reconoce la objeción real (falta de tiempo), da una salida
+fácil y deja la puerta abierta sin presión.
 
-## 6. Métricas para leer el programa
+---
 
-- Tasa de no-show por mes y por profesional.
-- Clientes reactivadas después de una campaña win-back.
-- Citas atribuidas a WhatsApp (campo `source`).
-- Tasa de respuesta y bajas.
-- Ticket promedio de clientas frecuentes vs. ocasionales.
-- Ocupación por día/profesional.
+## 5. Instagram / Facebook — pie de publicación
 
-Los reportes actuales cubren ingresos, ocupación, comisiones, servicios y clientas; la atribución fina por campaña (cupones/UTM) es la siguiente mejora.
+> Llevar un salón entre libreta, WhatsApp e Instagram no es "emprender", es
+> malabarear.
+>
+> Bellessa junta lo que ya haces todos los días en un solo lugar:
+>
+> - Agenda por estilista que bloquea traslapes y respeta el tiempo de limpieza
+> - Página propia de reservas, sin comisión por cita
+> - Expediente de cada clienta: color, alergias, cumpleaños, historial
+> - Cobros con propina aparte, IVA desglosado y recibo descargable
+> - Corte de caja y reportes que sí cuadran
+> - Recordatorios automáticos por WhatsApp
+>
+> Y se personaliza con el nombre y los colores de tu salón.
+>
+> Hecha en México, precios en pesos, pensada para nosotras.
+>
+> Link en la bio para probarla gratis.
+>
+> #salondebelleza #agenda #cdmx #mexico #emprendedoras #estilistas
+> #salonbelleza #apps #organizacion #colorimetria
 
-## 7. Límites actuales
+**Ajusta los hashtags a tu ciudad.** Los genéricos traen curiosos; los locales
+traen clientas.
 
-- La lealtad se calcula por historial; aún no hay canje ni contador de recompensas canjeadas.
-- No hay cupones con código único ni atribución de campaña.
-- El scheduler es un hilo interno, suficiente para un salón; a escala se reemplaza por Redis + worker (Celery/RQ/BullMQ).
-- El envío Cloud API usa texto; para producción se deben registrar plantillas aprobadas y mapear su nombre.
-- La recomendación automática de upselling por historial/IA aún no está implementada; hoy la clienta elige del menú.
+---
+
+## 6. Instagram Story / estado de WhatsApp
+
+Una sola línea, texto grande:
+
+> Tu agenda, tu caja y tus clientas en una sola app.
+> Pruébala gratis: {{app}}
+
+Variante para salones con clientas extranjeras:
+
+> Ahora en español y en inglés. Tu salón, en el idioma de tu clienta.
+
+---
+
+## 7. Correo — presentación (para enviar con la cuenta creada)
+
+**Asunto:** `{{salon}}, tu agenda de mañana ya puede estar resuelta`
+
+> Hola {{dueña}}:
+>
+> Te dejo tu cuenta de Bellessa lista. Puedes entrar con:
+>
+> - Correo: {{correo}}
+> - Contraseña temporal: {{password}}
+>
+> **Qué hacer primero (5 minutos):**
+> 1. Ajustes → Experiencia: pon el nombre, el color y la moneda de {{salon}}.
+> 2. Servicios: carga los que más vendes, con precio y duración.
+> 3. Equipo: agrega a cada estilista con su horario.
+> 4. Comparte tu página de reservas: {{link}}
+>
+> Con eso ya puedes agendar. Los recordatorios por WhatsApp salen solos.
+>
+> Cualquier duda, respóndeme este correo y te ayudo a dejarla andando.
+>
+> {{tunombre}}
+> Bellessa · Agenda y seguimiento para salones
+
+---
+
+## 8. Mensaje de reactivación (prospecto que probó y no volvió)
+
+> Hola {{dueña}}, ¿cómo va todo en {{salon}}?
+>
+> Vi que entraste a Bellessa pero no llegaste a cargar tus servicios. Es lo más
+> común: es el único paso que da flojera.
+>
+> ¿Te lo dejo listo yo? Me pasas tu lista de servicios y precios, te los cargo
+> en 10 minutos y tú solo revisas.
+>
+> ¿Te parece el jueves?
+
+**Por qué funciona:** quita el trabajo, no la culpa. Nunca digas "no has hecho
+nada".
+
+---
+
+## 9. Mensaje para vender a salones fuera de México (USD)
+
+> Hola {{dueña}}, soy {{tunombre}}.
+>
+> Bellessa es una app de agenda para salones que acaba de abrir el modo
+> internacional: cada salón elige su idioma (español o inglés) y su moneda base
+> (MXN o USD). La interfaz completa cambia, incluidas las etiquetas de tus
+> clientas y tus categorías de servicio.
+>
+> Si atiendes clientas que hablan inglés, tu página de reservas puede abrir en
+> inglés y en dólares, sin que tú cambies nada de tu operación diaria.
+>
+> Te la muestro en 10 minutos: {{app}}
+
+---
+
+## 10. Objeciones y respuestas
+
+| Lo que te van a decir | Qué contestas |
+|---|---|
+| "Ya uso la libreta y me funciona" | "Te funciona hasta que se te empalman dos citas. Bellessa no te cambia la forma de trabajar, solo te avisa antes de que pase." |
+| "Es caro" | "¿Cuánto te cuesta una clienta que no llegó el mes pasado? La app cuesta menos que un no-show." |
+| "No tengo tiempo de configurarla" | "Yo te la dejo lista con tus servicios. Tú solo revisas." |
+| "Mis clientas no saben usar apps" | "Ellas no instalan nada: entran a un link, eligen servicio y hora. Nada más." |
+| "Ya probé otra y la dejé" | "Casi todas piden migrar todo. Aquí cargas servicios y horarios, y ya. Si no te sirve en una semana, me dices." |
+| "¿Mis datos son míos?" | "Sí. Cada salón tiene su propia base en la nube, y no se comparte con nadie." |
+
+---
+
+## 11. Reglas antes de enviar
+
+1. **Nunca mandes el mismo mensaje a 50 números el mismo día.** WhatsApp te
+   marca como spam y pierdes el número. Máximo 15 a 20 conversaciones nuevas al
+   día, espaciadas.
+2. **Personaliza siempre la primera línea.** Si el mensaje se puede enviar igual
+   a otro salón, no está listo.
+3. **Incluye salida.** "Si no es el momento, dime y no te vuelvo a escribir."
+   Baja tus bloqueos y te da reputación.
+4. **Hora de envío.** Martes a jueves, 10:00 a 12:00 o 16:00 a 18:00. Nunca
+   lunes (día de caos) ni sábados (día de trabajo pesado).
+5. **Prueba social antes de precio.** Enseña primero la agenda funcionando; si
+   preguntan precio, responde con el valor, no con la cifra sola.
+6. **No inventes funciones.** Si te preguntan por facturación CFDI automática o
+   pagos con tarjeta dentro de la app, di la verdad: hoy el CFDI es una nota y
+   el pago con tarjeta se registra, no se procesa.
+
+---
+
+## 12. Versión ultra corta (para SMS o primer DM)
+
+> Hola {{dueña}}, soy {{tunombre}}. Hice una app de agenda para salones: evita
+> citas encimadas y lleva la caja del día. Te dejo prueba gratis: {{app}}.
+> ¿La veo contigo 10 min?

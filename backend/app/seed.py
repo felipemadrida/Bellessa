@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime, time, timedelta
 
 import logging
+import secrets
 
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
@@ -34,7 +35,6 @@ DEMO_SLUG = "salon-lucia"
 DEMO_EMAIL = "demo@bellessa.mx"
 DEMO_PASSWORD = "demo1234"
 PLATFORM_EMAIL = "admin@bellessa.mx"
-PLATFORM_PASSWORD = "admin1234"
 
 BUSINESS_HOURS = [
     (0, False, 540, 1140),
@@ -126,11 +126,27 @@ def seed_platform(db: Session) -> None:
 
 
 def _seed_platform(db: Session) -> None:
-    password = settings.platform_admin_password or (PLATFORM_PASSWORD if settings.seed_demo else "")
+    """Crea el superadmin si todavía no existe.
+
+    La contraseña **nunca** tiene un valor por defecto: se toma de
+    BELLESSA_PLATFORM_ADMIN_PASSWORD. Si no está definida y el entorno es de
+    demo, se genera una aleatoria y se escribe una sola vez en el log, de modo
+    que no quede ninguna credencial conocida en el repositorio.
+    """
     email = settings.platform_admin_email or PLATFORM_EMAIL
-    if password:
-        admin = db.scalar(select(PlatformAdmin).where(PlatformAdmin.email == email))
-        if admin is None:
+    password = settings.platform_admin_password
+
+    admin = db.scalar(select(PlatformAdmin).where(PlatformAdmin.email == email))
+    if admin is None:
+        if not password and settings.seed_demo:
+            password = secrets.token_urlsafe(18)
+            logger.warning(
+                "Superadmin %s creado con contraseña aleatoria: %s "
+                "(guárdala; no se vuelve a mostrar)",
+                email,
+                password,
+            )
+        if password:
             db.add(
                 PlatformAdmin(
                     name=settings.platform_admin_name,

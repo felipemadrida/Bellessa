@@ -71,8 +71,8 @@ interface CreatedCredentials {
 export function AdminSaaSPage() {
   const [admin, setAdmin] = useState<PlatformAdmin | null>(null)
   const [booting, setBooting] = useState(true)
-  const [email, setEmail] = useState('admin@bellessa.mx')
-  const [password, setPassword] = useState('admin1234')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [loggingIn, setLoggingIn] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -205,12 +205,6 @@ export function AdminSaaSPage() {
                 Entrar a la plataforma
               </Button>
             </form>
-            <p className="mt-5 rounded-2xl bg-sand/50 px-4 py-3 text-center text-[11px] leading-relaxed text-muted">
-              Demo: <span className="font-mono text-licorice">admin@bellessa.mx</span> /{' '}
-              <span className="font-mono text-licorice">admin1234</span>
-              <br />
-              En producción cambia esta contraseña.
-            </p>
             <a
               href="/login"
               className="mt-6 text-center text-[11px] font-semibold text-muted hover:text-licorice"

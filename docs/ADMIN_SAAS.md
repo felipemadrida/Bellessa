@@ -19,15 +19,24 @@ Bellessa tiene dos planos de acceso sobre el mismo despliegue:
 
 Es “híbrido” porque el **mismo frontend y la misma API** atienden al salón y a la plataforma, pero con identidades y tokens separados. Un token de salón no abre `/api/platform/*` y un token de plataforma no abre el dashboard del salón.
 
-## Acceso demo
+## Acceso
 
 ```text
-URL:      /admin
-Correo:   admin@bellessa.mx
-Password: admin1234
+URL: /admin
+Correo y contraseña: NO se publican en el repositorio ni en la interfaz.
 ```
 
-El acceso se crea solo si `SEED_DEMO=true` o si defines `BELLESSA_PLATFORM_ADMIN_PASSWORD` en producción. **Cambia la contraseña antes de un despliegue real.**
+La cuenta se crea al arrancar **solo si** existe `BELLESSA_PLATFORM_ADMIN_PASSWORD`.
+Si esa variable no está definida y el entorno es de demo, se genera una
+contraseña aleatoria que aparece **una única vez** en el log del servidor.
+
+Para rotar la contraseña de una cuenta que ya existe (el seed no la sobrescribe):
+
+```bash
+python backend/scripts/rotate_platform_admin.py <correo>
+```
+
+El script pide la nueva contraseña por consola, sin dejarla en el historial.
 
 ## Qué incluye
 
