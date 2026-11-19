@@ -28,18 +28,29 @@ MIN_LENGTH = 12
 
 
 def main() -> int:
-    email = sys.argv[1] if len(sys.argv) > 1 else settings.platform_admin_email
+    args = [arg for arg in sys.argv[1:] if not arg.startswith("--")]
+    from_stdin = "--stdin" in sys.argv
+
+    email = args[0] if args else settings.platform_admin_email
     if not email:
         print("No hay correo configurado. Pásalo como argumento.")
         return 2
 
-    password = getpass.getpass(f"Nueva contraseña para {email}: ")
-    if len(password) < MIN_LENGTH:
-        print(f"Rechazada: usa al menos {MIN_LENGTH} caracteres.")
-        return 2
-    if password != getpass.getpass("Repite la contraseña: "):
-        print("Rechazada: no coinciden.")
-        return 2
+    if from_stdin:
+        # Pensado para automatización: la contraseña entra por tubería y nunca
+        # aparece en los argumentos del proceso.
+        password = sys.stdin.readline().rstrip("\r\n")
+        if len(password) < MIN_LENGTH:
+            print(f"Rechazada: usa al menos {MIN_LENGTH} caracteres.")
+            return 2
+    else:
+        password = getpass.getpass(f"Nueva contraseña para {email}: ")
+        if len(password) < MIN_LENGTH:
+            print(f"Rechazada: usa al menos {MIN_LENGTH} caracteres.")
+            return 2
+        if password != getpass.getpass("Repite la contraseña: "):
+            print("Rechazada: no coinciden.")
+            return 2
 
     engine = create_engine(settings.database_url, pool_pre_ping=True)
 
