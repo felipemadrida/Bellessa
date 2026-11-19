@@ -98,7 +98,10 @@ GET    /api/platform/plans
 
 ```text
 BELLESSA_SEED_DEMO=true
-BELLESSA_PLATFORM_ADMIN_NAME=Felipe Madrid
-BELLESSA_PLATFORM_ADMIN_EMAIL=admin@bellessa.mx
-BELLESSA_PLATFORM_ADMIN_PASSWORD=cambia-esto-en-produccion
+BELLESSA_PLATFORM_ADMIN_NAME=<nombre del responsable>
+BELLESSA_PLATFORM_ADMIN_EMAIL=<correo del responsable>
+BELLESSA_PLATFORM_ADMIN_PASSWORD=<contraseña larga y aleatoria>
 ```
+
+Ninguna de las tres últimas tiene valor por defecto en el código: si falta la
+contraseña, la cuenta no se crea (o se crea con una aleatoria en modo demo).

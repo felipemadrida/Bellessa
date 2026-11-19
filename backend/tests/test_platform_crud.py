@@ -1,10 +1,13 @@
 from fastapi.testclient import TestClient
 
+PLATFORM_EMAIL = "admin@test.invalid"
+PLATFORM_PASSWORD = "test-only-admin-pass"
+
 
 def _platform_headers(client: TestClient) -> dict:
     response = client.post(
         "/api/platform/login",
-        json={"email": "admin@bellessa.mx", "password": "admin1234"},
+        json={"email": PLATFORM_EMAIL, "password": PLATFORM_PASSWORD},
     )
     assert response.status_code == 200, response.text
     return {"Authorization": f"Bearer {response.json()['access_token']}"}

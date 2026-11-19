@@ -3,7 +3,9 @@ from __future__ import annotations
 import os
 
 os.environ["BELLESSA_SEED_DEMO"] = "false"
-os.environ["BELLESSA_PLATFORM_ADMIN_PASSWORD"] = "admin1234"
+# Credenciales exclusivas de la suite: nunca coinciden con producción.
+os.environ["BELLESSA_PLATFORM_ADMIN_EMAIL"] = "admin@test.invalid"
+os.environ["BELLESSA_PLATFORM_ADMIN_PASSWORD"] = "test-only-admin-pass"
 os.environ["BELLESSA_DATABASE_URL"] = "sqlite:///./test-bootstrap.db"
 os.environ["BELLESSA_JWT_SECRET"] = "test-secret"
 
